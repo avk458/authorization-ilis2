@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
-import cn.hitek.authorization.ilis2.product.constants.DatabaseType;
+import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 
 /**
  * @author chenlm

@@ -2,7 +2,6 @@ package cn.hitek.authorization.ilis2.product.database.helper;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
-import cn.hitek.authorization.ilis2.product.constants.DatabaseConstant;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 
 import java.sql.Connection;
@@ -63,7 +62,7 @@ public class ConnectionHandler {
         }
 
         String getPath() {
-            String path = DatabaseConstant.MYSQL_PATH_PREFIX + this.host + Constant.COLON + this.port;
+            String path = Constant.MYSQL_PATH_PREFIX + this.host + Constant.COLON + this.port;
             return this.params == null ? path : path + this.params;
         }
     }

@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.constants;
+package cn.hitek.authorization.ilis2.common.enums;
 
 import lombok.Getter;
 
