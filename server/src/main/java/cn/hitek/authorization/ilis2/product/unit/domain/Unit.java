@@ -1,0 +1,73 @@
+package cn.hitek.authorization.ilis2.product.unit.domain;
+
+import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.time.LocalDate;
+
+/**
+ * @author chenlm
+ *
+ */
+@Getter
+@Setter
+public class Unit extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    public static final boolean AUTHORIZED = true;
+    /**
+     * 是否删除
+     */
+    @TableField(fill = FieldFill.INSERT)
+    @TableLogic
+    private Boolean isDeleted;
+
+    /**
+     * 单位名称
+     */
+    @NotBlank(message = "单位名称不能为空")
+    private String name;
+
+    /**
+     * 单位编码，使用数据源识别
+     */
+    @NotBlank(message = "单位编码不能为空")
+    private String uniqCode;
+
+    /**
+     * 有效截止日期
+     */
+    private LocalDate expireDate;
+
+    /**
+     * 最大用户数
+     */
+    private Integer maxAccount;
+
+    /**
+     * 最大在线用户数
+     */
+    private Integer maxOnlineAccount;
+
+    /**
+     * 联系人姓名
+     */
+    private String contactName;
+
+    /**
+     * 联系人电话
+     */
+    private String contactPhone;
+
+    private Boolean isAuthorized;
+
+    private String authorizationCode;
+
+}
