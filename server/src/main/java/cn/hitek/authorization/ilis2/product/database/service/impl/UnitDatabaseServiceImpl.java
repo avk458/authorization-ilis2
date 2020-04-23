@@ -4,6 +4,8 @@ import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.FileUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.database.exporter.AbstractExporter;
+import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -25,9 +28,12 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public void initUnitDatabase(String unitDatabaseId) {
+        UnitDatabase database = getById(unitDatabaseId);
+        Objects.requireNonNull(database, "database info error");
         // 1. export
+        Exporter dumper = AbstractExporter.getExporter(database.getDatabaseType());
+        dumper.export();
         // 2. initialize
-        UnitDatabase database = baseMapper.selectById(unitDatabaseId);
         try {
             Connection connection = ConnectionHandler.getConnection(database);
 
@@ -52,7 +58,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public void removeUnitDatabaseInfoViaUnitId(String unitId) {
-        boolean remove = super.remove(Wrappers.lambdaQuery(UnitDatabase.class)
+        boolean remove = remove(Wrappers.lambdaQuery(UnitDatabase.class)
                 .eq(UnitDatabase::getUnitId, unitId)
                 .eq(UnitDatabase::getIsInitialized, !UnitDatabase.INITIALIZED));
         if (!remove) {

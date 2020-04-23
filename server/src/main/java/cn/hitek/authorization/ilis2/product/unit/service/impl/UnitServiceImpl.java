@@ -31,7 +31,7 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     @Transactional(rollbackFor = BusinessException.class)
     @Override
     public void removeUnitInfoAndDatabaseInfoViaUnitId(String unitId) {
-        boolean remove = super.remove(Wrappers.lambdaQuery(Unit.class)
+        boolean remove = remove(Wrappers.lambdaQuery(Unit.class)
                 .eq(Unit::getId, unitId)
                 .eq(Unit::getIsAuthorized, !Unit.AUTHORIZED));
         if (!remove) {

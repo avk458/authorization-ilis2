@@ -1,6 +1,7 @@
 package cn.hitek.authorization.ilis2.product.database.domain;
 
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
+import cn.hitek.authorization.ilis2.product.constants.DatabaseType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
@@ -80,8 +81,8 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库类型
      */
-    // @Min(value = 211, message = "数据库类型不合法")
-    // @Min(value = 233, message = "数据库类型不合法")
+    @Min(value = 211, message = "数据库类型不合法")
+    @Min(value = 233, message = "数据库类型不合法")
     private Integer databaseType;
 
     /**
@@ -89,4 +90,14 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      */
     private Boolean isInitialized;
 
+    public DatabaseType getDatabaseType() {
+        switch (databaseType) {
+            case 222:
+                return DatabaseType.POSTGRE_SQL;
+            case 233:
+                return DatabaseType.MICROSOFT_SQL;
+            default:
+                return DatabaseType.MYSQL;
+        }
+    }
 }
