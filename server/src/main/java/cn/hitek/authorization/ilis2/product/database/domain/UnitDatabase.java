@@ -1,15 +1,14 @@
 package cn.hitek.authorization.ilis2.product.database.domain;
 
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
-import cn.hitek.authorization.ilis2.product.constants.DatabaseType;
+import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
@@ -52,8 +51,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库端口
      */
-    @Min(value = 20, message = "数据库端口太小")
-    @Max(value = 65535, message = "数据库端口不能超过65535")
+    @Digits(integer = 20, fraction = 65535, message = "数据库端口不合规")
     private Integer port;
 
     /**
@@ -81,8 +79,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库类型
      */
-    @Min(value = 211, message = "数据库类型不合法")
-    @Min(value = 233, message = "数据库类型不合法")
+    @Digits(integer = 211, fraction = 233, message = "数据库类型不合法")
     private Integer databaseType;
 
     /**

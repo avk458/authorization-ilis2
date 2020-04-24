@@ -96,7 +96,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T> implements Bas
         int i = 0;
         try (SqlSession batchSqlSession = sqlSessionBatch()) {
             for (T entity : entityList) {
-                if (null != tableInfo && StringUtils.isNotEmpty(tableInfo.getKeyProperty())) {
+                if (null != tableInfo && StringUtils.isNotBlank(tableInfo.getKeyProperty())) {
                     Object idVal = ReflectionKit.getMethodValue(cls, entity, tableInfo.getKeyProperty());
                     if (StringUtils.checkValNull(idVal) || Objects.isNull(getById((Serializable) idVal))) {
                         batchSqlSession.insert(sqlStatement(SqlMethod.INSERT_ONE), entity);

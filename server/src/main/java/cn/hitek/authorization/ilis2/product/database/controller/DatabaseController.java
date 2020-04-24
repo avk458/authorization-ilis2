@@ -8,11 +8,14 @@ import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
  * @author chenlm
  */
+@Validated
 @RestController
 @RequestMapping("database")
 public class DatabaseController {
@@ -42,19 +45,19 @@ public class DatabaseController {
     }
 
     @DeleteMapping("/{unitDatabaseId}")
-    public Response deleteUnitDatabase(@PathVariable String unitDatabaseId) {
+    public Response deleteUnitDatabase(@NotBlank(message = "参数异常") @PathVariable String unitDatabaseId) {
         this.databaseService.removeById(unitDatabaseId);
         return new Response().code(HttpStatus.DELETE);
     }
 
-    @PostMapping("/initialize/{unitDatabaseId}")
+    @PostMapping("/init/{unitDatabaseId}")
     public Response initUnitDatabase(@PathVariable String unitDatabaseId) {
         this.databaseService.initUnitDatabase(unitDatabaseId);
         return new Response().code(HttpStatus.OK);
     }
 
     @GetMapping("/initialized/{unitId}")
-    public Response isUnitDatabaseInitialized(@PathVariable String unitId) {
+    public Response isUnitDatabaseInitialized(@PathVariable @Min(value = 2, message = "参数异常") String unitId) {
         boolean initialized = this.databaseService.isUnitDatabaseInitialized(unitId);
         return new Response().code(HttpStatus.OK).data(initialized);
     }

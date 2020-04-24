@@ -49,22 +49,27 @@ public class LambdaQueryWrapperChain<T> extends AbstractChainWrapper<T, SFunctio
         throw ExceptionUtils.mpe("can not use this method for \"%s\"", "getSqlSelect");
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> list() {
         return baseService.list(getWrapper());
     }
 
+    @SuppressWarnings("unchecked")
     public T getOne() {
         return (T) baseService.getOne(getWrapper());
-    }
 
+    }
+    @SuppressWarnings("unchecked")
     public Integer count() {
         return baseService.count(getWrapper());
     }
 
+    @SuppressWarnings("unchecked")
     public boolean exist() {
         return baseService.exist(getWrapper());
     }
 
+    @SuppressWarnings("unchecked")
     public boolean nonExist() {
         return baseService.nonExist(getWrapper());
     }

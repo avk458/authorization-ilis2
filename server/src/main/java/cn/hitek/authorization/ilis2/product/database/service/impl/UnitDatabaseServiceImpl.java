@@ -38,7 +38,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Connection connection = ConnectionHandler.getConnection(database);
 
         } catch (SQLException e) {
-            log.debug("创建数据库链接失败！{}", e.getMessage());
+            log.warn("创建数据库链接失败！{}", e.getMessage());
             e.printStackTrace();
         }
     }

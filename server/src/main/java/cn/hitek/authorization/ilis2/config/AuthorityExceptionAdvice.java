@@ -10,6 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+
 
 /**
  * @author chenlm
@@ -18,31 +21,41 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class AuthorityExceptionAdvice {
 
+    private final String bem = "参数异常";
+
     @ExceptionHandler(Exception.class)
     public Response handlingUnexpectedException(Exception e) {
-        log.debug("系统异常：{}", e.getMessage());
+        log.warn("系统异常：{}", e.getMessage());
         return new Response().code(HttpStatus.FAIL).message("程序异常");
     }
 
     @ExceptionHandler(BusinessException.class)
     public Response handlingBusinessException(BusinessException be) {
-        log.debug("业务异常：{}", be.getMessage());
+        log.warn("业务异常：{}", be.getMessage());
         return new Response().code(HttpStatus.FAIL).message(be.getMessage());
     }
 
     @ExceptionHandler(BindException.class)
     public Response handlingBindingException(BindException be) {
-        log.debug("参数异常：{}", be.getMessage());
+        log.warn("参数异常：{}", be.getMessage());
         FieldError fieldError = be.getBindingResult().getFieldError();
-        assert fieldError != null;
-        return new Response().code(HttpStatus.FAIL).message(fieldError.getDefaultMessage());
+        return new Response().code(HttpStatus.FAIL).message(null != fieldError ? fieldError.getDefaultMessage() : bem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Response handlingMethodBindingException(MethodArgumentNotValidException e) {
-        log.debug("参数异常：{}", e.getMessage());
+        log.warn("参数异常：{}", e.getMessage());
         FieldError fieldError = e.getBindingResult().getFieldError();
-        assert fieldError != null;
-        return new Response().code(HttpStatus.FAIL).message(fieldError.getDefaultMessage());
+        return new Response().code(HttpStatus.FAIL).message(null != fieldError ? fieldError.getDefaultMessage() : bem);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Response handlingConstraintViolationException(ConstraintViolationException e) {
+        log.warn("参数异常：{}", e.getMessage());
+        return new Response().code(HttpStatus.FAIL).message(e
+                .getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessageTemplate)
+                .findFirst().orElse(bem));
     }
 }

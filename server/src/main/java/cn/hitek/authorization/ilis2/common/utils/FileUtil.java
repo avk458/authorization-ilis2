@@ -28,7 +28,7 @@ public class FileUtil {
                 keyWords.add(reader.readLine().toLowerCase());
             }
         } catch (IOException e) {
-            log.debug("获取MySql数据库命名关键字文件失败！");
+            log.warn("获取MySql数据库命名关键字文件失败！");
             e.printStackTrace();
         }
         return keyWords;
