@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.unit.controller;
 
+import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
@@ -10,11 +11,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
  * @author chenlm
  */
+@Validated
 @RestController
 @RequestMapping("/unit")
 public class UnitController {
@@ -33,7 +36,7 @@ public class UnitController {
     }
 
     @PostMapping("/info")
-    public Response createUnit(@Validated @RequestBody Unit unit) {
+    public Response createUnit(@RequestBody Unit unit) {
         this.unitService.save(unit);
         return new Response().code(HttpStatus.ADD);
     }
@@ -51,7 +54,7 @@ public class UnitController {
     }
 
     @GetMapping("/validate/code")
-    public Response validateUniqCode(String code) {
+    public Response validateUniqCode(@NotBlank(message = RequestConstants.PARAM_ERROR) String code) {
         boolean exists = this.unitService.validateCode(code);
         return new Response().code(HttpStatus.OK).data(exists);
     }

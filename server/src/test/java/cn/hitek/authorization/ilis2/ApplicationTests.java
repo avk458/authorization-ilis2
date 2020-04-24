@@ -81,13 +81,14 @@ class ApplicationTests {
 	public void do2() {
 		String dump = "mysqldump --host=127.0.0.1 --port=3306 --user=root --password=123456 auth01 ";
 		String dump1 = "mysqldump -h127.0.0.1 -P3306 -uroot -p123456 auth01 ";
-		String[] command = new String[]{"mysqldump ", "-uroot", "-p123456", "auth01"};
+		String[] command = new String[]{"mysqldump ", "-h192.168.2.2", "-P3306", "-uroot", "-p123456", "-d", "auth01"};
 		File backupFile = new File("C:\\Users\\chenlm\\Desktop\\javadump.sql");
+		File errorFile = new File("C:\\Users\\chenlm\\Desktop\\error.log");
 		InputStream inStream;
 		OutputStreamWriter writer;
 		try {
 			ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(command));
-			processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			processBuilder.redirectError(errorFile);
 			processBuilder.redirectOutput(ProcessBuilder.Redirect.to(backupFile));
 
 			Process process = processBuilder.start();

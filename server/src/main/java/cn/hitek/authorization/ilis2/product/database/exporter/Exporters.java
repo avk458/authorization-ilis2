@@ -5,14 +5,9 @@ import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 /**
  * @author chenlm
  */
-public abstract class AbstractExporter  implements Exporter {
+public class Exporters {
 
-    @Override
-    public void export() throws RuntimeException {
-
-    }
-
-    public static Exporter getExporter(DatabaseType type) {
+    public static Exporter init(DatabaseType type) {
         switch (type) {
             case POSTGRE_SQL:
                 return new PostgreSqlDumper();

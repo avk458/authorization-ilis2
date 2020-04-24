@@ -5,20 +5,23 @@
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
-          <Button type="success" size="small" style="margin-right: 5px" :disabled="row.isInitialized">初始化</Button>
+          <Button type="success" size="small" style="margin-right: 5px" @click="handleInit(row)" :disabled="row.isInitialized">初始化</Button>
           <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)" :disabled="row.isInitialized">编辑</Button>
-          <Button type="error" size="small" @click="remove(row.id)" :disabled="row.isInitialized">删除</Button>
+          <Button type="error" size="small" @click="remove(row)" :disabled="row.isInitialized">删除</Button>
         </template>
       </Table>
     </Card>
     <DatabaseModal ref="databaseModal" @on-success-valid="submit"/>
+    <InitializationModal ref="initializationModal"/>
   </div>
 </template>
 <script>
 import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseInfo } from '@/api/unit-database'
-import DatabaseModal from '@/views/single-page/database/list/component/DatabaseModal'
+import DatabaseModal from './component/dabase-modal/'
+import InitializationModal from './component/initialization-modal/'
+
 export default {
-  components: { DatabaseModal },
+  components: { DatabaseModal, InitializationModal },
   data () {
     return {
       columns: [
@@ -89,9 +92,15 @@ export default {
       Object.assign(data, row)
       this.$refs.databaseModal.showModal(data)
     },
-    async remove(id) {
-      deleteDatabaseInfo(id).then(res => this.$Message.success(res.message))
-      await this.fetchData()
+    async remove(val) {
+      this.$Modal.confirm({
+        title: '警告',
+        content: `您确定要删除：${val.databaseName}吗？`,
+        onOk: () => {
+          deleteDatabaseInfo(val.id).then(res => this.$Message.success(res.message))
+          this.fetchData()
+        }
+      })
     },
     submit(data) {
       if (data.id) {
@@ -105,6 +114,9 @@ export default {
           this.fetchData()
         })
       }
+    },
+    handleInit(val) {
+      this.$refs.initializationModal.showModal()
     }
   },
   mounted() {

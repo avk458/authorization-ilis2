@@ -1,14 +1,18 @@
 package cn.hitek.authorization.ilis2.product.database.service.impl;
 
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.common.utils.FileUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
-import cn.hitek.authorization.ilis2.product.database.exporter.AbstractExporter;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
+import cn.hitek.authorization.ilis2.product.database.exporter.Exporters;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
+import cn.hitek.authorization.ilis2.product.init.config.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.init.config.service.InitialConfigService;
+import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,13 +30,21 @@ import java.util.Set;
 @Slf4j
 public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper, UnitDatabase> implements UnitDatabaseService {
 
+    private final InitialConfigService configService;
+
+    public UnitDatabaseServiceImpl(InitialConfigService configService) {
+        this.configService = configService;
+    }
+
     @Override
     public void initUnitDatabase(String unitDatabaseId) {
         UnitDatabase database = getById(unitDatabaseId);
         Objects.requireNonNull(database, "database info error");
+        InitialConfig config = this.configService.getActiveConfig();
+        Objects.requireNonNull(config, "can't find active database initial configuration");
         // 1. export
-        Exporter dumper = AbstractExporter.getExporter(database.getDatabaseType());
-        dumper.export();
+        Exporter dumper = Exporters.init(database.getDatabaseEnum());
+        InitFile initFile = dumper.export(config);
         // 2. initialize
         try {
             Connection connection = ConnectionHandler.getConnection(database);
@@ -64,5 +76,12 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         if (!remove) {
             throw new BusinessException("删除失败！不能删除正在使用的数据库信息");
         }
+    }
+
+    @Override
+    public boolean save(UnitDatabase entity) {
+        entity.setDatabaseUsername(EncryptUtils.encrypt(entity.getDatabaseUsername()));
+        entity.setDatabasePwd(EncryptUtils.decrypt(entity.getDatabasePwd()));
+        return super.save(entity);
     }
 }

@@ -87,7 +87,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      */
     private Boolean isInitialized;
 
-    public DatabaseType getDatabaseType() {
+    public DatabaseType getDatabaseEnum() {
         switch (databaseType) {
             case 222:
                 return DatabaseType.POSTGRE_SQL;

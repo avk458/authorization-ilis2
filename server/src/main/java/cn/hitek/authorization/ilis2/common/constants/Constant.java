@@ -14,4 +14,6 @@ public class Constant {
      * 仅用于首次创建mysql链接
      */
     public static final String INIT_LINK_DATABASE = "mysql";
+
+    public static final String MYSQL_DUMP = "mysqldump";
 }
