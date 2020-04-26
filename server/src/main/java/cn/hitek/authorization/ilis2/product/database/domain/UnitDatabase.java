@@ -51,7 +51,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库端口
      */
-    @Digits(integer = 20, fraction = 65535, message = "数据库端口不合规")
+    @Digits(integer = 1025, fraction = 65535, message = "数据库端口不合规")
     private Integer port;
 
     /**

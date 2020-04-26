@@ -113,7 +113,7 @@ export default {
             const data = res.data
             commit('setAvatar', data.avatar)
             commit('setUserName', data.name)
-            commit('setUserId', data.user_id)
+            commit('setUserId', data.userId)
             commit('setAccess', data.access)
             commit('setHasGetInfo', true)
             resolve(data)

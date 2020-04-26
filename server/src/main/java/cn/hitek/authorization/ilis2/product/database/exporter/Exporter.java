@@ -2,7 +2,7 @@ package cn.hitek.authorization.ilis2.product.database.exporter;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
-import cn.hitek.authorization.ilis2.product.init.config.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 
 import java.util.ArrayList;

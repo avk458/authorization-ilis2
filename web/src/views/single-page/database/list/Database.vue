@@ -116,7 +116,7 @@ export default {
       }
     },
     handleInit(val) {
-      this.$refs.initializationModal.showModal()
+      this.$refs.initializationModal.showModal(val.id)
     }
   },
   mounted() {

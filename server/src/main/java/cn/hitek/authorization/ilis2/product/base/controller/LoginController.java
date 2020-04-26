@@ -26,7 +26,7 @@ public class LoginController {
     public Response getUserInfo() {
         HashMap<String, Object> result = new HashMap<>(0);
         result.put("name:", "super_admin");
-        result.put("user_id", "1");
+        result.put("userId", "1");
         result.put("access", new String[]{"super_admin", "admin"});
         result.put("token", "super_admin");
         result.put("avatar", "https://i.loli.net/2017/08/21/599a521472424.jpg");

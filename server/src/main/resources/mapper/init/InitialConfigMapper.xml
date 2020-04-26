@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.hitek.authorization.ilis2.product.init.config.mapper.InitialConfigMapper">
-  <resultMap id="BaseResultMap" type="cn.hitek.authorization.ilis2.product.init.config.domain.InitialConfig">
+<mapper namespace="cn.hitek.authorization.ilis2.product.init.configuration.mapper.InitialConfigMapper">
+  <resultMap id="BaseResultMap" type="cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig">
     <!--@mbg.generated-->
     <!--@Table t_initial_config-->
     <id column="id" jdbcType="VARCHAR" property="id" />

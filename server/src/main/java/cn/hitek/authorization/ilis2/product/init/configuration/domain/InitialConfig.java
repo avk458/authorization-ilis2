@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.init.config.domain;
+package cn.hitek.authorization.ilis2.product.init.configuration.domain;
 
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -36,7 +36,7 @@ public class InitialConfig extends BaseEntity {
     @NotBlank(message = "连接地址不能为空")
     private String host;
 
-    @Digits(integer = 20, fraction = 65535, message = "数据库端口不合规")
+    @Digits(integer = 1025, fraction = 65535, message = "数据库端口不合规")
     private Integer port;
 
     @NotBlank(message = "用户名不能为空")

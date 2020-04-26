@@ -44,3 +44,10 @@ export const isDatabaseNameIllegal = name => {
     params: { name: name }
   })
 }
+
+export const initUnitDatabase = id => {
+  return axios.request({
+    url: `/database/init/${id}`,
+    method: 'post'
+  })
+}

@@ -1,7 +1,7 @@
-package cn.hitek.authorization.ilis2.product.init.config.service;
+package cn.hitek.authorization.ilis2.product.init.configuration.service;
 
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
-import cn.hitek.authorization.ilis2.product.init.config.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 
 /**
  * @author chenlm
