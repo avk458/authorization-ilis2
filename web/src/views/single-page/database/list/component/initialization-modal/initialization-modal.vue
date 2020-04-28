@@ -1,12 +1,21 @@
 <template>
   <div class="test">
-    <Modal v-model="visible" title="数据库初始化" @on-visible-change="handleVisible"
-           :styles="{top: '20px'}"
+    <Modal v-model="visible" :title="modalTitle" @on-visible-change="handleVisible"
+           :styles="{top: '-200px'}"
+           :mask-closable="false"
            class-name="vertical-center-modal">
-      <div id="time-line">
+      <div id="time-line" v-if="items.length > 2">
         <Timeline pending>
           <TimelineItem v-for="item in items" :color="item.color" :key="item.value">{{ item.value }}</TimelineItem>
         </Timeline>
+      </div>
+      <div style="text-align:center" v-else>
+        <p>在初始化数据库的过程中不能暂停，除非遇到系统错误</p>
+        <p>您确定要执行吗？</p>
+      </div>
+      <div slot="footer">
+        <Button v-if="confirm" :type="btnType" long :loading="initializing" @click="handelInitialize">{{ btnLabel }}</Button>
+        <Button v-else long :type="btnType"  @click="handleCancel">{{ btnLabel }}</Button>
       </div>
     </Modal>
   </div>
@@ -14,30 +23,45 @@
 
 <script>
 import { initUnitDatabase } from '@/api/unit-database'
+import { mapGetters } from 'vuex'
 
 export default {
-  name: 'test',
   data() {
     return {
       websocket: null,
-      stompClient: null,
       visible: false,
       items: [
         { color: 'green', value: '连接成功' }
-      ]
+      ],
+      infoId: '',
+      initializing: false,
+      btnType: 'warning',
+      btnLabel: '确定',
+      modalTitle: '警告',
+      confirm: true
     }
+  },
+  computed: {
+    ...mapGetters([
+      'currentUserId'
+    ])
   },
   watch: {
     items() {
       this.$nextTick(() => {
         const div = document.getElementById('time-line')
-        div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
+        if (div) {
+          div.scrollTo({
+            top: div.scrollHeight,
+            behavior: 'smooth'
+          })
+        }
       })
     }
   },
   methods: {
     async initWebSocket() {
-      const broker = 'ws://127.0.0.1:10010/messenger?token=1234456'
+      const broker = `ws://127.0.0.1:10010/messenger?token=${this.currentUserId}`
       this.websocket = new WebSocket(broker)
       this.websocket.onmessage = this.onMessage
       this.websocket.onopen = this.onOpen
@@ -60,16 +84,48 @@ export default {
       this.websocket.close()
     },
     async showModal(val) {
-      this.visible = true
       await this.initWebSocket()
-      if (val) {
-        initUnitDatabase(val)
+      this.visible = true
+      this.infoId = val
+    },
+    handelInitialize() {
+      this.initializing = true
+      this.confirm = false
+      this.btnType = 'info'
+      this.btnLabel = 'processing'
+      this.modalTitle = '正在初始化'
+      if (this.infoId) {
+        initUnitDatabase(this.infoId).then(res => {
+          this.initializing = false
+          if (res.code === 20000) {
+            this.btnType = 'success'
+            this.btnLabel = '初始化成功'
+            this.modalTitle = '完成'
+            this.$emit('success-init')
+          } else {
+            this.btnType = 'error'
+            this.btnLabel = '初始化失败'
+            this.modalTitle = '失败'
+          }
+        }).catch(err => {
+          if (err) {
+            this.btnType = 'error'
+            this.btnLabel = '初始化失败'
+            this.modalTitle = '失败'
+          }
+        })
       }
     },
     handleCancel() {
-      this.modalVisible = false
+      this.visible = false
       this.websocket.close()
       this.items = []
+      this.infoId = ''
+      this.initializing = false
+      this.btnType = 'warning'
+      this.btnLabel = '确定'
+      this.modalTitle = '警告'
+      this.confirm = true
     },
     handleVisible(val) {
       if (!val) {

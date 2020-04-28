@@ -54,6 +54,9 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             UnitDatabase database = getById(unitDatabaseId);
             Objects.requireNonNull(database, "database info error");
             Messenger.sendMessage(LogType.SUCCESS, "获取单位数据库信息成功");
+            if (UnitDatabase.INITIALIZED == database.getIsInitialized()) {
+                throw new BusinessException("已初始化的数据库不允许再次初始化");
+            }
             Messenger.sendMessage(LogType.NORMAL, "准备获取单位配置信息");
             InitialConfig config = this.configService.getActiveConfig();
             Objects.requireNonNull(config, "can't find active database initial configuration");
@@ -83,9 +86,10 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
-            this.updateById(database);
+            super.updateById(database);
         } catch (Exception e) {
             Messenger.sendMessage(LogType.ERROR, String.format("系统错误：%s", e.getMessage()));
+            throw e;
         }
     }
 
@@ -121,8 +125,16 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public boolean updateById(UnitDatabase entity) {
-        entity.setDatabaseUsername(EncryptUtils.encrypt(entity.getDatabaseUsername()));
-        entity.setDatabasePwd(EncryptUtils.encrypt(entity.getDatabasePwd()));
+        String databaseUsername = entity.getDatabaseUsername();
+        String databasePwd = entity.getDatabasePwd();
+        if (StringUtils.isNotBlank(databaseUsername)) {
+            databaseUsername = EncryptUtils.encrypt(databaseUsername);
+        }
+        if (StringUtils.isNotBlank(databasePwd)) {
+            databasePwd = EncryptUtils.encrypt(databasePwd);
+        }
+        entity.setDatabaseUsername(databaseUsername);
+        entity.setDatabasePwd(databasePwd);
         return super.updateById(entity);
     }
 }

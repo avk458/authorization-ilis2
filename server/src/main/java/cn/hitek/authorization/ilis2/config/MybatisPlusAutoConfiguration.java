@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.autoconfigration;
+package cn.hitek.authorization.ilis2.config;
 
 import cn.hitek.authorization.ilis2.common.mybatisplus.CommonMetaDataHandler;
 import org.springframework.context.annotation.Bean;

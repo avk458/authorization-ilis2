@@ -8,10 +8,13 @@ import java.io.IOException;
 
 import static cn.hitek.authorization.ilis2.product.database.helper.EchoLogFactory.createLog;
 
+/**
+ * @author chenlm
+ */
 public class Messenger {
 
     public static void sendMessage(LogType type, String message) throws IOException {
-        WebSocketSession session = SocketManager.get("1234456");
+        WebSocketSession session = SocketManager.get("123123");
         String log = createLog(type, message);
         session.sendMessage(new TextMessage(log));
     }

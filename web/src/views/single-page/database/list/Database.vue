@@ -12,7 +12,7 @@
       </Table>
     </Card>
     <DatabaseModal ref="databaseModal" @on-success-valid="submit"/>
-    <InitializationModal ref="initializationModal"/>
+    <InitializationModal ref="initializationModal" @success-init="fetchData"/>
   </div>
 </template>
 <script>

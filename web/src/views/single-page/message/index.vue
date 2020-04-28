@@ -31,8 +31,8 @@
                 :style="{ display: item.loading ? 'inline-block !important' : '' }"
                 :loading="item.loading"
                 size="small"
-                :icon="currentMessageType === 'readed' ? 'md-trash' : 'md-redo'"
-                :title="currentMessageType === 'readed' ? '删除' : '还原'"
+                :icon="currentMessageType === 'read' ? 'md-trash' : 'md-redo'"
+                :title="currentMessageType === 'read' ? '删除' : '还原'"
                 type="text"
                 v-show="currentMessageType !== 'unread'"
                 @click.native.stop="removeMsg(item)"></Button>
@@ -56,7 +56,7 @@
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
 const listDic = {
   unread: 'messageUnreadList',
-  readed: 'messageReadedList',
+  read: 'messageReadList',
   trash: 'messageTrashList'
 }
 export default {
@@ -73,7 +73,7 @@ export default {
   computed: {
     ...mapState({
       messageUnreadList: state => state.user.messageUnreadList,
-      messageReadedList: state => state.user.messageReadedList,
+      messageReadList: state => state.user.messageReadList,
       messageTrashList: state => state.user.messageTrashList,
       messageList () {
         return this[listDic[this.currentMessageType]]
@@ -86,7 +86,7 @@ export default {
     }),
     ...mapGetters([
       'messageUnreadCount',
-      'messageReadedCount',
+      'messageReadCount',
       'messageTrashCount'
     ])
   },
@@ -98,7 +98,7 @@ export default {
       'getContentByMsgId',
       'getMessageList',
       'hasRead',
-      'removeReaded',
+      'removeRead',
       'restoreTrash'
     ]),
     stopLoading (name) {

@@ -24,7 +24,7 @@ public class ConnectionHandler {
         String pwd = EncryptUtils.decrypt(database.getDatabasePwd());
         Connection connection = DriverManager.getConnection(path, username, pwd);
         Statement statement = connection.createStatement();
-        ResultSet dbResultSet = statement.executeQuery("show databases ");
+        ResultSet dbResultSet = statement.executeQuery("SHOW DATABASES ");
         ArrayList<String> databases = new ArrayList<>(0);
         while (dbResultSet.next()) {
             databases.add(dbResultSet.getString("database"));
@@ -34,12 +34,10 @@ public class ConnectionHandler {
         } else {
             int rows = statement.executeUpdate("CREATE DATABASE " + database.getDatabaseName() + " CHARACTER SET utf8 COLLATE utf8_general_ci");
             if (1 == rows) {
-                statement.close();
-                connection.close();
+               statement.execute("USE " + database.getDatabaseName());
             }
         }
-        path = linear.setSchema(database.getDatabaseName()).getPath();
-        return DriverManager.getConnection(path, username, pwd);
+        return connection;
     }
 
     private static class DatabasePathLinear {

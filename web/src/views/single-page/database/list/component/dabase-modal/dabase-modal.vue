@@ -38,10 +38,10 @@
         </CheckboxGroup>
       </FormItem>
       <FormItem label="用户名" prop="databaseUsername">
-        <Input v-model="formData.databaseUsername" placeholder="请输入数据库用户名"></Input>
+        <Input v-model="formData.databaseUsername" :placeholder="usernameHolder"></Input>
       </FormItem>
       <FormItem label="密码" prop="databasePwd">
-        <Input v-model="formData.databasePwd" placeholder="请输入数据库密码" type="password" :password="true"></Input>
+        <Input v-model="formData.databasePwd" :placeholder="pwdHolder" type="password" :password="true"></Input>
       </FormItem>
       <FormItem label="数据库版本" prop="databaseVersion">
         <Input v-model="formData.databaseVersion" placeholder="请输入数据库数据库版本"></Input>
@@ -116,7 +116,9 @@ export default {
       unitList: [],
       checkParams: [],
       radio: 'false',
-      sslParam: ''
+      sslParam: '',
+      usernameHolder: '请输入数据库用户名',
+      pwdHolder: '请输入数据库密码'
     }
   },
   watch: {
@@ -134,11 +136,17 @@ export default {
       this.formData.id = ''
       this.formData.unitName = ''
       this.checkParams = []
+      this.usernameHolder = '请输入数据库用户名'
+      this.pwdHolder = '请输入数据库密码'
     },
     showModal(data) {
       if (data) {
         this.formData = data
         this.modalTitle = '编辑单位数据库信息'
+        delete this.databaseRules.databaseUsername
+        delete this.databaseRules.databasePwd
+        this.usernameHolder = '如需修改，请输入数据库用户名。留空则不修改用户名'
+        this.pwdHolder = '如需修改，请输入数据库密码。留空则不修改密码'
       } else {
         this.modalTitle = '新增单位数据库信息'
       }

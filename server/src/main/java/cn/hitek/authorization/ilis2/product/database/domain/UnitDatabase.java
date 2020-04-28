@@ -3,6 +3,7 @@ package cn.hitek.authorization.ilis2.product.database.domain;
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
 import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Getter;
@@ -25,7 +26,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      * 是否删除
      */
     @TableLogic
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(fill = FieldFill.INSERT, select = false)
     private Boolean isDeleted;
 
     /**
@@ -63,12 +64,14 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      * 数据库用户名
      */
     @NotBlank(message = "数据库地址不能为空")
+    @TableField(select = false, updateStrategy = FieldStrategy.NOT_EMPTY)
     private String databaseUsername;
 
     /**
      * 数据库密码
      */
     @NotBlank(message = "数据库地址不能为空")
+    @TableField(select = false, updateStrategy = FieldStrategy.NOT_EMPTY)
     private String databasePwd;
 
     /**
