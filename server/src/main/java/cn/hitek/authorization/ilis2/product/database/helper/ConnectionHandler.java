@@ -23,6 +23,7 @@ public class ConnectionHandler {
         String username = EncryptUtils.decrypt(database.getDatabaseUsername());
         String pwd = EncryptUtils.decrypt(database.getDatabasePwd());
         Connection connection = DriverManager.getConnection(path, username, pwd);
+        connection.setAutoCommit(false);
         Statement statement = connection.createStatement();
         ResultSet dbResultSet = statement.executeQuery("SHOW DATABASES ");
         ArrayList<String> databases = new ArrayList<>(0);
@@ -34,7 +35,8 @@ public class ConnectionHandler {
         } else {
             int rows = statement.executeUpdate("CREATE DATABASE " + database.getDatabaseName() + " CHARACTER SET utf8 COLLATE utf8_general_ci");
             if (1 == rows) {
-               statement.execute("USE " + database.getDatabaseName());
+                connection.commit();
+                statement.execute("USE " + database.getDatabaseName());
             }
         }
         return connection;
