@@ -173,9 +173,10 @@ class ApplicationTests {
 
 	@Test
 	public void do4() {
-		File[] files = File.listRoots();
-		for (File file : files) {
-			System.out.println(file);
+		File file = new File("C:\\");
+		File[] files = file.listFiles();
+		for (File f : files) {
+			System.out.println(f.getPath());
 		}
 	}
 }

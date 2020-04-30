@@ -9,7 +9,7 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="profile_name" jdbcType="VARCHAR" property="profileName" />
     <result column="host" jdbcType="VARCHAR" property="host" />
     <result column="port" jdbcType="INTEGER" property="port" />
     <result column="username" jdbcType="VARCHAR" property="username" />
@@ -22,6 +22,6 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, create_by, create_time, update_by, update_time, `name`, host, port, username, password, `path`, schema_name, active, init_with_data, is_deleted
+    id, create_by, create_time, update_by, update_time, profile_name, host, port, username, password, `path`, schema_name, active, init_with_data, is_deleted
   </sql>
 </mapper>

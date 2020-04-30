@@ -33,7 +33,7 @@ public class DatabaseController {
     }
 
     @PostMapping("/info")
-    public Response insertUnitDatabase(@RequestBody UnitDatabase database) {
+    public Response insertUnitDatabase(@Validated @RequestBody UnitDatabase database) {
         this.databaseService.save(database);
         return new Response().code(HttpStatus.ADD);
     }

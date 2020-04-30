@@ -4,6 +4,7 @@ import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
@@ -40,6 +41,16 @@ public class ConnectionHandler {
             }
         }
         return connection;
+    }
+
+    public static Connection getConnection(InitialConfig config) throws SQLException {
+        DatabasePathLinear linear = DatabasePathLinear.getInstance();
+        String path = linear.setHost(config.getHost())
+                .setPort(config.getPort())
+                .setSchema(config.getSchemaName())
+                .getPath();
+        path += "?characterEncoding=utf8&serverTimezone=Asia/Shanghai";
+        return DriverManager.getConnection(path, config.getUsername(), config.getPassword());
     }
 
     private static class DatabasePathLinear {

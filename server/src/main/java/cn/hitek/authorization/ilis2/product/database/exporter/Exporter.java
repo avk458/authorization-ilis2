@@ -50,7 +50,7 @@ public interface Exporter {
     default InitFile createInitFile(InitialConfig config, String sqlPath, String logPath) {
         InitFile initFile = new InitFile();
         initFile.setConfigId(config.getId());
-        initFile.setConfigName(config.getName());
+        initFile.setConfigName(config.getProfileName());
         initFile.setSqlFilePath(sqlPath);
         initFile.setErrorLogPath(logPath);
         return initFile;

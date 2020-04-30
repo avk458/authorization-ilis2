@@ -97,8 +97,10 @@ export default {
         title: '警告',
         content: `您确定要删除：${val.databaseName}吗？`,
         onOk: () => {
-          deleteDatabaseInfo(val.id).then(res => this.$Message.success(res.message))
-          this.fetchData()
+          deleteDatabaseInfo(val.id).then(res => {
+            this.$Message.success(res.message)
+            this.fetchData()
+          })
         }
       })
     },

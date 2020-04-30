@@ -145,6 +145,16 @@ export default [
           title: '单位数据管理'
         },
         component: () => import('@/views/single-page/database/manage/DatabaseManage.vue')
+      },
+      {
+        path: '/database/config',
+        name: 'database_init_config',
+        meta: {
+          icon: 'ios-cloud',
+          access: ['admin'],
+          title: '主数据源配置管理'
+        },
+        component: () => import('@/views/single-page/database/init-config/InitConfigManage.vue')
       }
     ]
   },
