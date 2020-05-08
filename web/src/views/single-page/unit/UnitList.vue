@@ -89,11 +89,13 @@ export default {
       if (data.id) {
         updateUnitInfo(data).then(res => {
           this.$Message.success(res.message)
+          this.$refs.infoModal.handleCancel()
           this.fetchData()
         })
       } else {
         saveUnitInfo(data).then(res => {
           this.$Message.success(res.message)
+          this.$refs.infoModal.handleCancel()
           this.fetchData()
         })
       }

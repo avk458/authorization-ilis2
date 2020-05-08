@@ -4,6 +4,7 @@ import cn.hitek.authorization.ilis2.common.utils.FileUtil;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import org.apache.ibatis.jdbc.ScriptRunner;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest
 class ApplicationTests {
@@ -178,5 +178,49 @@ class ApplicationTests {
 		for (File f : files) {
 			System.out.println(f.getPath());
 		}
+	}
+
+	@Test
+	public void do5() {
+		ArrayList<String> list = new ArrayList<>(Arrays.asList("1", "2", "2", "3", "4", "3"));
+		HashMap<String, Integer> map = new HashMap<>(0);
+		map.put("2", 8);
+		list.forEach(s -> map.computeIfAbsent(s, Integer::new));
+		System.out.println(map);
+	}
+
+	@Test
+	public void do6() {
+		List<String> command = Arrays.asList("mysqldump", "-h127.0.0.1", "-P3306", "-uroot", "-p123456", "-d", "auth01", "--ignore-table=auth01.t_init_file", "--ignore-table=auth01.t_initial_config");
+		List<String> command2 = Arrays.asList("mysqldump", "-h127.0.0.1", "-P3306", "-uroot", "-p123456", "auth01", "t_init_file");
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(new File("E:\\fileShare\\s.sql")));
+		processBuilder.redirectError(new File("E:\\fileShare\\l.log"));
+		Process process = null;
+		try {
+			process = processBuilder.start();
+			process.waitFor();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void do7() {
+		File file = new File("G:\\迅雷下载\\1588924827268\\init.sql");
+		File directory = new File(file.getParent());
+		File[] files = directory.listFiles();
+		if (null != files) {
+			for (File f : files) {
+				if (f.isFile()) {
+					boolean delete = f.delete();
+				}
+			}
+		} else {
+			boolean delete = directory.delete();
+		}
+		File[] files1 = directory.listFiles();
 	}
 }

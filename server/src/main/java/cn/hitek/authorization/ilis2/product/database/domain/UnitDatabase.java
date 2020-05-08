@@ -1,11 +1,15 @@
 package cn.hitek.authorization.ilis2.product.database.domain;
 
-import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
 import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
+import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
+import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
+import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +36,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 所属单位
      */
-    @NotBlank(message = "所属单位不能为空")
+    @NotBlank(message = "所属单位不能为空", groups = {OnCreate.class, OnUpdate.class})
     private String unitId;
 
     private String unitName;
@@ -40,19 +44,19 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库名
      */
-    @NotBlank(message = "数据库名不能为空")
+    @NotBlank(message = "数据库名不能为空", groups = {OnCreate.class, OnUpdate.class})
     private String databaseName;
 
     /**
      * 数据库ip
      */
-    @NotBlank(message = "数据库地址不能为空")
+    @NotBlank(message = "数据库地址不能为空", groups = {OnCreate.class, OnUpdate.class})
     private String host;
 
     /**
      * 数据库端口
      */
-    @Digits(integer = 1025, fraction = 65535, message = "数据库端口不合规")
+    @Digits(integer = 1025, fraction = 65535, message = "数据库端口不合规", groups = {OnCreate.class, OnUpdate.class})
     private Integer port;
 
     /**
@@ -63,15 +67,19 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库用户名
      */
-    @NotBlank(message = "数据库地址不能为空")
-    @TableField(select = false, updateStrategy = FieldStrategy.NOT_EMPTY)
+    @NotBlank(message = "数据库用户名不能为空", groups = OnCreate.class)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String databaseUsername;
 
     /**
      * 数据库密码
      */
-    @NotBlank(message = "数据库地址不能为空")
-    @TableField(select = false, updateStrategy = FieldStrategy.NOT_EMPTY)
+    @NotBlank(message = "数据库密码不能为空", groups = OnCreate.class)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String databasePwd;
 
     /**
@@ -82,7 +90,7 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     /**
      * 数据库类型
      */
-    @Digits(integer = 211, fraction = 233, message = "数据库类型不合法")
+    @Digits(integer = 211, fraction = 233, message = "数据库类型不合法", groups = {OnCreate.class, OnUpdate.class})
     private Integer databaseType;
 
     /**

@@ -3,6 +3,7 @@ package cn.hitek.authorization.ilis2.product.database.controller;
 import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
+import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
@@ -33,7 +34,7 @@ public class DatabaseController {
     }
 
     @PostMapping("/info")
-    public Response insertUnitDatabase(@Validated @RequestBody UnitDatabase database) {
+    public Response insertUnitDatabase(@Validated(OnCreate.class) @RequestBody UnitDatabase database) {
         this.databaseService.save(database);
         return new Response().code(HttpStatus.ADD);
     }

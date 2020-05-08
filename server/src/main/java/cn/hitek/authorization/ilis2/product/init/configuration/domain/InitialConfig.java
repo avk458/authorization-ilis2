@@ -4,6 +4,8 @@ import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,7 +49,9 @@ public class InitialConfig extends BaseEntity {
     private String username;
 
     @NotBlank(message = "密码不能为空", groups = OnCreate.class)
-    @TableField(select = false, updateStrategy = FieldStrategy.NOT_EMPTY)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     /**
@@ -84,6 +88,12 @@ public class InitialConfig extends BaseEntity {
      */
     @TableField(exist = false)
     private List<String> initDataTableSet;
+
+    /**
+     * 该属性用作各exporter判断是否需要生成多个命令行
+     */
+    @TableField(exist = false)
+    private boolean needSecondCommands;
 
     public void setInitDataTableSet(List<String> initDataTableSet) {
         if (!CollectionUtils.isEmpty(initDataTableSet)) {

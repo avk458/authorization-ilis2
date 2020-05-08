@@ -3,6 +3,7 @@ package cn.hitek.authorization.ilis2.product.unit.controller;
 import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
+import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
@@ -36,7 +37,7 @@ public class UnitController {
     }
 
     @PostMapping("/info")
-    public Response createUnit(@RequestBody Unit unit) {
+    public Response createUnit(@Validated(OnCreate.class) @RequestBody Unit unit) {
         this.unitService.save(unit);
         return new Response().code(HttpStatus.ADD);
     }

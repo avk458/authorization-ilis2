@@ -49,14 +49,14 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     @SneakyThrows
     @Override
     public void initUnitDatabase(String unitDatabaseId) {
+        InitFile initFile = null;
         try {
             Messenger.sendMessage(LogType.NORMAL, "准备获取单位数据库信息");
             UnitDatabase database = getById(unitDatabaseId);
             Objects.requireNonNull(database, "database info error");
             Messenger.sendMessage(LogType.SUCCESS, "获取单位数据库信息成功");
-            if (UnitDatabase.INITIALIZED == database.getIsInitialized()) {
-                throw new BusinessException("已初始化的数据库不允许再次初始化");
-            }
+            detectUnitDatabaseQualified(database);
+            Messenger.sendMessage(LogType.SUCCESS, "单位数据库验证成功");
             Messenger.sendMessage(LogType.NORMAL, "准备获取单位配置信息");
             InitialConfig config = this.configService.getActiveConfig();
             Objects.requireNonNull(config, "can't find active database initial configuration");
@@ -64,16 +64,22 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Messenger.sendMessage(LogType.NORMAL, "准备主数据源");
             // 1. export
             Exporter dumper = Exporters.init(database.getDatabaseEnum());
-            InitFile initFile = dumper.export(config);
-            Messenger.sendMessage(LogType.SUCCESS, String.format("从主数据源导出数据成功，sql文件：%s，日志文件：%s",
-                    initFile.getSqlFilePath(),
-                    initFile.getErrorLogPath()));
-            try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getErrorLogPath())))) {
+            initFile = dumper.export(config);
+            try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getProcessLogPath())))) {
                 String line;
                 while (StringUtils.isNotBlank(line = logReader.readLine())) {
-                    Messenger.sendMessage(LogType.WARN, line);
+                    if (line.contains("error")) {
+                        Messenger.sendMessage(LogType.ERROR, line);
+                        throw new BusinessException("Got error");
+                    } else {
+                        Messenger.sendMessage(LogType.WARN, line);
+                    }
                 }
             }
+            Messenger.sendMessage(LogType.SUCCESS,
+                    String.format("从主数据源导出数据成功，sql文件：%s，日志文件：%s",
+                            initFile.getSqlFilePath(),
+                            initFile.getProcessLogPath()));
             // 2. initialize
             Messenger.sendMessage(LogType.NORMAL, "准备初始化数据库");
             Connection connection = ConnectionHandler.getConnection(database);
@@ -84,12 +90,54 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                 runner.runScript(sqlReader);
             }
             Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
+            initFile.setUnitDatabaseId(database.getId());
+            initFile.setUnitDatabaseName(database.getDatabaseName());
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
             super.updateById(database);
+        } catch (BusinessException e) {
+            Messenger.sendMessage(LogType.ERROR, String.format("业务错误：%s", e.getMessage()));
+            if (null != initFile) {
+                File sql = new File(initFile.getSqlFilePath());
+                if (sql.exists()) {
+                    deleteFileWhenCatchException(sql.getParent());
+                }
+            }
+            Messenger.sendMessage(LogType.NORMAL, "工作文件夹已清空");
+            throw e;
         } catch (Exception e) {
             Messenger.sendMessage(LogType.ERROR, String.format("系统错误：%s", e.getMessage()));
             throw e;
+        }
+    }
+
+    private void deleteFileWhenCatchException(String path) {
+        File file = new File(path);
+        File[] files = file.listFiles();
+        if (null != files) {
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFileWhenCatchException(f.getPath());
+                } else {
+                    boolean delete = f.delete();
+                    if (!delete) {
+                        log.warn("删除文件失败：{}", f.getPath());
+                    }
+                }
+            }
+        }
+        boolean delete = file.delete();
+        if (!delete) {
+            log.warn("删除文件失败：{}", file.getPath());
+        }
+    }
+
+    private void detectUnitDatabaseQualified(UnitDatabase database) {
+        boolean exist = query().eq(UnitDatabase::getUnitId, database.getUnitId())
+                .eq(UnitDatabase::getIsInitialized, UnitDatabase.INITIALIZED)
+                .exist();
+        if (exist) {
+            throw new BusinessException("检测到该单位下有已初始化的数据库不允许再次初始化");
         }
     }
 
@@ -108,12 +156,12 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public void removeUnitDatabaseInfoViaUnitId(String unitId) {
-        boolean remove = remove(Wrappers.lambdaQuery(UnitDatabase.class)
-                .eq(UnitDatabase::getUnitId, unitId)
-                .eq(UnitDatabase::getIsInitialized, !UnitDatabase.INITIALIZED));
-        if (!remove) {
+        boolean existInitialized = query().eq(UnitDatabase::getUnitId, unitId)
+                .eq(UnitDatabase::getIsInitialized, !UnitDatabase.INITIALIZED).exist();
+        if (existInitialized) {
             throw new BusinessException("删除失败！不能删除正在使用的数据库信息");
         }
+        remove(Wrappers.lambdaQuery(UnitDatabase.class).eq(UnitDatabase::getUnitId, unitId));
     }
 
     @Override

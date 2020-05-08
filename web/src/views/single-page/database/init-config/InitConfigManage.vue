@@ -15,13 +15,27 @@
 <script>
 import { getInitConfigList, manipulateTheConfig, deleteConfigInfo, updateConfigInfo } from '@/api/config'
 import SettingModal from '@@/main/components/setting-modal/setting-modal'
+import TableSetExpand from './compoents/expand'
 
 export default {
   name: 'InitConfigManage',
-  components: { SettingModal },
+  components: {
+    SettingModal,
+    // eslint-disable-next-line vue/no-unused-components
+    TableSetExpand
+  },
   data() {
     return {
       columns: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, p) => {
+            return h(TableSetExpand, {
+              props: { set: p.row.initDataTableSet }
+            })
+          }
+        },
         { title: '配置名称', key: 'profileName', width: 100 },
         { title: 'Host', key: 'host' },
         { title: '端口', key: 'port', width: 80 },
@@ -60,7 +74,7 @@ export default {
           },
           width: 140
         },
-        { title: '初始化数据表', key: 'carryDataTables', tooltip: true },
+        { title: '初始化数据表', key: 'carryDataTables', ellipsis: true },
         { title: '操作', slot: 'action', align: 'center', width: 170 }
       ],
       data: [],
@@ -71,7 +85,13 @@ export default {
     fetchData() {
       this.loading = true
       getInitConfigList().then(res => {
-        this.data = res.data
+        const data = res.data
+        data.map(i => {
+          if (i.initWithData) {
+            i._disableExpand = true
+          }
+        })
+        this.data = data
         this.loading = false
       })
     },
@@ -103,6 +123,11 @@ export default {
         this.$Message.success(res.message)
         this.fetchData()
       })
+    },
+    handleCellClick(a, b, c) {
+      console.log(a)
+      console.log(b)
+      console.log(b)
     }
   },
   mounted() {

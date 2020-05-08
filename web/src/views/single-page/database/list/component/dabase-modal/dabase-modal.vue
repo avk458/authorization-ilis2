@@ -70,6 +70,9 @@ export default {
   name: 'DatabaseModal',
   data() {
     const unitValidator = async (rule, value, callback) => {
+      if (this.unitIdCache === value) {
+        callback()
+      }
       if (!value) {
         callback(new Error('请选择要新增数据库的单位'))
       } else if (await this.unitHasDatabaseAlready(value)) {
@@ -96,7 +99,7 @@ export default {
         host: [{ required: true, message: '您输入的地址不合规' }],
         port: [{ required: true, type: 'number' }],
         databaseUsername: [{ required: true, message: '数据库用户名不能为空' }],
-        databasePwd: [{ required: true, message: '数据库密码不能为空' }],
+        databasePwd: [{ required: true, min: 6, message: '数据库密码长度不合法', trigger: 'blur' }],
         databaseVersion: [{ required: true, message: '数据库版本不能为空' }],
         databaseType: [{ required: true, message: '请选择数据库类型' }]
       },
@@ -118,7 +121,8 @@ export default {
       radio: 'false',
       sslParam: '',
       usernameHolder: '请输入数据库用户名',
-      pwdHolder: '请输入数据库密码'
+      pwdHolder: '请输入数据库密码',
+      unitIdCache: undefined
     }
   },
   watch: {
@@ -147,6 +151,7 @@ export default {
         delete this.databaseRules.databasePwd
         this.usernameHolder = '如需修改，请输入数据库用户名。留空则不修改用户名'
         this.pwdHolder = '如需修改，请输入数据库密码。留空则不修改密码'
+        this.unitIdCache = data.unitId
       } else {
         this.modalTitle = '新增单位数据库信息'
       }
@@ -160,7 +165,7 @@ export default {
     handleUnitSelect(val) {
       if (val) {
         this.formData.unitName = val.label
-        this.formData.databaseName = getFirstCharAtSpell(val.label)
+        this.formData.databaseName = 'ilis2_' + getFirstCharAtSpell(val.label)
       }
     },
     handleSubmit() {
@@ -174,7 +179,6 @@ export default {
               : payload.params += '&' + this.sslParam
           }
           this.$emit('on-success-valid', payload)
-          this.handleCancel()
         }
       })
     },

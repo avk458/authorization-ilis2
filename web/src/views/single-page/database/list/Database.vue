@@ -109,11 +109,13 @@ export default {
         updateDatabaseInfo(data).then(res => {
           this.$Message.success(res.message)
           this.fetchData()
+          this.$refs.databaseModal.handleCancel()
         })
       } else {
         saveDatabaseInfo(data).then(res => {
           this.$Message.success(res.message)
           this.fetchData()
+          this.$refs.databaseModal.handleCancel()
         })
       }
     },

@@ -39,9 +39,12 @@ import { getFirstCharAtSpell } from '@/libs/tools'
 export default {
   name: 'InfoModal',
   data() {
+    const CODE_PATTERN = /^[a-z0-9]{3,10}$/
     const unitCodeValidator = async (rule, value, callback) => {
-      const pattern = /^[a-z0-9]{3,10}$/
-      if (!pattern.test(value)) {
+      if (this.uniqCodeCache === value) {
+        callback()
+      }
+      if (!CODE_PATTERN.test(value)) {
         callback(new Error('非法唯一识别码'))
       } else if (await this.validateCode(value)) {
         callback(new Error('检测到重复识别码，请重新输入'))
@@ -84,7 +87,8 @@ export default {
         contactPhone: [
           { required: true, type: 'string', message: '联系人电话不能为空', trigger: 'change', pattern: /^1[3|4|5|7|8][0-9]{9}$/ }
         ]
-      }
+      },
+      uniqCodeCache: undefined
     }
   },
   methods: {
@@ -92,12 +96,15 @@ export default {
       if (data) {
         this.formData = data
         this.modalTitle = '编辑单位信息'
+        this.uniqCodeCache = data.uniqCode
       } else {
         this.modalTitle = '新增单位信息'
       }
       this.modalVisible = true
     },
     handleSubmit() {
+      if (this.uniqCodeCache && this.formData.uniqCode === this.uniqCodeCache) {
+      }
       this.$refs.unitForm.validate((valid) => {
         if (valid) {
           if (this.formData.maxOnlineAccount > this.formData.maxAccount) {
@@ -107,7 +114,6 @@ export default {
           const payload = {}
           Object.assign(payload, this.formData)
           this.$emit('on-success-valid', payload)
-          this.handleCancel()
         }
       })
     },
@@ -115,6 +121,7 @@ export default {
       this.formData.id = ''
       this.$refs.unitForm.resetFields()
       this.modalVisible = false
+      this.uniqCodeCache = undefined
     },
     async validateCode(val) {
       const res = await validateUniqCode(val)

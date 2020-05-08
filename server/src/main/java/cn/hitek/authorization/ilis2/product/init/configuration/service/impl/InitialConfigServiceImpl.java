@@ -82,22 +82,26 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
     public void activeConfig(String configId) {
         InitialConfig config = getById(configId);
         if (!InitialConfig.ACTIVE == config.getActive()) {
-            InitialConfig activeConfig = this.getActiveConfig();
-            if (null != activeConfig) {
-                activeConfig.setActive(!InitialConfig.ACTIVE);
-                saveOrUpdate(activeConfig);
-            }
+            setOtherConfigInactive();
             config.setActive(InitialConfig.ACTIVE);
         } else {
             config.setActive(!InitialConfig.ACTIVE);
         }
-        saveOrUpdate(config);
+        super.updateById(config);
+    }
+
+    private void setOtherConfigInactive() {
+        InitialConfig activeConfig = this.getActiveConfig();
+        if (null != activeConfig) {
+            activeConfig.setActive(!InitialConfig.ACTIVE);
+            super.updateById(activeConfig);
+        }
     }
 
     @Override
     public boolean updateById(InitialConfig entity) {
         if (InitialConfig.ACTIVE == entity.getActive()) {
-            this.activeConfig(entity.getId());
+            setOtherConfigInactive();
         }
         return super.updateById(entity);
     }

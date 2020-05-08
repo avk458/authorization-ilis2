@@ -1,11 +1,10 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
-import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,18 +25,9 @@ public interface Exporter {
      * @param config 配置类
      * @return command
      */
-    default List<String> commandBuilder(InitialConfig config) {
-        ArrayList<String> command = new ArrayList<>(8);
-        command.add(Constant.MYSQL_DUMP);
-        command.add("-h" + config.getHost());
-        command.add("-P" + config.getPort());
-        command.add("-u" + config.getUsername());
-        command.add("-p" + config.getPassword());
-        if (config.getInitWithData()) {
-            command.add("-d");
-        }
-        command.add(config.getSchemaName());
-        return command;
+    default List<String> commandBuilder(InitialConfig config){
+        // do nothing
+        return Collections.emptyList();
     }
 
     /**
@@ -52,7 +42,7 @@ public interface Exporter {
         initFile.setConfigId(config.getId());
         initFile.setConfigName(config.getProfileName());
         initFile.setSqlFilePath(sqlPath);
-        initFile.setErrorLogPath(logPath);
+        initFile.setProcessLogPath(logPath);
         return initFile;
     }
 
