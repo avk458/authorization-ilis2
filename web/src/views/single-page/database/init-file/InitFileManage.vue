@@ -90,8 +90,8 @@ export default {
   methods: {
     fetchData() {
       getInitFileList(this.params).then(res => {
-        this.data = res.data.records
-        this.total = res.data.total
+        this.data = res.records
+        this.total = res.total
       })
     },
     handleSizeChange(size) {
