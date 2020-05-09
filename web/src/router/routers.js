@@ -130,7 +130,7 @@ export default [
         path: '/database/list',
         name: 'database_list',
         meta: {
-          icon: 'ios-pulse',
+          icon: 'md-cube',
           access: ['admin'],
           title: '单位数据库信息'
         },
@@ -155,6 +155,16 @@ export default [
           title: '主数据源配置管理'
         },
         component: () => import('@/views/single-page/database/init-config/InitConfigManage.vue')
+      },
+      {
+        path: '/database/init-file.js',
+        name: 'database_init_file',
+        meta: {
+          icon: 'md-albums',
+          access: ['admin'],
+          title: '初始化文件管理'
+        },
+        component: () => import('@/views/single-page/database/init-file/InitFileManage.vue')
       }
     ]
   },
