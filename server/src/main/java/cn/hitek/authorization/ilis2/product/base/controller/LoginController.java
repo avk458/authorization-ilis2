@@ -29,7 +29,7 @@ public class LoginController {
         result.put("userId", "123123");
         result.put("access", new String[]{"super_admin", "admin"});
         result.put("token", "super_admin");
-        result.put("avatar", "https://i.loli.net/2017/08/21/599a521472424.jpg");
+        result.put("avatar", "https://i.loli.net/2020/05/13/dzGrXugK6pCqncN.png");
         return new Response().code(HttpStatus.OK).data(result);
     }
 

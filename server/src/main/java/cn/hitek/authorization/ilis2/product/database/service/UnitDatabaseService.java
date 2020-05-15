@@ -2,6 +2,7 @@ package cn.hitek.authorization.ilis2.product.database.service;
 
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 
 /**
  * @author chenlm
@@ -34,4 +35,10 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param unitId 单位id
      */
     void removeUnitDatabaseInfoViaUnitId(String unitId);
+
+    /**
+     * 根据单位信息新增单位默认数据库信息
+     * @param unit 单位实体
+     */
+    void createUnitDatabaseInfo(Unit unit);
 }

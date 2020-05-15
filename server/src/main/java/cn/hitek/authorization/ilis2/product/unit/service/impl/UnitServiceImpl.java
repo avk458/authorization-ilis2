@@ -40,4 +40,11 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
             this.databaseService.removeUnitDatabaseInfoViaUnitId(unitId);
         }
     }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public void insertUnitInfo(Unit unit) {
+        save(unit);
+        this.databaseService.createUnitDatabaseInfo(unit);
+    }
 }

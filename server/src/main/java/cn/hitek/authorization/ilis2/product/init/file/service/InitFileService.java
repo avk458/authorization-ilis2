@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2.product.init.file.service;
 
-import cn.hitek.authorization.ilis2.common.QueryParams;
+import cn.hitek.authorization.ilis2.common.params.QueryParams;
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

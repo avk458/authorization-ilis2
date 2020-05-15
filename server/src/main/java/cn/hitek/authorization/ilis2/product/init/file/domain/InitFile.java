@@ -42,4 +42,18 @@ public class InitFile extends BaseEntity {
     public boolean isLogFileExist() {
         return new File(this.processLogPath).exists();
     }
+
+    public File getSqlFile() {
+        if (sqlFilePath != null) {
+            return new File(sqlFilePath);
+        }
+        return null;
+    }
+
+    public File getLogFile() {
+        if (processLogPath != null) {
+            return new File(processLogPath);
+        }
+        return null;
+    }
 }

@@ -3,6 +3,7 @@
     <Modal
       v-model="visible"
       :title="modalTitle"
+      :styles="{top: '20px'}"
       :footer-hide="true">
       <Form ref="configForm" :model="formData" :rules="ruleValidate" label-position="left" :label-width="120">
         <FormItem label="配置名称" prop="profileName">
@@ -12,7 +13,7 @@
           <Input v-model="formData.host" placeholder="请输入数据库连接地址"/>
         </FormItem>
         <FormItem label="数据库端口" prop="port">
-          <InputNumber :min="20" :max="65535" v-model="formData.port" placeholder="请输入数据库端口" style="width: 100%"></InputNumber>
+          <InputNumber :min="1024" :max="65535" v-model="formData.port" placeholder="请输入数据库端口" style="width: 100%"></InputNumber>
         </FormItem>
         <FormItem label="用户名" prop="username">
           <Input v-model="formData.username" :placeholder="usernameHolder"></Input>
@@ -22,6 +23,18 @@
         </FormItem>
         <FormItem label="Schema" prop="schemaName">
           <Input v-model="formData.schemaName" placeholder="请输入数据库名称"></Input>
+        </FormItem>
+        <FormItem label="目标数据库" prop="targetDatabaseHost">
+          <Input v-model="formData.targetDatabaseHost" placeholder="请输入目标数据库连接地址"></Input>
+        </FormItem>
+        <FormItem label="数据库端口" prop="targetDatabasePort">
+          <InputNumber :min="1024" :max="65535" v-model="formData.targetDatabasePort" placeholder="请输入目标数据库端口" style="width: 100%"></InputNumber>
+        </FormItem>
+        <FormItem label="用户名" prop="targetDatabaseUsername">
+          <Input v-model="formData.targetDatabaseUsername" placeholder="请输入目标数据库用户名"></Input>
+        </FormItem>
+        <FormItem label="密码" prop="targetDatabasePwd">
+          <Input v-model="formData.targetDatabasePwd" placeholder="请输入目标数据库密码"></Input>
         </FormItem>
         <FormItem v-if="!isEdit" label="文件存放路径" prop="path">
           <Cascader
@@ -90,7 +103,11 @@ export default {
         schemaName: '',
         active: true,
         initWithData: true,
-        initDataTableSet: []
+        initDataTableSet: [],
+        targetDatabaseHost: '',
+        targetDatabasePort: 3306,
+        targetDatabaseUsername: '',
+        targetDatabasePwd: ''
       },
       pathData: [],
       usernameHolder: '请输入数据库用户名',
@@ -102,10 +119,14 @@ export default {
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
         password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
         // path: [{ required: true, type: 'array', message: '请选择路径', trigger: 'change' }],
-        schemaName: [{ required: true, message: 'schema不能为空', trigger: 'blur' }]
+        schemaName: [{ required: true, message: 'schema不能为空', trigger: 'blur' }],
+        targetDatabaseHost: [{ required: true, message: '目标数据库host不能为空', trigger: 'blur' }],
+        targetDatabasePort: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
+        targetDatabaseUsername: [{ required: true, message: '目标数据库用户名不能为空', trigger: 'blur' }],
+        targetDatabasePwd: [{ required: true, message: '目标数据库密码不能为空', trigger: 'blur' }]
       },
       tableList: [],
-      modalTitle: '新增主数据配置信息',
+      modalTitle: '新增主数据源配置信息',
       isEdit: false
     }
   },
@@ -162,7 +183,7 @@ export default {
       this.visible = false
       this.$refs.configForm.resetFields()
       this.formData.initDataTableSet = []
-      this.modalTitle = '新增主数据配置信息'
+      this.modalTitle = '新增主数据源配置信息'
       this.isEdit = false
     },
     handleInitDataSwitch(on) {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Button type="primary" @click="handleModal">新增数据库</Button>
+      <Button type="primary" @click="handleModal" disabled>新增数据库</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">

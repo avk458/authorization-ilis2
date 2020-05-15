@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2.product.init.file.service.impl;
 
-import cn.hitek.authorization.ilis2.common.QueryParams;
+import cn.hitek.authorization.ilis2.common.params.QueryParams;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.mapper.InitFileMapper;

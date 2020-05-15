@@ -1,14 +1,13 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
-import cn.hitek.authorization.ilis2.common.exception.BusinessException;
+import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ import java.util.List;
 public class MySqlDumper implements Exporter {
 
     @Override
-    public InitFile export(InitialConfig config) throws BusinessException {
+    public InitFile export(InitialConfig config) throws Exception {
         long millis = System.currentTimeMillis();
         List<String> command = commandBuilder(config);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -29,29 +28,39 @@ public class MySqlDumper implements Exporter {
         File error = new File(errorLogPath);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(sqlFile));
         processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(error));
-        Process process = null;
-        try {
+        Process process = processBuilder.start();
+        process.waitFor();
+        if (!config.getInitWithData() && !CollectionUtils.isEmpty(config.getInitDataTableSet())) {
+            config.setNeedSecondCommands(true);
+            List<String> secondCommands = commandBuilder(config);
+            processBuilder.command(secondCommands);
             process = processBuilder.start();
             process.waitFor();
-            if (!config.getInitWithData() && !CollectionUtils.isEmpty(config.getInitDataTableSet())) {
-                config.setNeedSecondCommands(true);
-                List<String> secondCommands = commandBuilder(config);
-                processBuilder.command(secondCommands);
-                process = processBuilder.start();
-                process.waitFor();
-            }
-            return createInitFile(config, sqlFilePath, errorLogPath);
-        } catch (IOException e) {
-            log.warn("mysql dump processor fatal");
-            throw new BusinessException("mysql dump 失败！");
-        } catch (InterruptedException e) {
-            log.warn("Interrupted!!! Processor will hang");
-            throw new BusinessException("Interrupted!!! Processor will hang");
-        } finally {
-            if (null != process && process.isAlive()) {
-                process.destroy();
-            }
         }
+        return createInitFile(config, sqlFilePath, errorLogPath);
+    }
+
+    @Override
+    public void restore(UnitDatabase database, InitFile initFile) throws Exception {
+        final List<String> commands = buildRestoreCommands(database);
+        final ProcessBuilder builder = new ProcessBuilder(commands);
+        builder.redirectError(ProcessBuilder.Redirect.appendTo(initFile.getLogFile()));
+        builder.redirectInput(initFile.getSqlFile());
+        Process process = builder.start();
+        process.waitFor();
+    }
+
+    private List<String> buildRestoreCommands(UnitDatabase database) {
+        ArrayList<String> command = new ArrayList<>(8);
+        command.add(Constant.MYSQL);
+        command.add("-h" + database.getHost());
+        command.add("-P" + database.getPort());
+        // command.add("-u" + EncryptUtils.decrypt(database.getDatabaseUsername()));
+        // command.add("-p" + EncryptUtils.decrypt(database.getDatabasePwd()));
+        command.add("-uroot");
+        command.add("-p123456");
+        command.add(database.getDatabaseName());
+        return command;
     }
 
     private String getCurrentWorkDirectory(int fileType, long millis, String path) {
@@ -76,6 +85,10 @@ public class MySqlDumper implements Exporter {
         if (!config.getInitWithData() && !config.isNeedSecondCommands()) {
             command.add("-d");
         }
+        // dump with Database routines
+        command.add("-R");
+        // make sure this progress will not hang in metadata lock
+        command.add("--single-transaction");
         command.add(config.getSchemaName());
         List<String> initDataTableSet = config.getInitDataTableSet();
         if (!CollectionUtils.isEmpty(initDataTableSet) && !config.getInitWithData() && !config.isNeedSecondCommands()) {

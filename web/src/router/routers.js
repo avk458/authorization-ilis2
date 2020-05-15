@@ -77,7 +77,7 @@ export default [
         name: 'unit_list',
         meta: {
           icon: 'logo-buffer',
-          title: '单位管理',
+          title: '单位信息管理',
           access: ['super_admin']
         },
         component: () => import('@/views/single-page/unit/UnitList.vue')

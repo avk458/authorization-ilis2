@@ -39,4 +39,10 @@ public interface InitialConfigService extends BaseService<InitialConfig> {
      * @param configId 配置id
      */
     void activeConfig(String configId);
+
+    /**
+     * 保存主数据源配置文件
+     * @param config 配置实体
+     */
+    void saveInitialConfig(InitialConfig config);
 }

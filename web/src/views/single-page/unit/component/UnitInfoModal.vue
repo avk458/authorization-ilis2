@@ -1,7 +1,8 @@
 <template>
-  <Modal v-model="modalVisible" :title="modalTitle" :footer-hide="true" width="45"
+  <Modal v-model="modalVisible" :title="modalTitle" :footer-hide="true" width="40"
          @on-visible-change="handleVisible">
-    <Form ref="unitForm" :model="formData" :rules="ruleValidate" :label-width="140"
+    <Form ref="unitForm" :model="formData" :rules="ruleValidate" :label-width="130"
+          inline
           label-position="left">
       <FormItem label="单位名称" prop="name">
         <Input v-model="formData.name" placeholder="请输入单位名称" @on-blur="handleNameInput"></Input>
@@ -9,22 +10,64 @@
       <FormItem label="唯一标识码" prop="uniqCode">
         <Input v-model="formData.uniqCode" placeholder="请输入4-6位英文单位唯一标识"></Input>
       </FormItem>
+      <FormItem label="单位简称" prop="unitShortName">
+        <Input v-model="formData.unitShortName" placeholder="用于二维码扫描页面展示" />
+      </FormItem>
+      <FormItem label="二级名称">
+        <Input v-model="formData.unitSubName" placeholder="请输入单位二级名称"/>
+      </FormItem>
+      <FormItem label="申述电子邮箱">
+        <Input v-model="formData.complaintMail" placeholder="请输入申述电子邮箱"/>
+      </FormItem>
+      <FormItem label="申述电话">
+        <Input v-model="formData.complaintPhone" placeholder="请输入申述电话" />
+      </FormItem>
+      <FormItem label="邮编">
+        <Input v-model="formData.postCode" placeholder="请输入邮编" />
+      </FormItem>
+      <FormItem label="联系电话">
+        <Input v-model="formData.contactTel" placeholder="请输入联系电话"/>
+      </FormItem>
+      <FormItem label="单位联系人">
+        <Input v-model="formData.contactName" placeholder="请输入联系人姓名"></Input>
+      </FormItem>
+      <FormItem label="单位联系人电话">
+        <Input v-model="formData.contactPhone" placeholder="请输入联系人电话"></Input>
+      </FormItem>
+      <FormItem label="联系地址">
+        <Input v-model="formData.address" placeholder="请输入联系地址" />
+      </FormItem>
+      <FormItem label="传真">
+        <Input v-model="formData.fax" placeholder="请输入传真号码"/>
+      </FormItem>
+      <FormItem label="银行账户">
+        <Input v-model="formData.bankAccount" placeholder="请输入银行账户" />
+      </FormItem>
+      <FormItem label="银行地址">
+        <Input v-model="formData.bankAddress" placeholder="请输入银行地址" />
+      </FormItem>
+      <FormItem label="银行名称">
+        <Input v-model="formData.bankName" placeholder="请输入银行名称" />
+      </FormItem>
+      <FormItem label="开户名称">
+        <Input v-model="formData.bankOfDeposit" placeholder="请输入开户行" />
+      </FormItem>
+      <FormItem label="查询电话">
+        <Input v-model="formData.queryTel" placeholder="请输入查询电话" />
+      </FormItem>
+      <FormItem label="说明">
+        <Input v-model="formData.description" type="textarea" placeholder="说明..." :autosize="{minSize:1, maxSize:1}"/>
+      </FormItem>
+      <FormItem label="最大用户数" prop="maxAccount">
+        <InputNumber :max="1000" :min="1" v-model="formData.maxAccount" style="width: 100%"></InputNumber>
+      </FormItem>
+      <FormItem label="最大在线用户数" prop="maxOnlineAccount">
+        <InputNumber :max="1000" :min="1" v-model="formData.maxOnlineAccount" style="width: 100%"></InputNumber>
+      </FormItem>
       <FormItem label="过期时间" prop="expireDate">
         <DatePicker type="date" format="yyyy-MM-dd" placeholder="选择日期" v-model="formData.expireDate"></DatePicker>
       </FormItem>
-      <FormItem label="最大用户数" prop="maxAccount">
-        <InputNumber :max="1000" :min="1" v-model="formData.maxAccount"></InputNumber>
-      </FormItem>
-      <FormItem label="最大在线用户数" prop="maxOnlineAccount">
-        <InputNumber :max="1000" :min="1" v-model="formData.maxOnlineAccount"></InputNumber>
-      </FormItem>
-      <FormItem label="单位联系人" prop="contactName">
-        <Input v-model="formData.contactName" placeholder="请输入联系人姓名"></Input>
-      </FormItem>
-      <FormItem label="单位联系人电话" prop="contactPhone">
-        <Input v-model="formData.contactPhone" placeholder="请输入联系人电话"></Input>
-      </FormItem>
-      <FormItem style="text-align: right">
+      <FormItem style="text-align: right;width: 100%">
         <Button type="primary" @click="handleSubmit('unitForm')">提交</Button>
         <Button @click="handleCancel" style="margin-left: 8px">取消</Button>
       </FormItem>
@@ -62,12 +105,29 @@ export default {
         maxAccount: 0,
         maxOnlineAccount: 0,
         contactName: '',
-        contactPhone: ''
+        contactPhone: '',
+        unitShortName: '',
+        unitSubName: '',
+        complaintMail: '',
+        complaintPhone: '',
+        postCode: '',
+        contactTel: '',
+        address: '',
+        fax: '',
+        bankAccount: '',
+        bankAddress: '',
+        bankName: '',
+        bankOfDeposit: '',
+        queryTel: '',
+        description: ''
       },
       modalTitle: '新增单位信息',
       ruleValidate: {
         name: [
           { required: true, min: 3, max: 10, message: '单位名称需要3-10个字', trigger: 'blur' }
+        ],
+        unitShortName: [
+          { required: true, min: 3, max: 6, message: '单位简称最好是3-6个字', trigger: 'blur' }
         ],
         uniqCode: [
           { required: true, validator: unitCodeValidator, trigger: 'blur' }

@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.init.configuration.service.impl;
 
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
@@ -25,6 +26,15 @@ import java.util.Map;
  */
 @Service
 public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMapper, InitialConfig> implements InitialConfigService {
+
+    @Override
+    public void saveInitialConfig(InitialConfig config) {
+        config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+        if (InitialConfig.ACTIVE == config.getActive()) {
+            setOtherConfigInactive();
+        }
+        save(config);
+    }
 
     @Override
     public InitialConfig getActiveConfig() {

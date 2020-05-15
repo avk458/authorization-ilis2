@@ -36,11 +36,11 @@ export default {
             })
           }
         },
-        { title: '配置名称', key: 'profileName', width: 100 },
+        { title: '配置名称', key: 'profileName', width: 120 },
         { title: 'Host', key: 'host' },
         { title: '端口', key: 'port', width: 80 },
         { title: '用户名', key: 'username', width: 100 },
-        { title: '文件存放位置', key: 'path' },
+        { title: '文件存放位置', key: 'path', ellipsis: true },
         { title: 'Schema', key: 'schemaName', width: 120 },
         {
           title: '是否启用',

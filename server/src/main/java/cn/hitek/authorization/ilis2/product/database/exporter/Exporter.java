@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
-import cn.hitek.authorization.ilis2.common.exception.BusinessException;
+import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 
@@ -16,9 +16,17 @@ public interface Exporter {
      * 从数据库中导出
      * @param config 配置信息
      * @return init file
-     * @throws BusinessException 抛出让用户知晓的业务异常
+     * @throws Exception runtime exception
      */
-    InitFile export(InitialConfig config) throws BusinessException;
+    InitFile export(InitialConfig config) throws Exception;
+
+    /**
+     * restore database base on dump file
+     * @param initFile etc sql file log file
+     * @param database database info
+     * @throws Exception runtime exception
+     */
+    void restore(UnitDatabase database, InitFile initFile) throws Exception;
 
     /**
      * 从配置类实体构建processBuilder dump命令

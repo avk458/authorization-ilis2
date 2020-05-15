@@ -3,6 +3,7 @@
     <Modal v-model="visible" :title="modalTitle" @on-visible-change="handleVisible"
            :styles="{top: '-200px'}"
            :mask-closable="false"
+           :closable="!initializing"
            class-name="vertical-center-modal">
       <div id="time-line" v-if="items.length > 2">
         <Timeline pending>
@@ -14,8 +15,8 @@
         <p>您确定要执行吗？</p>
       </div>
       <div slot="footer">
-        <Button v-if="confirm" :type="btnType" long :loading="initializing" @click="handelInitialize">{{ btnLabel }}</Button>
-        <Button v-else long :type="btnType"  @click="handleCancel">{{ btnLabel }}</Button>
+        <Button v-if="confirm" :type="btnType" long  @click="handelInitialize">{{ btnLabel }}</Button>
+        <Button v-else long :type="btnType" :loading="initializing"  @click="handleCancel">{{ btnLabel }}</Button>
       </div>
     </Modal>
   </div>
@@ -108,6 +109,7 @@ export default {
             this.modalTitle = '失败'
           }
         }).catch(err => {
+          this.initializing = false
           if (err) {
             this.btnType = 'error'
             this.btnLabel = '初始化失败'

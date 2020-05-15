@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.common;
+package cn.hitek.authorization.ilis2.common.params;
 
 import lombok.Data;
 

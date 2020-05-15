@@ -16,4 +16,6 @@ public class Constant {
     public static final String INIT_LINK_DATABASE = "mysql";
 
     public static final String MYSQL_DUMP = "mysqldump";
+    public static final String MYSQL = "mysql";
+    public static final String PARAMS = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai";
 }

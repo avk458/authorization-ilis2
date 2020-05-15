@@ -1,14 +1,15 @@
 package cn.hitek.authorization.ilis2.product.database.helper;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
-import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import org.apache.commons.lang3.StringUtils;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author chenlm
@@ -23,24 +24,7 @@ public class ConnectionHandler {
                 .getPath();
         String username = EncryptUtils.decrypt(database.getDatabaseUsername());
         String pwd = EncryptUtils.decrypt(database.getDatabasePwd());
-        Connection connection = DriverManager.getConnection(path, username, pwd);
-        connection.setAutoCommit(false);
-        Statement statement = connection.createStatement();
-        ResultSet dbResultSet = statement.executeQuery("SHOW DATABASES ");
-        ArrayList<String> databases = new ArrayList<>(0);
-        while (dbResultSet.next()) {
-            databases.add(dbResultSet.getString("database"));
-        }
-        if (databases.contains(database.getDatabaseName())) {
-            throw new BusinessException("数据库中有相同schema");
-        } else {
-            int rows = statement.executeUpdate("CREATE DATABASE " + database.getDatabaseName() + " CHARACTER SET utf8 COLLATE utf8_general_ci");
-            if (1 == rows) {
-                connection.commit();
-                statement.execute("USE " + database.getDatabaseName());
-            }
-        }
-        return connection;
+        return DriverManager.getConnection(path, "root", "123456");
     }
 
     public static Connection getConnection(InitialConfig config) throws SQLException {
@@ -49,8 +33,21 @@ public class ConnectionHandler {
                 .setPort(config.getPort())
                 .setSchema(config.getSchemaName())
                 .getPath();
-        path += "?characterEncoding=utf8&serverTimezone=Asia/Shanghai";
-        return DriverManager.getConnection(path, config.getUsername(), config.getPassword());
+        path += Constant.PARAMS;
+        return DriverManager.getConnection(path, config.getUsername(), EncryptUtils.decrypt(config.getPassword()));
+    }
+
+    public static void initializeDatabaseUser(InitialConfig config, UnitDatabase unitDatabase) throws SQLException {
+        final String schema = unitDatabase.getDatabaseName();
+        final String user = EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
+        final String decryptPwd = EncryptUtils.decrypt(unitDatabase.getDatabasePwd());
+        final Connection connection = getConnection(config);
+        connection.setAutoCommit(false);
+        Statement statement = connection.createStatement();
+        statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
+        // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
+        statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema +".* " + "TO " + user);
+        statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
     }
 
     private static class DatabasePathLinear {

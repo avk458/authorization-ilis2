@@ -8,8 +8,11 @@
           <strong>{{ row.name }}</strong>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)" :disabled="row.isAuthorized">编辑</Button>
-          <Button type="error" size="small" @click="remove(row)" :disabled="row.isAuthorized">删除</Button>
+          <ButtonGroup size="small">
+            <Button type="info" @click="showInfo(row)">查看</Button>
+            <Button type="primary" @click="edit(row)" :disabled="row.isAuthorized">编辑</Button>
+            <Button type="error" @click="remove(row)" :disabled="row.isAuthorized">删除</Button>
+          </ButtonGroup>
         </template>
       </Table>
     </Card>
@@ -20,6 +23,7 @@
 <script>
 import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo } from '@/api/unit'
 import InfoModal from '@/views/single-page/unit/component/UnitInfoModal'
+import { generateUnitDatabase } from '@/api/unit-database'
 
 export default {
   name: 'unit-info',
@@ -47,11 +51,25 @@ export default {
                 }
               }),
               h('span', ' '),
-              h('span', isAuth ? '已授权' : '未授权')
+              h('span', isAuth ? '已授权' : '未授权'),
+              h('span', ' '),
+              !isAuth ? h('Button', {
+                props: {
+                  type: 'success',
+                  icon: 'md-color-wand',
+                  size: 'small'
+                },
+                on: {
+                  click: () => {
+                    this.applyForAuthorization(p.row)
+                  }
+                }
+              }, '申请授权') : h('')
             ])
-          }
+          },
+          width: 200
         },
-        { title: '操作', slot: 'action', align: 'center' }
+        { title: '操作', slot: 'action', align: 'center', width: 170 }
       ],
       data: [],
       loading: false
@@ -99,6 +117,22 @@ export default {
           this.fetchData()
         })
       }
+    },
+    applyForAuthorization(row) {
+      console.log(row)
+    },
+    showInfo(row) {
+      this.$Modal.info({
+        title: `单位名称：${row.name} `,
+        content: `单位简称：${row.unitShortName || ''} 二级名称：${row.unitSubName || ''} </br>
+                  申述电子邮箱：${row.complaintMail || ''} 申述电话：${row.complaintPhone || ''} </br>
+                  邮编：${row.postCode || ''} 联系电话：${row.contactTel || ''} </br>
+                  单位联系人：${row.contactName || ''} 单位联系人电话：${row.contactPhone || ''} </br>
+                  联系地址：${row.address || ''} 传真： ${row.fax || ''} </br>
+                  银行账户：${row.bankAccount || ''} 银行地址：${row.bankAddress || ''} </br>
+                  银行名称：${row.bankName || ''} 开户行名称：${row.bankOfDeposit || ''} </br>
+                  查询电话：${row.queryTel || ''} 说明： ${row.description || ''} `
+      })
     }
   },
   mounted() {

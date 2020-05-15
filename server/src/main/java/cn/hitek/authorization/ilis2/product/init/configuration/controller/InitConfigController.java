@@ -41,7 +41,7 @@ public class InitConfigController {
 
     @PostMapping("/info")
     public Response insertInitConfig(@Validated(OnCreate.class) @RequestBody InitialConfig config) {
-        this.configService.save(config);
+        this.configService.saveInitialConfig(config);
         return new Response().code(HttpStatus.ADD);
     }
 

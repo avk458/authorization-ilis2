@@ -1,5 +1,7 @@
 package cn.hitek.authorization.ilis2.product.database.service.impl;
 
+import cn.hitek.authorization.ilis2.common.constants.Constant;
+import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.common.utils.FileUtil;
@@ -16,17 +18,18 @@ import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialCon
 import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialConfigService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.service.InitFileService;
+import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.jdbc.ScriptRunner;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.sql.Connection;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -62,41 +65,29 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Objects.requireNonNull(config, "can't find active database initial configuration");
             Messenger.sendMessage(LogType.SUCCESS, "获取单位配置信息成功");
             Messenger.sendMessage(LogType.NORMAL, "准备主数据源");
-            // 1. export
             Exporter dumper = Exporters.init(database.getDatabaseEnum());
+            // 1. export
+            Messenger.sendMessage(LogType.NORMAL, "正在从主数据源导出数据");
             initFile = dumper.export(config);
-            try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getProcessLogPath())))) {
-                String line;
-                while (StringUtils.isNotBlank(line = logReader.readLine())) {
-                    if (line.contains("error")) {
-                        Messenger.sendMessage(LogType.ERROR, line);
-                        throw new BusinessException("Got error");
-                    } else {
-                        Messenger.sendMessage(LogType.WARN, line);
-                    }
-                }
-            }
+            readProcessLogAndSent2Client(initFile);
             Messenger.sendMessage(LogType.SUCCESS,
                     String.format("从主数据源导出数据成功，sql文件：%s，日志文件：%s",
                             initFile.getSqlFilePath(),
                             initFile.getProcessLogPath()));
-            // 2. initialize
-            Messenger.sendMessage(LogType.NORMAL, "准备初始化数据库");
-            Connection connection = ConnectionHandler.getConnection(database);
-            ScriptRunner runner = new ScriptRunner(connection);
-            File sql = new File(initFile.getSqlFilePath());
-            Messenger.sendMessage(LogType.NORMAL, "准备运行脚本");
-            try (BufferedReader sqlReader = new BufferedReader(new FileReader(sql))) {
-                runner.runScript(sqlReader);
-            }
-            Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             initFile.setUnitDatabaseId(database.getId());
             initFile.setUnitDatabaseName(database.getDatabaseName());
+            Messenger.sendMessage(LogType.NORMAL, "开始新增数据库用户信息");
+            ConnectionHandler.initializeDatabaseUser(config, database);
+            Messenger.sendMessage(LogType.SUCCESS, "新增数据库用户信息成功");
+            // 2. initialize
+            Messenger.sendMessage(LogType.NORMAL, "开始初始化数据库");
+            dumper.restore(database, initFile);
+            Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
             super.updateById(database);
-        } catch (BusinessException e) {
-            Messenger.sendMessage(LogType.ERROR, String.format("业务错误：%s", e.getMessage()));
+        } catch (BusinessException | SQLException e) {
+            Messenger.sendMessage(LogType.ERROR, String.format("操作失败：%s", e.getMessage()));
             if (null != initFile) {
                 File sql = new File(initFile.getSqlFilePath());
                 if (sql.exists()) {
@@ -106,8 +97,22 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Messenger.sendMessage(LogType.NORMAL, "工作文件夹已清空");
             throw e;
         } catch (Exception e) {
-            Messenger.sendMessage(LogType.ERROR, String.format("系统错误：%s", e.getMessage()));
+            Messenger.sendMessage(LogType.ERROR, String.format("程序异常：%s", e.getMessage()));
             throw e;
+        }
+    }
+
+    private void readProcessLogAndSent2Client(InitFile initFile) throws IOException {
+        try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getProcessLogPath())))) {
+            String line;
+            while (StringUtils.isNotBlank(line = logReader.readLine())) {
+                if (line.contains("error")) {
+                    Messenger.sendMessage(LogType.ERROR, line);
+                    throw new BusinessException("Got error");
+                } else {
+                    Messenger.sendMessage(LogType.WARN, line);
+                }
+            }
         }
     }
 
@@ -184,5 +189,24 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         entity.setDatabaseUsername(databaseUsername);
         entity.setDatabasePwd(databasePwd);
         return super.updateById(entity);
+    }
+
+    @Override
+    public void createUnitDatabaseInfo(Unit unit) {
+        String defaultName = "ilis_" + unit.getUniqCode();
+        String encrypt = EncryptUtils.encrypt(defaultName);
+        InitialConfig activeConfig = this.configService.getActiveConfig();
+        UnitDatabase ud = new UnitDatabase();
+        ud.setDatabaseUsername(encrypt);
+        ud.setDatabasePwd(encrypt);
+        ud.setDatabaseName(defaultName);
+        ud.setDatabaseType(DatabaseType.MYSQL.getType());
+        ud.setDatabaseVersion("5.7");
+        ud.setHost(activeConfig.getTargetDatabaseHost());
+        ud.setPort(activeConfig.getTargetDatabasePort());
+        ud.setParams(Constant.PARAMS);
+        ud.setUnitId(unit.getId());
+        ud.setUnitName(unit.getName());
+        save(ud);
     }
 }

@@ -95,6 +95,24 @@ public class InitialConfig extends BaseEntity {
     @TableField(exist = false)
     private boolean needSecondCommands;
 
+    @NotBlank(message = "目标数据库连接地址不能为空", groups = {OnUpdate.class, OnCreate.class})
+    private String targetDatabaseHost;
+
+    @Digits(integer = 1025, fraction = 65535, message = "数据库端口不合规", groups = {OnUpdate.class, OnCreate.class})
+    private Integer targetDatabasePort;
+
+    @NotBlank(message = "目标数据库用户名不能为空", groups = OnCreate.class)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String targetDatabaseUsername;
+
+    @NotBlank(message = "目标数据库密码不能为空", groups = OnCreate.class)
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String targetDatabasePwd;
+
     public void setInitDataTableSet(List<String> initDataTableSet) {
         if (!CollectionUtils.isEmpty(initDataTableSet)) {
             setCarryDataTables(String.join(",", initDataTableSet));

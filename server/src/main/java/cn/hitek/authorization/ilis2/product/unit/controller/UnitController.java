@@ -38,7 +38,7 @@ public class UnitController {
 
     @PostMapping("/info")
     public Response createUnit(@Validated(OnCreate.class) @RequestBody Unit unit) {
-        this.unitService.save(unit);
+        this.unitService.insertUnitInfo(unit);
         return new Response().code(HttpStatus.ADD);
     }
 

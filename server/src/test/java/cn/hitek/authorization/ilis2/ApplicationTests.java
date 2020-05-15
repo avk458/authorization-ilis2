@@ -1,13 +1,10 @@
 package cn.hitek.authorization.ilis2;
 
 import cn.hitek.authorization.ilis2.common.utils.FileUtil;
+import cn.hitek.authorization.ilis2.common.utils.ScriptRunner;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
-import org.apache.ibatis.jdbc.ScriptRunner;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -16,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest
 class ApplicationTests {
@@ -192,8 +188,8 @@ class ApplicationTests {
 	@Test
 	public void do6() {
 		List<String> command = Arrays.asList("mysqldump", "-h127.0.0.1", "-P3306", "-uroot", "-p123456", "-d", "auth01", "--ignore-table=auth01.t_init_file", "--ignore-table=auth01.t_initial_config");
-		List<String> command2 = Arrays.asList("mysqldump", "-h127.0.0.1", "-P3306", "-uroot", "-p123456", "auth01", "t_init_file");
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		List<String> command2 = Arrays.asList("mysqldump", "-h192.168.2.3", "-P3306", "-uroot", "-p123456", "ilis_test");
+		ProcessBuilder processBuilder = new ProcessBuilder(command2);
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(new File("E:\\fileShare\\s.sql")));
 		processBuilder.redirectError(new File("E:\\fileShare\\l.log"));
 		Process process = null;
@@ -208,19 +204,25 @@ class ApplicationTests {
 	}
 
 	@Test
-	public void do7() {
-		File file = new File("G:\\迅雷下载\\1588924827268\\init.sql");
-		File directory = new File(file.getParent());
-		File[] files = directory.listFiles();
-		if (null != files) {
-			for (File f : files) {
-				if (f.isFile()) {
-					boolean delete = f.delete();
-				}
-			}
-		} else {
-			boolean delete = directory.delete();
-		}
-		File[] files1 = directory.listFiles();
+	public void do7() throws SQLException, IOException, InterruptedException {
+		String url = "jdbc:mysql://127.0.0.1:3306/auth01?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
+		// final List<String> commands = Arrays.asList("mysql", "-h127.0.0.1", "-P3306", "-uroot", "-p123456", "ilis_dev");
+		// final ProcessBuilder builder = new ProcessBuilder(commands);
+		// builder.redirectInput(new File("G:\\ilis\\1589505804078\\init.sql"));
+		// builder.redirectError(new File("G:\\ilis\\1589505804078\\process.log"));
+		// final Process process = builder.start();
+		// process.waitFor();
+		// Connection con = DriverManager.getConnection(url, "root", "123456");
+		// Statement statement = con.createStatement();
+		// String user = "'ilis_dev'@'%'";
+		// String decryptPwd = "ilis_dev";
+		// String schema = "ilis_dev";
+		// boolean createUser = statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
+		// if (createUser) {
+		// 	statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
+		// }
+		FileWriter fileWriter = new FileWriter(new File("G:\\ilis\\\\1589509014511\\process.log"), true);
+		fileWriter.write("INSERT INTO t_s_depart_version (id, sys_org_code, sys_company_code, departname, extendname, description, address, postcode, fax, email, phone, query_phone, explain_phone, contacts, mobile, bank_account, bank_account_name, bank_name, bank_address, version, start_time, end_time, status, complaint_phone, org_type, org_code, depart_id, parentdepartid, bpm_status, update_date, update_by, update_name, create_date, create_by, create_name, company_short_name) VALUES ('402882105ec60bc0015ec6262d3d0003', null, 'A03', '贵州宏信创达工程检测咨询有限公司', '', '', '贵州省贵阳市贵阳国家高新技术开发产业园区高海路949号', '550014', '0851—85861098', 'hr_hxcd@163.com', '0851—85861098', '', '0851—84285207', '', '0851—85861098', '', '', '', '', 0, '2020-05-14 17:15:27', '2040-05-14 17:15:27', '1', null, null, null, null, null, null, '2020-05-14 17:15:27', 'liuyi', '刘燚', null, null, null, '贵州宏信创达工程检测咨询有限公司');");
+		fileWriter.flush();
 	}
 }

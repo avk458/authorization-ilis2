@@ -74,4 +74,19 @@ public class Unit extends BaseEntity implements Serializable {
 
     private String authorizationCode;
 
+    private String unitShortName;
+    private String unitSubName;
+    private String complaintMail;
+    private String complaintPhone;
+    private String postCode;
+    private String contactTel;
+    private String address;
+    private String fax;
+    private String bankAccount;
+    private String bankAddress;
+    private String bankName;
+    private String bankOfDeposit;
+    private String queryTel;
+    private String description;
+
 }
