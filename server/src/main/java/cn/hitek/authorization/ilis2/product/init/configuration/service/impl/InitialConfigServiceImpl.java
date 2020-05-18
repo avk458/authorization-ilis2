@@ -72,10 +72,8 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
     @Override
     public List<Map<String, String>> getTableList(InitialConfig config) throws SQLException {
         ArrayList<Map<String, String>> tables = new ArrayList<>(0);
-        Connection connection = ConnectionHandler.getConnection(config);
-        if (null != connection) {
+        try (Connection connection = ConnectionHandler.getConnection(config)) {
             Statement statement = connection.createStatement();
-
             ResultSet rs = statement.executeQuery("SHOW TABLES ");
             int count = 0;
             while (rs.next()) {

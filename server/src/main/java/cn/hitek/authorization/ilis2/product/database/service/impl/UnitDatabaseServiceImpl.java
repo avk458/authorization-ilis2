@@ -29,7 +29,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Objects;
 import java.util.Set;
 
@@ -77,11 +79,11 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             initFile.setUnitDatabaseId(database.getId());
             initFile.setUnitDatabaseName(database.getDatabaseName());
             Messenger.sendMessage(LogType.NORMAL, "开始新增数据库用户信息");
-            ConnectionHandler.initializeDatabaseUser(config, database);
+            initializeDatabaseUser(ConnectionHandler.getTargetConnection(config), database);
             Messenger.sendMessage(LogType.SUCCESS, "新增数据库用户信息成功");
             // 2. initialize
             Messenger.sendMessage(LogType.NORMAL, "开始初始化目标数据库");
-            dumper.restore(database, initFile);
+            dumper.restore(config, database, initFile);
             Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
@@ -99,6 +101,22 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         } catch (Exception e) {
             Messenger.sendMessage(LogType.ERROR, String.format("程序异常：%s", e.getMessage()));
             throw e;
+        }
+    }
+
+    public void initializeDatabaseUser(Connection connection, UnitDatabase unitDatabase) throws SQLException {
+        try {
+            final String schema = unitDatabase.getDatabaseName();
+            final String user = EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
+            final String decryptPwd = EncryptUtils.decrypt(unitDatabase.getDatabasePwd());
+            Statement statement = connection.createStatement();
+            statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
+            // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
+            statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema +".* " + "TO " + user);
+            statement.execute("FLUSH PRIVILEGES ");
+            statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
+        } finally {
+            connection.close();
         }
     }
 

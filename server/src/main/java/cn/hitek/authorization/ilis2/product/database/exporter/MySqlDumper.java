@@ -5,7 +5,7 @@ import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author chenlm
  */
-@Slf4j
+@Log4j2
 public class MySqlDumper implements Exporter {
 
     @Override
@@ -42,8 +42,8 @@ public class MySqlDumper implements Exporter {
     }
 
     @Override
-    public void restore(UnitDatabase database, InitFile initFile) throws Exception {
-        final List<String> commands = buildRestoreCommands(database);
+    public void restore(InitialConfig activeConfig, UnitDatabase database, InitFile initFile) throws Exception {
+        final List<String> commands = buildRestoreCommands(activeConfig, database);
         final ProcessBuilder builder = new ProcessBuilder(commands);
         builder.redirectError(ProcessBuilder.Redirect.appendTo(initFile.getLogFile()));
         builder.redirectInput(initFile.getSqlFile());
@@ -51,13 +51,13 @@ public class MySqlDumper implements Exporter {
         process.waitFor();
     }
 
-    private List<String> buildRestoreCommands(UnitDatabase database) {
-        ArrayList<String> command = new ArrayList<>(8);
+    private List<String> buildRestoreCommands(InitialConfig activeConfig, UnitDatabase database) {
+        ArrayList<String> command = new ArrayList<>(6);
         command.add(Constant.MYSQL);
         command.add("-h" + database.getHost());
         command.add("-P" + database.getPort());
-        command.add("-u" + EncryptUtils.decrypt(database.getDatabaseUsername()));
-        command.add("-p" + EncryptUtils.decrypt(database.getDatabasePwd()));
+        command.add("-u" + EncryptUtils.decrypt(activeConfig.getTargetDatabaseUsername()));
+        command.add("-p" + EncryptUtils.decrypt(activeConfig.getTargetDatabasePwd()));
         command.add(database.getDatabaseName());
         return command;
     }

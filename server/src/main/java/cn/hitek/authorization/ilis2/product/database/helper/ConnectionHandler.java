@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * @author chenlm
@@ -25,6 +24,16 @@ public class ConnectionHandler {
         return DriverManager.getConnection(path, EncryptUtils.decrypt(config.getTargetDatabaseUsername()), EncryptUtils.decrypt(config.getTargetDatabasePwd()));
     }
 
+    public static Connection getConnection(UnitDatabase unitDatabase) throws SQLException {
+        DatabasePathLinear linear = DatabasePathLinear.getInstance();
+        String path = linear.setHost(unitDatabase.getHost())
+                .setPort(unitDatabase.getPort())
+                .setSchema(unitDatabase.getDatabaseName())
+                .setParams(unitDatabase.getParams())
+                .getPath();
+        return DriverManager.getConnection(path, EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()), EncryptUtils.decrypt(unitDatabase.getDatabasePwd()));
+    }
+
     public static Connection getConnection(InitialConfig config) throws SQLException {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
         String path = linear.setHost(config.getHost())
@@ -33,19 +42,6 @@ public class ConnectionHandler {
                 .getPath();
         path += Constant.PARAMS;
         return DriverManager.getConnection(path, config.getUsername(), EncryptUtils.decrypt(config.getPassword()));
-    }
-
-    public static void initializeDatabaseUser(InitialConfig config, UnitDatabase unitDatabase) throws SQLException {
-        final String schema = unitDatabase.getDatabaseName();
-        final String user = EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
-        final String decryptPwd = EncryptUtils.decrypt(unitDatabase.getDatabasePwd());
-        final Connection connection = getTargetConnection(config);
-        Statement statement = connection.createStatement();
-        statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
-        // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
-        statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema +".* " + "TO " + user);
-        statement.execute("FLUSH PRIVILEGES ");
-        statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
     }
 
     private static class DatabasePathLinear {

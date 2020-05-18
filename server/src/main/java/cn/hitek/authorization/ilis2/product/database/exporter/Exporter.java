@@ -22,11 +22,12 @@ public interface Exporter {
 
     /**
      * restore database base on dump file
+     * @param activeConfig active config
      * @param initFile etc sql file log file
      * @param database database info
      * @throws Exception runtime exception
      */
-    void restore(UnitDatabase database, InitFile initFile) throws Exception;
+    void restore(InitialConfig activeConfig, UnitDatabase database, InitFile initFile) throws Exception;
 
     /**
      * 从配置类实体构建processBuilder dump命令

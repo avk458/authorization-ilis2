@@ -16,7 +16,7 @@ public class MicrosoftSqlDumper implements Exporter {
     }
 
     @Override
-    public void restore(UnitDatabase database, InitFile initFile) throws BusinessException {
+    public void restore(InitialConfig activeConfig, UnitDatabase database, InitFile initFile) throws Exception {
 
     }
 }
