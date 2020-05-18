@@ -31,10 +31,10 @@
           <InputNumber :min="1024" :max="65535" v-model="formData.targetDatabasePort" placeholder="请输入目标数据库端口" style="width: 100%"></InputNumber>
         </FormItem>
         <FormItem label="用户名" prop="targetDatabaseUsername">
-          <Input v-model="formData.targetDatabaseUsername" placeholder="请输入目标数据库用户名"></Input>
+          <Input v-model="formData.targetDatabaseUsername" :placeholder="usernameHolder"></Input>
         </FormItem>
         <FormItem label="密码" prop="targetDatabasePwd">
-          <Input v-model="formData.targetDatabasePwd" placeholder="请输入目标数据库密码"></Input>
+          <Input v-model="formData.targetDatabasePwd" type="password" :password="true" :placeholder="passwordHolder"></Input>
         </FormItem>
         <FormItem v-if="!isEdit" label="文件存放路径" prop="path">
           <Cascader
@@ -137,7 +137,8 @@ export default {
         this.isEdit = true
         this.formData = data
         this.modalTitle = `编辑${data.profileName}信息`
-        delete this.ruleValidate.password
+        this.usernameHolder = '如需修改，请输入数据库用户名。留空则不修改用户名'
+        this.passwordHolder = '如需修改，请输入数据库密码。留空则不修改密码'
       }
       loadSystemPath().then(res => {
         this.pathData = res.data

@@ -5,16 +5,16 @@
           inline
           label-position="left">
       <FormItem label="单位名称" prop="name">
-        <Input v-model="formData.name" placeholder="请输入单位名称" @on-blur="handleNameInput"></Input>
-      </FormItem>
-      <FormItem label="唯一标识码" prop="uniqCode">
-        <Input v-model="formData.uniqCode" placeholder="请输入4-6位英文单位唯一标识"></Input>
-      </FormItem>
-      <FormItem label="单位简称" prop="unitShortName">
-        <Input v-model="formData.unitShortName" placeholder="用于二维码扫描页面展示" />
+        <Input v-model="formData.name" placeholder="请输入单位名称"></Input>
       </FormItem>
       <FormItem label="二级名称">
         <Input v-model="formData.unitSubName" placeholder="请输入单位二级名称"/>
+      </FormItem>
+      <FormItem label="单位简称" prop="unitShortName">
+        <Input v-model="formData.unitShortName" placeholder="用于二维码扫描页面展示" @on-blur="handleNameInput"/>
+      </FormItem>
+      <FormItem label="唯一标识码" prop="uniqCode">
+        <Input v-model="formData.uniqCode" placeholder="请输入4-6位英文单位唯一标识"></Input>
       </FormItem>
       <FormItem label="申述电子邮箱">
         <Input v-model="formData.complaintMail" placeholder="请输入申述电子邮箱"/>
@@ -193,7 +193,7 @@ export default {
       }
     },
     handleNameInput() {
-      this.formData.uniqCode = getFirstCharAtSpell(this.formData.name)
+      this.formData.uniqCode = getFirstCharAtSpell(this.formData.unitShortName)
     }
   }
 }

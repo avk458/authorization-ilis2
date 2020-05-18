@@ -16,15 +16,13 @@ import java.sql.Statement;
  */
 public class ConnectionHandler {
 
-    public static Connection getConnection(UnitDatabase database) throws SQLException {
+    public static Connection getTargetConnection(InitialConfig config) throws SQLException {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
-        String path = linear.setHost(database.getHost())
-                .setPort(database.getPort())
-                .setParams(database.getParams())
+        String path = linear.setHost(config.getTargetDatabaseHost())
+                .setPort(config.getTargetDatabasePort())
                 .getPath();
-        String username = EncryptUtils.decrypt(database.getDatabaseUsername());
-        String pwd = EncryptUtils.decrypt(database.getDatabasePwd());
-        return DriverManager.getConnection(path, "root", "123456");
+        path += Constant.PARAMS;
+        return DriverManager.getConnection(path, EncryptUtils.decrypt(config.getTargetDatabaseUsername()), EncryptUtils.decrypt(config.getTargetDatabasePwd()));
     }
 
     public static Connection getConnection(InitialConfig config) throws SQLException {
@@ -41,12 +39,12 @@ public class ConnectionHandler {
         final String schema = unitDatabase.getDatabaseName();
         final String user = EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
         final String decryptPwd = EncryptUtils.decrypt(unitDatabase.getDatabasePwd());
-        final Connection connection = getConnection(config);
-        connection.setAutoCommit(false);
+        final Connection connection = getTargetConnection(config);
         Statement statement = connection.createStatement();
         statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
         // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
         statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema +".* " + "TO " + user);
+        statement.execute("FLUSH PRIVILEGES ");
         statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
     }
 

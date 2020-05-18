@@ -30,6 +30,8 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
     @Override
     public void saveInitialConfig(InitialConfig config) {
         config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+        config.setTargetDatabaseUsername(EncryptUtils.encrypt(config.getTargetDatabaseUsername()));
+        config.setTargetDatabasePwd(EncryptUtils.encrypt(config.getTargetDatabasePwd()));
         if (InitialConfig.ACTIVE == config.getActive()) {
             setOtherConfigInactive();
         }
@@ -112,6 +114,18 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
     public boolean updateById(InitialConfig entity) {
         if (InitialConfig.ACTIVE == entity.getActive()) {
             setOtherConfigInactive();
+        }
+        String password = entity.getPassword();
+        if (StringUtils.isNotBlank(password)) {
+            entity.setPassword(EncryptUtils.encrypt(password));
+        }
+        String targetDatabaseUsername = entity.getTargetDatabaseUsername();
+        if (StringUtils.isNotBlank(targetDatabaseUsername)) {
+            entity.setTargetDatabaseUsername(EncryptUtils.encrypt(targetDatabaseUsername));
+        }
+        String targetDatabasePwd = entity.getTargetDatabasePwd();
+        if (StringUtils.isNotBlank(targetDatabasePwd)) {
+            entity.setTargetDatabasePwd(EncryptUtils.encrypt(targetDatabasePwd));
         }
         return super.updateById(entity);
     }

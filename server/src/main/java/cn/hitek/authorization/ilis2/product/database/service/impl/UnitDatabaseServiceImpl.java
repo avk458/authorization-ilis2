@@ -80,7 +80,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             ConnectionHandler.initializeDatabaseUser(config, database);
             Messenger.sendMessage(LogType.SUCCESS, "新增数据库用户信息成功");
             // 2. initialize
-            Messenger.sendMessage(LogType.NORMAL, "开始初始化数据库");
+            Messenger.sendMessage(LogType.NORMAL, "开始初始化目标数据库");
             dumper.restore(database, initFile);
             Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             this.initFileService.save(initFile);
@@ -106,7 +106,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getProcessLogPath())))) {
             String line;
             while (StringUtils.isNotBlank(line = logReader.readLine())) {
-                if (line.contains("error")) {
+                if (line.contains("error") || line.contains("ERROR")) {
                     Messenger.sendMessage(LogType.ERROR, line);
                     throw new BusinessException("Got error");
                 } else {
@@ -148,7 +148,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public boolean isUnitDatabaseInitialized(String unitId) {
-        return query().eq(StringUtils.isNotBlank(unitId), UnitDatabase::getUnitId, unitId)
+        return query()
+                .eq(StringUtils.isNotBlank(unitId), UnitDatabase::getUnitId, unitId)
                 .eq(UnitDatabase::getIsInitialized, UnitDatabase.INITIALIZED)
                 .exist();
     }
