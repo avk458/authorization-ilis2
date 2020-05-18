@@ -98,6 +98,8 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      */
     private Boolean isInitialized;
 
+    private String initializeProfile;
+
     public DatabaseType getDatabaseEnum() {
         switch (databaseType) {
             case 222:

@@ -225,4 +225,18 @@ class ApplicationTests {
 		fileWriter.write("INSERT INTO t_s_depart_version (id, sys_org_code, sys_company_code, departname, extendname, description, address, postcode, fax, email, phone, query_phone, explain_phone, contacts, mobile, bank_account, bank_account_name, bank_name, bank_address, version, start_time, end_time, status, complaint_phone, org_type, org_code, depart_id, parentdepartid, bpm_status, update_date, update_by, update_name, create_date, create_by, create_name, company_short_name) VALUES ('402882105ec60bc0015ec6262d3d0003', null, 'A03', '贵州宏信创达工程检测咨询有限公司', '', '', '贵州省贵阳市贵阳国家高新技术开发产业园区高海路949号', '550014', '0851—85861098', 'hr_hxcd@163.com', '0851—85861098', '', '0851—84285207', '', '0851—85861098', '', '', '', '', 0, '2020-05-14 17:15:27', '2040-05-14 17:15:27', '1', null, null, null, null, null, null, '2020-05-14 17:15:27', 'liuyi', '刘燚', null, null, null, '贵州宏信创达工程检测咨询有限公司');");
 		fileWriter.flush();
 	}
+
+	@Test
+	public void do8() throws SQLException {
+		String url = "jdbc:mysql://127.0.0.1:3306/ilis_local?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
+		Connection con = DriverManager.getConnection(url, "root", "123456");
+		Statement statement = con.createStatement();
+		String schema = "ilis_local";
+		ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = " + schema);
+		String res = "";
+		while (resultSet.next()) {
+			res = resultSet.getString(1);
+		}
+		System.out.println(res);
+	}
 }

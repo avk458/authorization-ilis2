@@ -1,29 +1,81 @@
 <template>
   <div>
-    <DatabaseCard :cards="cards"/>
+    <Button type="primary">数据库字段同步</Button>
+    <Divider/>
+    <Row :gutter="16">
+      <Col span="4" v-for="c in cards" :key="c.name">
+        <Card style="margin-bottom: 20px;width: 250px">
+          <p slot="title">
+            <Icon type="md-disc"/>
+            {{ c.name }}
+          </p>
+          <Icon slot="extra" :type="c.online ? 'ios-wifi' : 'ios-wifi-outline'" :color=" c.online ? 'green' : 'gray'" size="20"/>
+          <List>
+            <ListItem>
+              <ListItemMeta title="Tables:"/>
+              {{ c.tables }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Database size:"/>
+              {{ c.dataSize }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Index size"/>
+              {{ c.indexSize }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Max connections"/>
+              {{ c.maxConnections }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Thread cached"/>
+              {{ c.threadsCached }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Thread connected"/>
+              {{ c.threadConnected }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Thread Created"/>
+              {{ c.threadCreated }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Thread Running"/>
+              {{ c.threadRunning }}
+            </ListItem>
+            <ListItem>
+              <ListItemMeta title="Uptime"/>
+              <Time v-if="c.uptime" :time="new Date() - (c.uptime * 1000)"/>
+            </ListItem>
+          </List>
+        </Card>
+      </Col>
+      <Spin size="large" fix v-if="spinShow"></Spin>
+    </Row>
   </div>
 </template>
 <script>
-import DatabaseCard from './components/database-card'
+import { getTableData } from '@/api/data'
+
 export default {
-  components: { DatabaseCard },
   data () {
     return {
+      spinShow: true,
       cards: [
-        { name: 'hitek1' },
-        { name: 'hitek2' },
-        { name: 'hitek3' },
-        { name: 'hitek4' },
-        { name: 'hitek5' },
-        { name: 'hitek6' },
-        { name: 'hitek7' },
-        { name: 'hitek8' }
+        { name: 'hitek1', online: true, tables: 388, dataSize: '83493MB', indexSize: '300MB', uptime: 339392 }
       ]
     }
   },
   methods: {
     fetchData() {
+      getTableData().then(res => {
+        this.cards = res.data
+        this.spinShow = false
+      })
     }
+  },
+  mounted() {
+    this.fetchData()
   }
 }
 </script>

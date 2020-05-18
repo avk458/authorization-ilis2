@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Card>
+    <Card dis-hover>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>

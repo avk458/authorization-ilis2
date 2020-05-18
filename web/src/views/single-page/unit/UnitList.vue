@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Card>
+    <Card dis-hover>
       <Button type="primary" @click="handleModal">新增单位</Button>
       <Divider />
       <Table border :columns="columns" :data="data" :loading="loading">
@@ -23,7 +23,6 @@
 <script>
 import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo } from '@/api/unit'
 import InfoModal from '@/views/single-page/unit/component/UnitInfoModal'
-import { generateUnitDatabase } from '@/api/unit-database'
 
 export default {
   name: 'unit-info',

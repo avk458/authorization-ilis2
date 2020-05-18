@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card dis-hover>
     <Col span="4" style="margin-bottom: 10px">
       <Card>
         <p slot="title">Tips</p>

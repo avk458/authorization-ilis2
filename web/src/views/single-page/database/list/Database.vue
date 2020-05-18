@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Card>
+    <Card dis-hover>
       <Button type="primary" @click="handleModal" disabled>新增数据库</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
