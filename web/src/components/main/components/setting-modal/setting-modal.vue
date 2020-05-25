@@ -90,6 +90,25 @@ import { loadSystemPath, getTableListViaDatabase, saveInitConfigInfo } from '@/a
 export default {
   name: 'SettingModal',
   data () {
+    const commonValidator = (rule, value, callback) => {
+      if (this.isEdit && !value) {
+        callback()
+      } else {
+        if (rule.field === 'password' || rule.field === 'targetDatabasePwd') {
+          if (!value || value.length < 6) {
+            callback(new Error())
+          } else {
+            callback()
+          }
+        } else {
+          if (!value || value.length < 4) {
+            callback(new Error())
+          } else {
+            callback()
+          }
+        }
+      }
+    }
     return {
       visible: false,
       formData: {
@@ -117,13 +136,13 @@ export default {
         host: [{ required: true, message: 'host不能为空', trigger: 'blur' }],
         port: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+        password: [{ required: true, validator: commonValidator, message: '密码不合规', trigger: 'blur' }],
         // path: [{ required: true, type: 'array', message: '请选择路径', trigger: 'change' }],
         schemaName: [{ required: true, message: 'schema不能为空', trigger: 'blur' }],
         targetDatabaseHost: [{ required: true, message: '目标数据库host不能为空', trigger: 'blur' }],
         targetDatabasePort: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
-        targetDatabaseUsername: [{ required: true, message: '目标数据库用户名不能为空', trigger: 'blur' }],
-        targetDatabasePwd: [{ required: true, message: '目标数据库密码不能为空', trigger: 'blur' }]
+        targetDatabaseUsername: [{ required: true, validator: commonValidator, message: '目标数据库用户名不合规', trigger: 'blur' }],
+        targetDatabasePwd: [{ required: true, validator: commonValidator, message: '目标数据库密码不合规', trigger: 'blur' }]
       },
       tableList: [],
       modalTitle: '新增主数据源配置信息',
@@ -196,6 +215,7 @@ export default {
               desc: '正在尝试连接数据库'
             })
             const queryData = {
+              id: this.formData.id,
               host: this.formData.host,
               port: this.formData.port,
               username: this.formData.username,

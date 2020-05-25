@@ -123,11 +123,6 @@ export default {
         this.$Message.success(res.message)
         this.fetchData()
       })
-    },
-    handleCellClick(a, b, c) {
-      console.log(a)
-      console.log(b)
-      console.log(b)
     }
   },
   mounted() {

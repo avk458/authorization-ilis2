@@ -1,19 +1,15 @@
 <template>
   <Card dis-hover>
-    <Col span="4" style="margin-bottom: 10px">
-      <Card>
-        <p slot="title">Tips</p>
-        <p>
-          <Icon type="md-document" color="green" size="18"/>
-          文件存在
-        </p>
-        <p>
-          <Icon type="md-close" color="red" size="18"/>
-          文件不存在
-        </p>
-      </Card>
-    </Col>
-    <Divider/>
+    <Alert show-icon>
+      Tips
+      <Icon type="ios-bulb-outline" slot="icon"></Icon>
+      <span slot="desc">
+      <Icon type="md-document" color="green" size="18"/>
+      文件存在
+      <Icon type="md-close" color="red" size="18"/>
+      文件不存在
+      </span>
+    </Alert>
     <Table border :data="data" :columns="columns"></Table>
     <div class="pagination" v-if="total > 10">
       <Page

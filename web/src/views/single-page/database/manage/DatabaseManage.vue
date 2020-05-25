@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Button type="primary">数据库字段同步</Button>
+    <Button type="primary" @click="handleColumnSync">数据库字段同步</Button>
     <Divider/>
     <Row :gutter="16">
       <Col span="4" v-for="c in cards" :key="c.name">
@@ -52,12 +52,15 @@
       </Col>
       <Spin size="large" fix v-if="spinShow"></Spin>
     </Row>
+    <column-sync-modal ref="syncModal"/>
   </div>
 </template>
 <script>
 import { getTableData } from '@/api/data'
+import ColumnSyncModal from './components/sync-column-modal'
 
 export default {
+  components: { ColumnSyncModal },
   data () {
     return {
       spinShow: true,
@@ -71,7 +74,11 @@ export default {
       getTableData().then(res => {
         this.cards = res.data
         this.spinShow = false
-      })
+        // eslint-disable-next-line no-return-assign
+      }).catch(() => this.spinShow = false)
+    },
+    handleColumnSync() {
+      this.$refs.syncModal.showModal()
     }
   },
   mounted() {

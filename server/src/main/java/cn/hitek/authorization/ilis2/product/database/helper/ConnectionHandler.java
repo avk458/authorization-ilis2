@@ -19,9 +19,10 @@ public class ConnectionHandler {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
         String path = linear.setHost(config.getTargetDatabaseHost())
                 .setPort(config.getTargetDatabasePort())
+                .setSchema(null)
                 .getPath();
         path += Constant.PARAMS;
-        return DriverManager.getConnection(path, EncryptUtils.decrypt(config.getTargetDatabaseUsername()), EncryptUtils.decrypt(config.getTargetDatabasePwd()));
+        return DriverManager.getConnection(path, config.getDecryptTargetDatabaseUsername(), config.getDecryptTargetDatabasePwd());
     }
 
     public static Connection getConnection(UnitDatabase unitDatabase) throws SQLException {
@@ -41,7 +42,7 @@ public class ConnectionHandler {
                 .setSchema(config.getSchemaName())
                 .getPath();
         path += Constant.PARAMS;
-        return DriverManager.getConnection(path, config.getUsername(), EncryptUtils.decrypt(config.getPassword()));
+        return DriverManager.getConnection(path, config.getUsername(), config.getDecryptPassword());
     }
 
     private static class DatabasePathLinear {

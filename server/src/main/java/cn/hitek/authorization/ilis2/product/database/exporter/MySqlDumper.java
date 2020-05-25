@@ -1,7 +1,6 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
@@ -56,8 +55,8 @@ public class MySqlDumper implements Exporter {
         command.add(Constant.MYSQL);
         command.add("-h" + database.getHost());
         command.add("-P" + database.getPort());
-        command.add("-u" + EncryptUtils.decrypt(activeConfig.getTargetDatabaseUsername()));
-        command.add("-p" + EncryptUtils.decrypt(activeConfig.getTargetDatabasePwd()));
+        command.add("-u" + activeConfig.getTargetDatabaseUsername());
+        command.add("-p" + activeConfig.getTargetDatabasePwd());
         command.add(database.getDatabaseName());
         return command;
     }
@@ -77,7 +76,6 @@ public class MySqlDumper implements Exporter {
     public List<String> commandBuilder(InitialConfig config) {
         ArrayList<String> command = new ArrayList<>(8);
         String password = config.getPassword();
-        password = EncryptUtils.decrypt(password);
         command.add(Constant.MYSQL_DUMP);
         command.add("-h" + config.getHost());
         command.add("-P" + config.getPort());

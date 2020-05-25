@@ -2,11 +2,13 @@ package cn.hitek.authorization.ilis2.product.init.configuration.controller;
 
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.vo.Folder;
 import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +37,11 @@ public class InitConfigController {
 
     @GetMapping("/table/list")
     public Response getTableListFormDatabase(InitialConfig config) throws SQLException {
+        if (StringUtils.isNotBlank(config.getId())) {
+            config = this.configService.getById(config.getId());
+        } else {
+            config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+        }
         List<Map<String, String>> list = this.configService.getTableList(config);
         return new Response().code(HttpStatus.OK).data(list);
     }

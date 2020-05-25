@@ -2,14 +2,22 @@ package cn.hitek.authorization.ilis2;
 
 import cn.hitek.authorization.ilis2.common.utils.FileUtil;
 import cn.hitek.authorization.ilis2.common.utils.ScriptRunner;
+import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -239,4 +247,14 @@ class ApplicationTests {
 		}
 		System.out.println(res);
 	}
+
+	@Test
+	public void do9() throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+		InitialConfig config = new InitialConfig();
+		config.setPassword("123456");
+		config.setTargetDatabaseUsername("root");
+		config.setTargetDatabasePwd("123456");
+		System.out.println(config);
+	}
+
 }

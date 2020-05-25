@@ -152,7 +152,7 @@ export default [
         meta: {
           icon: 'ios-cloud',
           access: ['admin'],
-          title: '主数据源配置管理'
+          title: '数据源配置管理'
         },
         component: () => import('@/views/single-page/database/init-config/InitConfigManage.vue')
       },

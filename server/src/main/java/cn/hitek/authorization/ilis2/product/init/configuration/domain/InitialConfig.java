@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.init.configuration.domain;
 
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
@@ -112,6 +113,21 @@ public class InitialConfig extends BaseEntity {
     @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String targetDatabasePwd;
+
+    @JsonIgnore
+    public String getDecryptPassword() {
+        return EncryptUtils.decrypt(password);
+    }
+
+    @JsonIgnore
+    public String getDecryptTargetDatabaseUsername() {
+        return EncryptUtils.decrypt(targetDatabaseUsername);
+    }
+
+    @JsonIgnore
+    public String getDecryptTargetDatabasePwd() {
+        return EncryptUtils.decrypt(targetDatabasePwd);
+    }
 
     public void setInitDataTableSet(List<String> initDataTableSet) {
         if (!CollectionUtils.isEmpty(initDataTableSet)) {
