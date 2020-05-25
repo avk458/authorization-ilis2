@@ -1,12 +1,13 @@
 package cn.hitek.authorization.ilis2.product.data.management.service;
 
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.data.management.domain.SchemaInfo;
+import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenlm
@@ -26,5 +27,5 @@ public interface DataManageService {
      * @return 数据库databases
      * @throws SQLException SQLException
      */
-    List<SchemaInfo> getSourceSchemaList(InitialConfig config) throws SQLException;
+    Map<String, List<Schema>> getSourceSchemaList(InitialConfig config) throws SQLException;
 }

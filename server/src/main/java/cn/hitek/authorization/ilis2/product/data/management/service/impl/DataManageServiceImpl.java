@@ -2,7 +2,7 @@ package cn.hitek.authorization.ilis2.product.data.management.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.data.management.domain.SchemaInfo;
+import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -107,32 +108,26 @@ public class DataManageServiceImpl implements DataManageService {
 
     @SneakyThrows
     @Override
-    public List<SchemaInfo> getSourceSchemaList(InitialConfig config) {
-        ArrayList<SchemaInfo> list = new ArrayList<>(0);
+    public Map<String, List<Schema>> getSourceSchemaList(InitialConfig config) {
+        Map<String, List<Schema>> result = new HashMap<>(2);
         try (Connection connection = ConnectionHandler.getConnection(config)) {
-            list.add(getSchemaFromDatabase(connection, SOURCE));
+            result.put(SOURCE, getSchemaFromDatabase(connection));
         }
         try (Connection connection = ConnectionHandler.getTargetConnection(config)) {
-            list.add(getSchemaFromDatabase(connection, TARGET));
+            result.put(TARGET, getSchemaFromDatabase(connection));
         }
-        return list;
+        return result;
     }
 
-    private SchemaInfo getSchemaFromDatabase(Connection connection, String schemaType) throws SQLException {
+    private List<Schema> getSchemaFromDatabase(Connection connection) throws SQLException {
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery("SHOW DATABASES ");
-        SchemaInfo schemaInfo = new SchemaInfo();
-        schemaInfo.setSchemaType(schemaType);
-        ArrayList<SchemaInfo.Schema> schemas = new ArrayList<>();
+        ArrayList<Schema> schemas = new ArrayList<>();
         while (rs.next()) {
             String s = rs.getString(1);
-            SchemaInfo.Schema schema = new SchemaInfo.Schema();
-            schema.setKey(s);
-            schema.setLabel(s);
-            schema.setDisabled(Constant.SYSTEM_SCHEMA.contains(s));
+            Schema schema = new Schema(s, s, Constant.SYSTEM_SCHEMA.contains(s));
             schemas.add(schema);
         }
-        schemaInfo.setSchemaList(schemas);
-        return schemaInfo;
+        return schemas;
     }
 }

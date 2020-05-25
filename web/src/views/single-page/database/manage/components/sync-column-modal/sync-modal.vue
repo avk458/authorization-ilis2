@@ -77,8 +77,9 @@ export default {
     },
     handleSchemaRequest(val) {
       getSchemaList(val).then(res => {
-        this.sourceSchemaList = res.data.find(s => s.schemaType === 'source').schemaList
-        this.targetList = res.data.find(s => s.schemaType === 'target').schemaList
+        const { source, target } = res.data
+        this.sourceSchemaList = source
+        this.targetList = target
       }).catch(() => {
         this.sourceSchemaList = []
         this.targetList = []
@@ -110,7 +111,6 @@ export default {
         this.$Message.warning('您选择了相同的schema')
         return
       }
-
     }
   }
 }
