@@ -9,10 +9,13 @@ import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialConfigService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import java.util.Map;
 /**
  * @author chenlm
  */
+@Validated
 @RestController
 @RequestMapping("data-manage")
 public class DataManageController {
@@ -46,9 +50,17 @@ public class DataManageController {
 
 
     @GetMapping("/schema/list")
-    public Response getSourceSchemaList(String configId) throws SQLException {
+    public Response getSourceSchemaList(@NotBlank(message = "请求参数有误") String configId) throws SQLException {
         InitialConfig config = this.configService.getById(configId);
         Map<String, List<Schema>> result = this.dataManageService.getSourceSchemaList(config);
         return new Response().code(HttpStatus.OK).data(result);
+    }
+
+    @PostMapping("/actions/sync-columns")
+    public Response syncSchemasColumns(@NotBlank(message = "配置参数有误") String configId,
+                                       @NotBlank(message = "Source Schema不能为空") String sourceSchema,
+                                       @NotBlank(message = "Target Schemas不能为空") String targetSchemas) {
+        this.dataManageService.sync(configId, sourceSchema, targetSchemas);
+        return new Response().code(HttpStatus.OK);
     }
 }

@@ -39,14 +39,14 @@
       </div>
     </div>
     <div slot="footer">
-      <Button type="warning" size="large" long @click="doTheMagic">Run</Button>
+      <Button :type="btnType" size="large" :loading="btnLoading" long @click="doTheMagic">{{ btn }}</Button>
     </div>
   </Modal>
 </template>
 
 <script>
 import { getInitConfigList } from '@/api/config'
-import { getSchemaList } from '@/api/data'
+import { getSchemaList, syncSchemaColumns } from '@/api/data'
 
 export default {
   name: 'sync-modal',
@@ -62,7 +62,10 @@ export default {
       listStyle: {
         width: '250px',
         height: '370px'
-      }
+      },
+      btnLoading: false,
+      btnType: 'warning',
+      btn: 'Run'
     }
   },
   methods: {
@@ -93,6 +96,9 @@ export default {
     handelCancel(visible) {
       if (!visible) {
         this.visible = visible
+        this.btn = 'Run'
+        this.btnType = 'warning'
+        this.btnLoading = false
       }
     },
     transferRender(item) {
@@ -105,12 +111,41 @@ export default {
       this.handleSchemaRequest(val)
     },
     doTheMagic() {
+      if (this.btnType === 'success') {
+        this.handelCancel(false)
+        return
+      }
+      if (this.btnType === 'error') {
+        this.btnType = 'info'
+      }
       const source = this.sourceSchema
       const target = this.targetKeys.join(',')
       if (source === target) {
         this.$Message.warning('您选择了相同的schema')
         return
       }
+      this.btnLoading = true
+      this.btn = 'Processing'
+      const req = {
+        configId: this.selectedProfile,
+        sourceSchema: this.sourceSchema,
+        targetSchemas: target
+      }
+      syncSchemaColumns(req)
+        .then(res => {
+          this.btnLoading = false
+          this.btnType = 'success'
+          this.btn = 'Done'
+        })
+        .catch(err => {
+          this.btnLoading = false
+          this.btnType = 'error'
+          this.btn = 'Retry'
+          this.$Notice.error({
+            desc: err.data.message,
+            duration: 0
+          })
+        })
     }
   }
 }

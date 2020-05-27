@@ -7,7 +7,7 @@ import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialCon
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.vo.Folder;
 import cn.hitek.authorization.ilis2.product.init.configuration.mapper.InitialConfigMapper;
 import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialConfigService;
-import org.apache.commons.lang3.StringUtils;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +48,7 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
         ArrayList<Folder> folders = new ArrayList<>(0);
         File[] files;
         Folder folder;
-        if (StringUtils.isBlank(path)) {
+        if (StrUtil.isBlank(path)) {
             files = File.listRoots();
             for (File file : files) {
                 folder = new Folder(file);
@@ -114,15 +114,15 @@ public class InitialConfigServiceImpl extends BaseServiceImpl<InitialConfigMappe
             setOtherConfigInactive();
         }
         String password = entity.getPassword();
-        if (StringUtils.isNotBlank(password)) {
+        if (StrUtil.isNotBlank(password)) {
             entity.setPassword(EncryptUtils.encrypt(password));
         }
         String targetDatabaseUsername = entity.getTargetDatabaseUsername();
-        if (StringUtils.isNotBlank(targetDatabaseUsername)) {
+        if (StrUtil.isNotBlank(targetDatabaseUsername)) {
             entity.setTargetDatabaseUsername(EncryptUtils.encrypt(targetDatabaseUsername));
         }
         String targetDatabasePwd = entity.getTargetDatabasePwd();
-        if (StringUtils.isNotBlank(targetDatabasePwd)) {
+        if (StrUtil.isNotBlank(targetDatabasePwd)) {
             entity.setTargetDatabasePwd(EncryptUtils.encrypt(targetDatabasePwd));
         }
         return super.updateById(entity);

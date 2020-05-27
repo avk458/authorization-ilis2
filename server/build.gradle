@@ -29,8 +29,7 @@ dependencies {
 //	testImplementation 'org.springframework.security:spring-security-test'
 	compile group: 'com.baomidou', name: 'mybatis-plus-boot-starter', version: '3.3.1.tmp'
 	compile group: 'p6spy', name: 'p6spy', version: '3.9.0'
-	implementation "com.lmax:disruptor:3.4.2"
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+	compile 'cn.hutool:hutool-all:5.3.5'
 }
 
 test {

@@ -1,7 +1,5 @@
 package cn.hitek.authorization.ilis2;
 
-import cn.hitek.authorization.ilis2.common.utils.FileUtil;
-import cn.hitek.authorization.ilis2.common.utils.ScriptRunner;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
@@ -63,13 +61,7 @@ class ApplicationTests {
 			connectionPath = jdbcPathPrefix + host + colon + port + slash + database + pathParams;
 			connection = DriverManager.getConnection(connectionPath, username, pwd);
 			System.out.println("开始执行数据库初始化脚本");
-			ScriptRunner runner = new ScriptRunner(connection);
-			InputStreamReader fileReader = new InputStreamReader(new FileInputStream(initSqlFilePath), StandardCharsets.UTF_8);
-			runner.runScript(fileReader);
-			runner.setStopOnError(true);
-			System.out.println("数据库【" + database + "】初始化完毕！");
-			runner.closeConnection();
-		} catch (SQLException | FileNotFoundException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -77,8 +69,6 @@ class ApplicationTests {
 	@Test
 	public void do1() {
 
-		Set<String> mySqlDatabaseNameKeyWords = FileUtil.getMySqlDatabaseNameKeyWords();
-		mySqlDatabaseNameKeyWords.forEach(System.out::println);
 	}
 
 	@Test

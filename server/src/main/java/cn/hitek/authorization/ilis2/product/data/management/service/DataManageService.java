@@ -28,4 +28,12 @@ public interface DataManageService {
      * @throws SQLException SQLException
      */
     Map<String, List<Schema>> getSourceSchemaList(InitialConfig config) throws SQLException;
+
+    /**
+     * 同步数据库字段
+     * @param configId 使用配置
+     * @param sourceSchema form
+     * @param targetSchemas to 多个target以半角逗号分隔
+     */
+    void sync(String configId, String sourceSchema, String targetSchemas);
 }

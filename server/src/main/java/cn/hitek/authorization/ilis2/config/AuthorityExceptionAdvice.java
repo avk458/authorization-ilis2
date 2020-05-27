@@ -27,7 +27,7 @@ public class AuthorityExceptionAdvice {
     public Response handlingUnexpectedException(Exception e) {
         e.printStackTrace();
         log.warn("系统异常：{}", e.getMessage());
-        return new Response().code(HttpStatus.FAIL).message("程序异常");
+        return new Response().code(HttpStatus.FAIL).message("程序异常：" + e.getMessage());
     }
 
     @ExceptionHandler(BusinessException.class)

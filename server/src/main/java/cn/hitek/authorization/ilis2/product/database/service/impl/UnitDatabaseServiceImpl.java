@@ -4,7 +4,6 @@ import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
-import cn.hitek.authorization.ilis2.common.utils.FileUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
@@ -19,19 +18,21 @@ import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialCo
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.service.InitFileService;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import cn.hutool.core.io.file.FileReader;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -121,15 +122,14 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     }
 
     private void readProcessLogAndSent2Client(InitFile initFile) throws IOException {
-        try (BufferedReader logReader = new BufferedReader(new FileReader(new File(initFile.getProcessLogPath())))) {
-            String line;
-            while (StringUtils.isNotBlank(line = logReader.readLine())) {
-                if (line.contains("error") || line.contains("ERROR")) {
-                    Messenger.sendMessage(LogType.ERROR, line);
-                    throw new BusinessException("Got error");
-                } else {
-                    Messenger.sendMessage(LogType.WARN, line);
-                }
+        FileReader fileReader = FileReader.create(initFile.getLogFile());
+        List<String> logs = fileReader.readLines();
+        for (String log : logs) {
+            if (log.contains("error") || log.contains("ERROR")) {
+                Messenger.sendMessage(LogType.ERROR, log);
+                throw new BusinessException("Got error");
+            } else {
+                Messenger.sendMessage(LogType.WARN, log);
             }
         }
     }
@@ -167,14 +167,17 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     @Override
     public boolean isUnitDatabaseInitialized(String unitId) {
         return query()
-                .eq(StringUtils.isNotBlank(unitId), UnitDatabase::getUnitId, unitId)
+                .eq(StrUtil.isNotBlank(unitId), UnitDatabase::getUnitId, unitId)
                 .eq(UnitDatabase::getIsInitialized, UnitDatabase.INITIALIZED)
                 .exist();
     }
 
+    @SneakyThrows
     @Override
     public boolean isDatabaseNameIllegally(String name) {
-        Set<String> mySqlDatabaseNameKeyWords = FileUtil.getMySqlDatabaseNameKeyWords();
+        File file = ResourceUtils.getFile("classpath:MySQLKeyWords.txt");
+        FileReader fileReader = FileReader.create(file);
+        Set<String> mySqlDatabaseNameKeyWords = new HashSet<>(fileReader.readLines());
         return mySqlDatabaseNameKeyWords.contains(name.toLowerCase());
     }
 
@@ -199,10 +202,10 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     public boolean updateById(UnitDatabase entity) {
         String databaseUsername = entity.getDatabaseUsername();
         String databasePwd = entity.getDatabasePwd();
-        if (StringUtils.isNotBlank(databaseUsername)) {
+        if (StrUtil.isNotBlank(databaseUsername)) {
             databaseUsername = EncryptUtils.encrypt(databaseUsername);
         }
-        if (StringUtils.isNotBlank(databasePwd)) {
+        if (StrUtil.isNotBlank(databasePwd)) {
             databasePwd = EncryptUtils.encrypt(databasePwd);
         }
         entity.setDatabaseUsername(databaseUsername);

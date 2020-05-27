@@ -4,7 +4,7 @@ import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
-import org.apache.commons.lang3.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -90,7 +90,7 @@ public class ConnectionHandler {
 
         String getPath() {
             String path = Constant.MYSQL_PATH_PREFIX + this.host + Constant.COLON + this.port;
-            if (StringUtils.isNotBlank(schema)) {
+            if (StrUtil.isNotBlank(schema)) {
                 path += Constant.SLASH + schema;
             }
             return this.params == null ? path : path + this.params;

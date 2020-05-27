@@ -1,8 +1,10 @@
 package cn.hitek.authorization.ilis2.product.data.management.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
+import cn.hitek.authorization.ilis2.product.data.management.compare.Comparer;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
 import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
+import cn.hitek.authorization.ilis2.product.data.management.domain.meta.MetaData;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
@@ -16,13 +18,15 @@ import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static cn.hitek.authorization.ilis2.product.database.helper.SqlUtil.executeQuery;
 
 /**
  * @author chenlm
@@ -58,39 +62,42 @@ public class DataManageServiceImpl implements DataManageService {
                 .eq(InitialConfig::getId, unitDatabase.getInitializeProfile()));
         try (Connection connection = ConnectionHandler.getTargetConnection(config)) {
             info.setOnline(true);
-            Statement statement = connection.createStatement();
             String schema = unitDatabase.getDatabaseName();
-            ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'");
+            String tableCount = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'";
+            ResultSet resultSet = executeQuery(connection, tableCount);
             int tables = 0;
             while (resultSet.next()) {
                 tables = resultSet.getInt(1);
             }
             info.setTables(tables);
-            resultSet = statement.executeQuery("SELECT CONCAT(ROUND(SUM(DATA_LENGTH)/(1024*1024),2) + ROUND(SUM(INDEX_LENGTH)/(1024*1024),2),'MB') FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'");
+            String dataSizeSql = "SELECT CONCAT(ROUND(SUM(DATA_LENGTH)/(1024*1024),2) + ROUND(SUM(INDEX_LENGTH)/(1024*1024),2),'MB') FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'";
+            resultSet = executeQuery(connection, dataSizeSql);
             String dataSize = "";
             while (resultSet.next()) {
                 dataSize = resultSet.getString(1);
             }
             info.setDataSize(dataSize);
-            resultSet = statement.executeQuery("SELECT CONCAT(ROUND(SUM(INDEX_LENGTH)/(1024*1024),2),'MB') FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'");
+            String indexSizeSql = "SELECT CONCAT(ROUND(SUM(INDEX_LENGTH)/(1024*1024),2),'MB') FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'";
+            resultSet = executeQuery(connection, indexSizeSql);
             String indexSize = "";
             while (resultSet.next()) {
                 indexSize = resultSet.getString(1);
             }
             info.setIndexSize(indexSize);
-            resultSet = statement.executeQuery("SHOW GLOBAL STATUS LIKE 'Uptime'");
+            String uptimeSql = "SHOW GLOBAL STATUS LIKE 'Uptime'";
+            resultSet = executeQuery(connection, uptimeSql);
             long uptime = 0L;
             while (resultSet.next()) {
                 uptime = resultSet.getLong(2);
             }
             info.setUptime(uptime);
-            resultSet = statement.executeQuery("SHOW VARIABLES LIKE '%max_connections%'");
+            resultSet = executeQuery(connection, "SHOW VARIABLES LIKE '%max_connections%'");
             int maxConnections = 0;
             while (resultSet.next()) {
                 maxConnections = resultSet.getInt(2);
             }
             info.setMaxConnections(maxConnections);
-            resultSet = statement.executeQuery("SHOW STATUS LIKE 'Threads%'");
+            resultSet = executeQuery(connection, "SHOW STATUS LIKE 'Threads%'");
             HashMap<String, Integer> threadResultContainer = new HashMap<>(4);
             while (resultSet.next()) {
                 threadResultContainer.put(resultSet.getString(1), resultSet.getInt(2));
@@ -120,8 +127,7 @@ public class DataManageServiceImpl implements DataManageService {
     }
 
     private List<Schema> getSchemaFromDatabase(Connection connection) throws SQLException {
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SHOW DATABASES ");
+        ResultSet rs = executeQuery(connection, "SHOW DATABASES ");
         ArrayList<Schema> schemas = new ArrayList<>();
         while (rs.next()) {
             String s = rs.getString(1);
@@ -129,5 +135,46 @@ public class DataManageServiceImpl implements DataManageService {
             schemas.add(schema);
         }
         return schemas;
+    }
+
+    @SneakyThrows
+    @Override
+    public void sync(String configId, String sourceSchema, String targetSchemas) {
+        InitialConfig config = this.configService.getById(configId);
+        Connection sourceConnection = ConnectionHandler.getConnection(config);
+        MetaData source = initTargetMetaData(sourceSchema, sourceConnection);
+        Connection targetConnection = ConnectionHandler.getTargetConnection(config);
+        CompletableFuture.allOf(Stream.of(targetSchemas.split(","))
+                .map(targetSchema -> CompletableFuture
+                        .supplyAsync(() -> initTargetMetaData(targetSchema, targetConnection))
+                        .whenCompleteAsync((target, th) -> compareAndExecute(source, target)))
+                .toArray(CompletableFuture[]::new))
+                .whenComplete((v, th) -> afterSync(sourceConnection, targetConnection))
+                .join();
+    }
+
+    @SneakyThrows
+    private void afterSync(Connection sourceConnection, Connection targetConnection) {
+        if (!sourceConnection.isClosed()) {
+            sourceConnection.close();
+        }
+        if (!targetConnection.isClosed()) {
+            targetConnection.close();
+        }
+    }
+
+    private void compareAndExecute(MetaData source, MetaData target) {
+        Comparer comparer = new Comparer(source, target);
+        comparer.compare();
+        comparer.execute();
+    }
+
+    @SneakyThrows
+    private MetaData initTargetMetaData(String schema, Connection connection) {
+        MetaData metaData = MetaData.builder().build();
+        metaData.setSchema(schema);
+        metaData.setConnection(connection);
+        metaData.init();
+        return metaData;
     }
 }

@@ -4,13 +4,13 @@ import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.Digits;
@@ -139,7 +139,7 @@ public class InitialConfig extends BaseEntity {
     }
 
     public List<String> getInitDataTableSet() {
-        if (StringUtils.isNotBlank(carryDataTables)) {
+        if (StrUtil.isNotBlank(carryDataTables)) {
             this.initDataTableSet = new ArrayList<>(Arrays.asList(carryDataTables.split(",")));
         }
         return initDataTableSet;

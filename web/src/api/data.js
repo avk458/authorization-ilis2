@@ -16,3 +16,16 @@ export const getSchemaList = configId => {
     }
   })
 }
+
+export const syncSchemaColumns = data => {
+  const { configId, sourceSchema, targetSchemas } = data
+  return axios.request({
+    url: '/data-manage/actions/sync-columns',
+    method: 'post',
+    params: {
+      configId: configId,
+      sourceSchema: sourceSchema,
+      targetSchemas: targetSchemas
+    }
+  })
+}
