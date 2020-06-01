@@ -14,7 +14,7 @@
     <div class="pagination" v-if="total > 10">
       <Page
         :total="total"
-        :current.sync="params.page"
+        :current.sync="params.current"
         :page-size.sync="params.size"
         show-sizer
         @on-page-size-change="handleSizeChange"
@@ -78,7 +78,7 @@ export default {
       ],
       total: 0,
       params: {
-        page: 1,
+        current: 1,
         size: 10
       }
     }
@@ -94,8 +94,8 @@ export default {
       this.params.size = size
       this.fetchData()
     },
-    handlePageChange(page) {
-      this.params.page = page
+    handlePageChange(current) {
+      this.params.current = current
       this.fetchData()
     }
   },
