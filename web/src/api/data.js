@@ -7,25 +7,26 @@ export const getTableData = () => {
   })
 }
 
-export const getSchemaList = configId => {
-  return axios.request({
-    url: '/data-manage/schema/list',
-    method: 'get',
-    params: {
-      configId: configId
-    }
-  })
-}
-
 export const syncSchemaColumns = data => {
-  const { configId, sourceSchema, targetSchemas } = data
+  const { mainProfileId, targetProfileId, sourceSchema, targetSchemas } = data
   return axios.request({
     url: '/data-manage/actions/sync-columns',
     method: 'post',
     params: {
-      configId: configId,
+      mainProfileId: mainProfileId,
+      targetProfileId: targetProfileId,
       sourceSchema: sourceSchema,
       targetSchemas: targetSchemas
+    }
+  })
+}
+
+export const getStandardSchemaViaConfigId = configId => {
+  return axios.request({
+    url: 'data-manage/config/standard-database',
+    method: 'get',
+    params: {
+      configId: configId
     }
   })
 }

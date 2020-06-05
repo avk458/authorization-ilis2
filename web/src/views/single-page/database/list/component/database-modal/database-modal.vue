@@ -2,20 +2,20 @@
   <Modal v-model="modalVisible" :title="modalTitle" :footer-hide="true" width="45"
          @on-visible-change="handleVisible">
     <Form ref="databaseForm" :model="formData" :rules="databaseRules" :label-width="100"
-          label-position="left">
+          label-position="right">
       <FormItem label="所属单位" prop="unitId">
         <Select v-model="formData.unitId" :label-in-value="true" @on-change="handleUnitSelect">
           <Option v-for="u in unitList" :value="u.id" :key="u.id">{{ u.name }}</Option>
         </Select>
       </FormItem>
       <FormItem label="数据库名" prop="databaseName">
-        <Input v-model="formData.databaseName" placeholder="请输入数据库名"></Input>
+        <Input v-model="formData.databaseName" placeholder="请输入数据库名" :disabled="true"></Input>
       </FormItem>
       <FormItem label="数据库地址" prop="host">
-        <Input v-model="formData.host" placeholder="请输入数据库地址"></Input>
+        <Input v-model="formData.host" placeholder="请输入数据库地址" :disabled="true"></Input>
       </FormItem>
       <FormItem label="数据库端口" prop="port">
-        <InputNumber :min="20" :max="65535" v-model="formData.port" placeholder="请输入数据库端口" style="width: 100%"></InputNumber>
+        <InputNumber :min="20" :max="65535" v-model="formData.port" placeholder="请输入数据库端口" :disabled="true" style="width: 100%"></InputNumber>
       </FormItem>
       <FormItem label="连接参数" prop="params">
         <CheckboxGroup v-model="checkParams" @on-change="handleParamChecked">

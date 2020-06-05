@@ -25,6 +25,7 @@
 <script>
 import { initUnitDatabase } from '@/api/unit-database'
 import { mapGetters } from 'vuex'
+import config from '@/config'
 
 export default {
   data() {
@@ -45,7 +46,11 @@ export default {
   computed: {
     ...mapGetters([
       'currentUserId'
-    ])
+    ]),
+    webSocketUrl() {
+      const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      return baseUrl.replace('http', 'ws')
+    }
   },
   watch: {
     items() {
@@ -62,7 +67,7 @@ export default {
   },
   methods: {
     async initWebSocket() {
-      const broker = `ws://127.0.0.1:10010/messenger?token=${this.currentUserId}`
+      const broker = `${this.webSocketUrl}/messenger?token=${this.currentUserId}`
       this.websocket = new WebSocket(broker)
       this.websocket.onmessage = this.onMessage
       this.websocket.onopen = this.onOpen
@@ -70,6 +75,7 @@ export default {
       this.websocket.onclose = this.onClose
     },
     onOpen() {
+      this.$emit('websocket-init')
     },
     onError() {
       this.initWebSocket()
@@ -89,7 +95,7 @@ export default {
       this.visible = true
       this.infoId = val
     },
-    handelInitialize() {
+    async handelInitialize() {
       this.initializing = true
       this.confirm = false
       this.btnType = 'info'

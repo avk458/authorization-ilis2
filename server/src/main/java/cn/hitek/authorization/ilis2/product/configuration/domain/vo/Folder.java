@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.init.configuration.domain.vo;
+package cn.hitek.authorization.ilis2.product.configuration.domain.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

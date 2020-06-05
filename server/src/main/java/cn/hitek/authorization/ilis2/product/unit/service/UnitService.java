@@ -24,6 +24,7 @@ public interface UnitService extends BaseService<Unit>{
     /**
      * 新增单位信息并新增单位数据库信息
      * @param unit 单位实体
+     * @return unit database id
      */
-    void insertUnitInfo(Unit unit);
+    String insertUnitInfo(Unit unit);
 }

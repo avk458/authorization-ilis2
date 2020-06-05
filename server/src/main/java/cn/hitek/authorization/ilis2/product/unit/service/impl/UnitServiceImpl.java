@@ -43,8 +43,8 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void insertUnitInfo(Unit unit) {
+    public String insertUnitInfo(Unit unit) {
         save(unit);
-        this.databaseService.createUnitDatabaseInfo(unit);
+        return this.databaseService.createUnitDatabaseInfo(unit);
     }
 }

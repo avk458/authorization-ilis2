@@ -2,8 +2,9 @@ package cn.hitek.authorization.ilis2.product.database.helper;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
-import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hutool.core.util.StrUtil;
 
 import java.sql.Connection;
@@ -15,14 +16,17 @@ import java.sql.SQLException;
  */
 public class ConnectionHandler {
 
-    public static Connection getTargetConnection(InitialConfig config) throws SQLException {
+    public synchronized static Connection getTargetConnection(TargetSourceProfile profile) throws SQLException {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
-        String path = linear.setHost(config.getTargetDatabaseHost())
-                .setPort(config.getTargetDatabasePort())
+        String path = linear.setHost(profile.getHost())
+                .setPort(profile.getPort())
                 .setSchema(null)
                 .getPath();
         path += Constant.PARAMS;
-        return DriverManager.getConnection(path, config.getDecryptTargetDatabaseUsername(), config.getDecryptTargetDatabasePwd());
+        return DriverManager.getConnection(
+                path,
+                profile.getUsername(),
+                EncryptUtils.decrypt(profile.getPassword()));
     }
 
     public static Connection getConnection(UnitDatabase unitDatabase) throws SQLException {
@@ -35,11 +39,11 @@ public class ConnectionHandler {
         return DriverManager.getConnection(path, EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()), EncryptUtils.decrypt(unitDatabase.getDatabasePwd()));
     }
 
-    public static Connection getConnection(InitialConfig config) throws SQLException {
+    public static Connection getConnection(MainSourceProfile config) throws SQLException {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
         String path = linear.setHost(config.getHost())
                 .setPort(config.getPort())
-                .setSchema(config.getSchemaName())
+                .setSchema(config.getSourceSchema())
                 .getPath();
         path += Constant.PARAMS;
         return DriverManager.getConnection(path, config.getUsername(), config.getDecryptPassword());

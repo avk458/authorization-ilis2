@@ -60,33 +60,15 @@ public class Unit extends BaseEntity implements Serializable {
      */
     private Integer maxOnlineAccount;
 
-    /**
-     * 联系人姓名
-     */
-    private String contactName;
-
-    /**
-     * 联系人电话
-     */
-    private String contactPhone;
-
     private Boolean isAuthorized;
 
     private String authorizationCode;
 
     private String unitShortName;
-    private String unitSubName;
-    private String complaintMail;
-    private String complaintPhone;
-    private String postCode;
-    private String contactTel;
-    private String address;
-    private String fax;
-    private String bankAccount;
-    private String bankAddress;
-    private String bankName;
-    private String bankOfDeposit;
-    private String queryTel;
-    private String description;
+
+    @NotBlank(message = "必须选择目标数据源", groups = {OnCreate.class, OnUpdate.class})
+    private String targetSourceId;
+
+    private String targetSource;
 
 }

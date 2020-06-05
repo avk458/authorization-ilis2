@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2;
 
-import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import org.junit.jupiter.api.Test;
@@ -8,14 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.crypto.*;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -226,7 +222,7 @@ class ApplicationTests {
 
 	@Test
 	public void do8() throws SQLException {
-		String url = "jdbc:mysql://127.0.0.1:3306/ilis_local?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
+		String url = "jdbc:mysql://192.168.1.1:3306/ilis_local?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
 		Connection con = DriverManager.getConnection(url, "root", "123456");
 		Statement statement = con.createStatement();
 		String schema = "ilis_local";
@@ -236,15 +232,6 @@ class ApplicationTests {
 			res = resultSet.getString(1);
 		}
 		System.out.println(res);
-	}
-
-	@Test
-	public void do9() throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-		InitialConfig config = new InitialConfig();
-		config.setPassword("123456");
-		config.setTargetDatabaseUsername("root");
-		config.setTargetDatabasePwd("123456");
-		System.out.println(config);
 	}
 
 }

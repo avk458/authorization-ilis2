@@ -38,8 +38,8 @@ public class UnitController {
 
     @PostMapping("/info")
     public Response createUnit(@Validated(OnCreate.class) @RequestBody Unit unit) {
-        this.unitService.insertUnitInfo(unit);
-        return new Response().code(HttpStatus.ADD);
+        String unitDatabaseId = this.unitService.insertUnitInfo(unit);
+        return new Response().code(HttpStatus.ADD).data(unitDatabaseId);
     }
 
     @PutMapping("/info")

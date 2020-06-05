@@ -12,7 +12,6 @@
       <Header class="header-con">
         <header-bar :collapsed="collapsed" @on-coll-change="handleCollapsedChange">
           <user :message-unread-count="unreadCount" :user-avatar="userAvatar"/>
-          <Icon class="header-setting" type="md-build" @click="handleSetting"/>
         </header-bar>
       </Header>
       <Content class="main-content-con">
@@ -28,7 +27,6 @@
           </Content>
         </Layout>
       </Content>
-      <SettingModal ref="settingModal"/>
     </Layout>
   </Layout>
 </template>
@@ -44,12 +42,10 @@ import routers from '@/router/routers'
 import minLogo from '@/assets/logo-mini.png'
 import maxLogo from '@/assets/logo.png'
 import './main.less'
-import SettingModal from './components/setting-modal'
 
 export default {
   name: 'Main',
   components: {
-    SettingModal,
     SideMenu,
     HeaderBar,
     TagsNav,
@@ -140,9 +136,6 @@ export default {
     },
     handleClick (item) {
       this.turnToPage(item)
-    },
-    handleSetting() {
-      this.$refs.settingModal.showModal()
     }
   },
   watch: {

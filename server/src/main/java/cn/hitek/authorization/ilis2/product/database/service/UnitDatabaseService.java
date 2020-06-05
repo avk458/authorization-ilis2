@@ -39,6 +39,7 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
     /**
      * 根据单位信息新增单位默认数据库信息
      * @param unit 单位实体
+     * @return unit database id
      */
-    void createUnitDatabaseInfo(Unit unit);
+    String createUnitDatabaseInfo(Unit unit);
 }

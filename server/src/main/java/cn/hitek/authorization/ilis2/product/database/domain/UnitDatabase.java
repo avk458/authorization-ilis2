@@ -98,7 +98,10 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      */
     private Boolean isInitialized;
 
-    private String initializeProfile;
+    private String targetProfileId;
+
+    private String targetProfile;
+
 
     public DatabaseType getDatabaseEnum() {
         switch (databaseType) {

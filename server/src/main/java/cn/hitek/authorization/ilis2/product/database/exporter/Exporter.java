@@ -1,7 +1,8 @@
 package cn.hitek.authorization.ilis2.product.database.exporter;
 
+import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
-import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
+import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 
 import java.util.Collections;
@@ -18,23 +19,23 @@ public interface Exporter {
      * @return init file
      * @throws Exception runtime exception
      */
-    InitFile export(InitialConfig config) throws Exception;
+    InitFile export(MainSourceProfile config) throws Exception;
 
     /**
      * restore database base on dump file
-     * @param activeConfig active config
+     * @param targetSource active config
      * @param initFile etc sql file log file
      * @param database database info
      * @throws Exception runtime exception
      */
-    void restore(InitialConfig activeConfig, UnitDatabase database, InitFile initFile) throws Exception;
+    void restore(TargetSourceProfile targetSource, UnitDatabase database, InitFile initFile) throws Exception;
 
     /**
      * 从配置类实体构建processBuilder dump命令
      * @param config 配置类
      * @return command
      */
-    default List<String> commandBuilder(InitialConfig config){
+    default List<String> commandBuilder(MainSourceProfile config){
         // do nothing
         return Collections.emptyList();
     }
@@ -46,7 +47,7 @@ public interface Exporter {
      * @param logPath log地址
      * @return init
      */
-    default InitFile createInitFile(InitialConfig config, String sqlPath, String logPath) {
+    default InitFile createInitFile(MainSourceProfile config, String sqlPath, String logPath) {
         InitFile initFile = new InitFile();
         initFile.setConfigId(config.getId());
         initFile.setConfigName(config.getProfileName());

@@ -1,13 +1,9 @@
 package cn.hitek.authorization.ilis2.product.data.management.service;
 
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
-import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author chenlm
@@ -22,18 +18,18 @@ public interface DataManageService {
     List<DatabaseInfo> getUnitDatabaseList(List<UnitDatabase> unitDatabaseList);
 
     /**
-     * 根据配置，获取数据库schema
-     * @param config 配置实体
-     * @return 数据库databases
-     * @throws SQLException SQLException
-     */
-    Map<String, List<Schema>> getSourceSchemaList(InitialConfig config) throws SQLException;
-
-    /**
      * 同步数据库字段
-     * @param configId 使用配置
+     * @param targetProfileId 目标数据源id
+     * @param mainProfileId 主数据源id
      * @param sourceSchema form
      * @param targetSchemas to 多个target以半角逗号分隔
      */
-    void sync(String configId, String sourceSchema, String targetSchemas);
+    void sync(String mainProfileId, String targetProfileId, String sourceSchema, String targetSchemas);
+
+    /**
+     * 根据配置获取标准库schema
+     * @param configId 配置id
+     * @return schema or null
+     */
+    String getConfigStandardDatabase(String configId);
 }

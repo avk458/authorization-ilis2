@@ -34,6 +34,7 @@ public class Comparer {
         Statement statement = target.getConnection().createStatement();
         statement.execute("USE " + target.getSchema());
         for (String sql : sqlContainer) {
+            System.out.println(sql);
             statement.execute(sql);
         }
     }
@@ -79,8 +80,8 @@ public class Comparer {
         String after = null;
         for (Column column : sourceTable.getColumns().values()) {
             if (targetTable.getColumns().get(column.getName()) == null) {
-                String sql = "alter table " + target.getSchema() + "." + targetTable.getTableName() + " add " + column
-                        .getName() + " ";
+                String sql = "alter table " + target.getSchema() + "." + targetTable.getTableName() + " add " +
+                        backtick(column.getName()) + " ";
                 sql += column.getType() + " ";
                 if ("NO".equals(column.getIsNull())) {
                     sql += "NOT NULL ";
@@ -101,13 +102,13 @@ public class Comparer {
                     sql += "COMMENT " + singleQuote(column.getComment()) + " ";
                 }
                 if (after != null) {
-                    sql += "after " + after;
+                    sql += "after " + backtick(after);
                 }
                 addSql(sql);
             } else {
                 String sql =
-                        "alter table " + target.getSchema() + "." + targetTable.getTableName() + " change " + column
-                                .getName() + " ";
+                        "alter table " + target.getSchema() + "." + backtick(targetTable.getTableName()) + " change " +
+                                backtick(column.getName()) + " ";
                 Column targetColumn = targetTable.getColumns().get(column.getName());
                 String sqlExtend = compareSingleColumn(column, targetColumn);
                 if (sqlExtend != null) {

@@ -8,14 +8,14 @@
     </Alert>
     <div class="sync-box">
       <div class="left-panel">
-        <p class="sync-label">Profile:</p>
-        <Select style="margin-bottom: 20px" v-model="selectedProfile" @on-change="handelConfigChange">
-          <Option v-for="p in profileList" :key="p.id" :value="p.id">{{ p.profileName }}</Option>
+        <p class="sync-label">Main Profile:</p>
+        <Select style="margin-bottom: 20px" v-model="mainProfile" @on-change="handelMainProfileChange">
+          <Option v-for="p in mainProfiles" :key="p.id" :value="p.id">{{ p.profileName }}</Option>
         </Select>
         <p class="sync-label">Source Schema:</p>
         <div class="source-box">
           <RadioGroup v-model="sourceSchema" vertical>
-            <Radio style="margin-top: 2px" v-for="s in sourceSchemaList"
+            <Radio style="margin-top: 2px" v-for="s in sourceSchemas"
                    :key="s.key"
                    :value="s.label"
                    :label="s.label"
@@ -26,11 +26,17 @@
         </div>
       </div>
       <div class="right-panel">
+        <div style="width: 260px">
+          <p class="sync-label">Target Profile:</p>
+          <Select style="margin-bottom: 20px" v-model="targetProfile" @on-change="handelTargetProfileChange">
+            <Option v-for="p in targetProfiles" :key="p.id" :value="p.id">{{ p.profileName }}</Option>
+          </Select>
+        </div>
         <p class="sync-label">Target Schema:</p>
         <Transfer
           :titles="['Unit Schema', 'Waiting List']"
           :list-style="listStyle"
-          :data="targetList"
+          :data="targetSchemas"
           :target-keys="targetKeys"
           :render-format="transferRender"
           :not-found-text="'No data'"
@@ -45,23 +51,25 @@
 </template>
 
 <script>
-import { getInitConfigList } from '@/api/config'
-import { getSchemaList, syncSchemaColumns } from '@/api/data'
+import { getMainProfiles, getTargetProfiles, getMainSourceSchemas, getTargetSourceSchemas } from '@/api/config'
+import { syncSchemaColumns } from '@/api/data'
 
 export default {
   name: 'sync-modal',
   data() {
     return {
       visible: false,
-      selectedProfile: '',
-      profileList: [],
+      mainProfile: '',
+      targetProfile: '',
+      mainProfiles: [],
+      targetProfiles: [],
       sourceSchema: '',
-      sourceSchemaList: [],
-      targetList: [],
+      sourceSchemas: [],
+      targetSchemas: [],
       targetKeys: [],
       listStyle: {
         width: '250px',
-        height: '370px'
+        height: '300px'
       },
       btnLoading: false,
       btnType: 'warning',
@@ -71,22 +79,20 @@ export default {
   methods: {
     async fetchData() {
       await this.handelConfigRequest()
-      this.handleSchemaRequest(this.selectedProfile)
+      this.handelMainSchemasRequest(this.mainProfile)
     },
     async handelConfigRequest() {
-      const res = await getInitConfigList()
-      this.profileList = res.data
-      this.selectedProfile = this.profileList.find(p => p.active).id
+      const mains = await getMainProfiles()
+      const targets = await getTargetProfiles()
+      this.mainProfiles = mains.data
+      this.targetProfiles = targets.data
+      this.mainProfile = this.mainProfiles.find(p => p.active).id
     },
-    handleSchemaRequest(val) {
-      getSchemaList(val).then(res => {
-        const { source, target } = res.data
-        this.sourceSchemaList = source
-        this.targetList = target
+    handelMainSchemasRequest(mainProfileId) {
+      getMainSourceSchemas(mainProfileId).then(res => {
+        this.sourceSchemas = res.data
       }).catch(() => {
-        this.sourceSchemaList = []
-        this.targetList = []
-        this.targetKeys = []
+        this.sourceSchemas = []
       })
     },
     showModal() {
@@ -107,8 +113,13 @@ export default {
     handleTransferChange(newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
-    handelConfigChange(val) {
-      this.handleSchemaRequest(val)
+    handelMainProfileChange(val) {
+      this.handelMainSchemasRequest(val)
+    },
+    handelTargetProfileChange(val) {
+      getTargetSourceSchemas(val).then(res => {
+        this.targetSchemas = res.data
+      })
     },
     doTheMagic() {
       if (this.btnType === 'success') {
@@ -127,7 +138,8 @@ export default {
       this.btnLoading = true
       this.btn = 'Processing'
       const req = {
-        configId: this.selectedProfile,
+        mainProfileId: this.mainProfile,
+        targetProfileId: this.targetProfile,
         sourceSchema: this.sourceSchema,
         targetSchemas: target
       }
@@ -187,18 +199,5 @@ export default {
 .sync-label{
   font-size: 16px;
   font-weight: bold;
-}
-.ivu-transfer::-webkit-scrollbar {
-  width: 8px!important;
-  background-color: #eee!important;
-}
-.ivu-transfer::-webkit-scrollbar-track {
-  border-radius: 10px;
-  background-color: #eee;
-}
-
-.ivu-transfer::-webkit-scrollbar-thumb {
-  background: #3d3838;
-  border-radius: 10px;
 }
 </style>

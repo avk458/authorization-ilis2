@@ -3,9 +3,9 @@
     <Modal
       v-model="visible"
       :title="modalTitle"
-      :styles="{top: '20px'}"
-      :footer-hide="true">
-      <Form ref="configForm" :model="formData" :rules="ruleValidate" label-position="left" :label-width="120">
+      :footer-hide="true"
+      @on-visible-change="handelVisible">
+      <Form ref="configForm" :model="formData" :rules="ruleValidate" label-position="right" :label-width="150">
         <FormItem label="配置名称" prop="profileName">
           <Input v-model="formData.profileName" placeholder="请输入配置名称"></Input>
         </FormItem>
@@ -19,22 +19,23 @@
           <Input v-model="formData.username" :placeholder="usernameHolder"></Input>
         </FormItem>
         <FormItem label="密码" prop="password">
-          <Input v-model="formData.password" :placeholder="passwordHolder" type="password" :password="true"></Input>
+          <Input v-model="formData.password" :placeholder="passwordHolder" type="password" :password="true"  @on-blur="handleConnection"></Input>
         </FormItem>
-        <FormItem label="Schema" prop="schemaName">
-          <Input v-model="formData.schemaName" placeholder="请输入数据库名称"></Input>
+        <FormItem label="Source Schema" prop="sourceSchema">
+          <Select
+            v-model="formData.sourceSchema"
+            style="width: 100%"
+          >
+            <Option v-for="item in databases" :value="item.label" :key="item.value">{{ item.label }}</Option>
+          </Select>
         </FormItem>
-        <FormItem label="目标数据库" prop="targetDatabaseHost">
-          <Input v-model="formData.targetDatabaseHost" placeholder="请输入目标数据库连接地址"></Input>
-        </FormItem>
-        <FormItem label="数据库端口" prop="targetDatabasePort">
-          <InputNumber :min="1024" :max="65535" v-model="formData.targetDatabasePort" placeholder="请输入目标数据库端口" style="width: 100%"></InputNumber>
-        </FormItem>
-        <FormItem label="用户名" prop="targetDatabaseUsername">
-          <Input v-model="formData.targetDatabaseUsername" :placeholder="usernameHolder"></Input>
-        </FormItem>
-        <FormItem label="密码" prop="targetDatabasePwd">
-          <Input v-model="formData.targetDatabasePwd" type="password" :password="true" :placeholder="passwordHolder"></Input>
+        <FormItem label="Standard Schema" prop="standardSchema">
+          <Select
+            v-model="formData.standardSchema"
+            style="width: 100%"
+          >
+            <Option v-for="item in databases" :value="item.label" :key="item.value">{{ item.label }}</Option>
+          </Select>
         </FormItem>
         <FormItem v-if="!isEdit" label="文件存放路径" prop="path">
           <Cascader
@@ -59,23 +60,6 @@
             <span slot="close">关闭</span>
           </i-switch>
         </FormItem>
-        <FormItem label="初始化数据" prop="initWithData">
-          <i-switch v-model="formData.initWithData" size="large" @on-change="handleInitDataSwitch">
-            <span slot="open">是</span>
-            <span slot="close">否</span>
-          </i-switch>
-        </FormItem>
-        <FormItem label="选择表" v-if="!formData.initWithData">
-          <Select
-            v-model="formData.initDataTableSet"
-            multiple
-            style="width: 100%"
-            :max-tag-count="2"
-            :max-tag-placeholder="maxTagPlaceholder"
-            >
-            <Option v-for="item in tableList" :value="item.label" :key="item.value">{{ item.label }}</Option>
-          </Select>
-        </FormItem>
         <FormItem style="text-align: right">
           <Button type="primary" @click="handleSubmit('configForm')">保存</Button>
           <Button @click="handleClose" style="margin-left: 8px">取消</Button>
@@ -85,7 +69,7 @@
   </div>
 </template>
 <script>
-import { loadSystemPath, getTableListViaDatabase, saveInitConfigInfo } from '@/api/config'
+import { loadSystemPath, getTableListViaDatabase, saveMainProfile, getDatabases } from '@/api/config'
 
 export default {
   name: 'SettingModal',
@@ -94,7 +78,7 @@ export default {
       if (this.isEdit && !value) {
         callback()
       } else {
-        if (rule.field === 'password' || rule.field === 'targetDatabasePwd') {
+        if (rule.field === 'password') {
           if (!value || value.length < 6) {
             callback(new Error())
           } else {
@@ -119,14 +103,9 @@ export default {
         username: '',
         password: '',
         path: [],
-        schemaName: '',
+        sourceSchema: '',
         active: true,
-        initWithData: true,
-        initDataTableSet: [],
-        targetDatabaseHost: '',
-        targetDatabasePort: 3306,
-        targetDatabaseUsername: '',
-        targetDatabasePwd: ''
+        standardSchema: ''
       },
       pathData: [],
       usernameHolder: '请输入数据库用户名',
@@ -137,16 +116,13 @@ export default {
         port: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
         password: [{ required: true, validator: commonValidator, message: '密码不合规', trigger: 'blur' }],
-        // path: [{ required: true, type: 'array', message: '请选择路径', trigger: 'change' }],
-        schemaName: [{ required: true, message: 'schema不能为空', trigger: 'blur' }],
-        targetDatabaseHost: [{ required: true, message: '目标数据库host不能为空', trigger: 'blur' }],
-        targetDatabasePort: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
-        targetDatabaseUsername: [{ required: true, validator: commonValidator, message: '目标数据库用户名不合规', trigger: 'blur' }],
-        targetDatabasePwd: [{ required: true, validator: commonValidator, message: '目标数据库密码不合规', trigger: 'blur' }]
+        sourceSchema: [{ required: true, message: 'schema不能为空', trigger: 'blur' }],
+        standardSchema: [{ required: true, message: 'schema不能为空', trigger: 'blur' }]
       },
       tableList: [],
       modalTitle: '新增主数据源配置信息',
-      isEdit: false
+      isEdit: false,
+      databases: []
     }
   },
   methods: {
@@ -189,22 +165,25 @@ export default {
             const payload = {}
             Object.assign(payload, this.formData)
             this.$emit('update-validate', payload)
-            this.handleClose()
             return
           }
           // insert
-          const res = await saveInitConfigInfo(this.formData)
+          const res = await saveMainProfile(this.formData)
           this.$Message.success(res.message)
           this.handleClose()
         }
       })
     },
+    handelVisible(visible) {
+      if (!visible) {
+        this.handleClose()
+      }
+    },
     handleClose() {
       this.visible = false
-      this.$refs.configForm.resetFields()
-      this.formData.initDataTableSet = []
       this.modalTitle = '新增主数据源配置信息'
       this.isEdit = false
+      this.$refs.configForm.resetFields()
     },
     handleInitDataSwitch(on) {
       if (!on) {
@@ -244,6 +223,18 @@ export default {
     },
     maxTagPlaceholder(num) {
       return `还有${num}个`
+    },
+    handleConnection() {
+      const queryData = {
+        id: this.formData.id,
+        host: this.formData.host,
+        port: this.formData.port,
+        username: this.formData.username,
+        password: this.formData.password
+      }
+      getDatabases(queryData).then(res => {
+        this.databases = res.data
+      })
     }
   }
 }

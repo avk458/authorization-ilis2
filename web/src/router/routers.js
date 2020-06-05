@@ -145,7 +145,19 @@ export default [
           title: '单位数据管理'
         },
         component: () => import('@/views/single-page/database/manage/DatabaseManage.vue')
-      },
+      }
+    ]
+  },
+  {
+    path: '/system-config',
+    name: 'system-config',
+    component: Main,
+    meta: {
+      hideInBread: true,
+      title: '系统设置',
+      icon: 'md-cog'
+    },
+    children: [
       {
         path: '/database/config',
         name: 'database_init_config',
@@ -154,10 +166,10 @@ export default [
           access: ['admin'],
           title: '数据源配置管理'
         },
-        component: () => import('@/views/single-page/database/init-config/InitConfigManage.vue')
+        component: () => import('@/views/single-page/configuration/ProfilesManage.vue')
       },
       {
-        path: '/database/init-file.js',
+        path: '/database/init-file',
         name: 'database_init_file',
         meta: {
           icon: 'md-albums',
@@ -165,6 +177,16 @@ export default [
           title: '初始化文件管理'
         },
         component: () => import('@/views/single-page/database/init-file/InitFileManage.vue')
+      },
+      {
+        path: '/database/standard_database',
+        name: 'database_standard_database',
+        meta: {
+          icon: 'md-cloud-circle',
+          access: ['admin'],
+          title: '标准库维护'
+        },
+        component: () => import('@/views/single-page/database/manage/components/standard/standard-database.vue')
       }
     ]
   },

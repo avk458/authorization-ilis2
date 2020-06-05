@@ -1,16 +1,18 @@
 package cn.hitek.authorization.ilis2.product.data.management.service.impl;
 
-import cn.hitek.authorization.ilis2.common.constants.Constant;
+import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
+import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.compare.Comparer;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
+import cn.hitek.authorization.ilis2.product.data.management.domain.StandardDatabase;
 import cn.hitek.authorization.ilis2.product.data.management.domain.meta.MetaData;
+import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseDetailMapper;
+import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
-import cn.hitek.authorization.ilis2.product.init.configuration.domain.InitialConfig;
-import cn.hitek.authorization.ilis2.product.init.configuration.service.InitialConfigService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,8 @@ import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,16 +33,15 @@ import static cn.hitek.authorization.ilis2.product.database.helper.SqlUtil.execu
  */
 @Service
 @Log4j2
+@AllArgsConstructor
 public class DataManageServiceImpl implements DataManageService {
 
     private final static String SOURCE = "source";
     private final static String TARGET = "target";
 
-    private final InitialConfigService configService;
-
-    public DataManageServiceImpl(InitialConfigService configService) {
-        this.configService = configService;
-    }
+    private final ConfigService configService;
+    private final StandardDatabaseMapper standardDatabaseMapper;
+    private final StandardDatabaseDetailMapper standardDatabaseDetailMapper;
 
     @SneakyThrows
     @Override
@@ -58,9 +57,7 @@ public class DataManageServiceImpl implements DataManageService {
     private DatabaseInfo queryDatabaseInfo(UnitDatabase unitDatabase) {
         DatabaseInfo info = new DatabaseInfo();
         info.setName(unitDatabase.getDatabaseName());
-        InitialConfig config = this.configService.getOne(Wrappers.lambdaQuery(InitialConfig.class)
-                .eq(InitialConfig::getId, unitDatabase.getInitializeProfile()));
-        try (Connection connection = ConnectionHandler.getTargetConnection(config)) {
+        try (Connection connection = this.configService.getTargetSourceConnection(unitDatabase.getTargetProfileId())) {
             info.setOnline(true);
             String schema = unitDatabase.getDatabaseName();
             String tableCount = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + schema + "'";
@@ -115,35 +112,11 @@ public class DataManageServiceImpl implements DataManageService {
 
     @SneakyThrows
     @Override
-    public Map<String, List<Schema>> getSourceSchemaList(InitialConfig config) {
-        Map<String, List<Schema>> result = new HashMap<>(2);
-        try (Connection connection = ConnectionHandler.getConnection(config)) {
-            result.put(SOURCE, getSchemaFromDatabase(connection));
-        }
-        try (Connection connection = ConnectionHandler.getTargetConnection(config)) {
-            result.put(TARGET, getSchemaFromDatabase(connection));
-        }
-        return result;
-    }
-
-    private List<Schema> getSchemaFromDatabase(Connection connection) throws SQLException {
-        ResultSet rs = executeQuery(connection, "SHOW DATABASES ");
-        ArrayList<Schema> schemas = new ArrayList<>();
-        while (rs.next()) {
-            String s = rs.getString(1);
-            Schema schema = new Schema(s, s, Constant.SYSTEM_SCHEMA.contains(s));
-            schemas.add(schema);
-        }
-        return schemas;
-    }
-
-    @SneakyThrows
-    @Override
-    public void sync(String configId, String sourceSchema, String targetSchemas) {
-        InitialConfig config = this.configService.getById(configId);
-        Connection sourceConnection = ConnectionHandler.getConnection(config);
+    public void sync(String mainProfileId, String targetProfileId, String sourceSchema, String targetSchemas) {
+        MainSourceProfile mainProfile = this.configService.getById(mainProfileId);
+        Connection sourceConnection = ConnectionHandler.getConnection(mainProfile);
         MetaData source = initTargetMetaData(sourceSchema, sourceConnection);
-        Connection targetConnection = ConnectionHandler.getTargetConnection(config);
+        Connection targetConnection = this.configService.getTargetSourceConnection(targetProfileId);
         CompletableFuture.allOf(Stream.of(targetSchemas.split(","))
                 .map(targetSchema -> CompletableFuture
                         .supplyAsync(() -> initTargetMetaData(targetSchema, targetConnection))
@@ -176,5 +149,13 @@ public class DataManageServiceImpl implements DataManageService {
         metaData.setConnection(connection);
         metaData.init();
         return metaData;
+    }
+
+    @Override
+    public String getConfigStandardDatabase(String configId) {
+        StandardDatabase standardDatabase = this.standardDatabaseMapper.selectOne(
+                Wrappers.lambdaQuery(StandardDatabase.class)
+                        .eq(StandardDatabase::getConfigId, configId));
+        return standardDatabase != null ? standardDatabase.getSchemaName() : null;
     }
 }
