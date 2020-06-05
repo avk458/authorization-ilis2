@@ -32,15 +32,15 @@ export const deleteDatabaseInfo = id => {
 
 export const isUnitHasActiveDatabase = id => {
   return axios.request({
-    url: `/database/initialized/${id}`,
+    url: `/database/initialization/status/${id}`,
     method: 'get'
   })
 }
 
 export const isDatabaseNameIllegal = name => {
   return axios.request({
-    url: '/database/name-illegally',
-    method: 'get',
+    url: '/database/actions/validate-schema-name',
+    method: 'post',
     params: { name: name }
   })
 }

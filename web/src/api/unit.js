@@ -32,8 +32,8 @@ export const deleteUnitInfo = id => {
 
 export const validateUniqCode = code => {
   return axios.request({
-    url: '/unit/validate/code',
-    method: 'get',
+    url: '/unit/actions/validate-uniq-code',
+    method: 'post',
     params: { code: code }
   })
 }

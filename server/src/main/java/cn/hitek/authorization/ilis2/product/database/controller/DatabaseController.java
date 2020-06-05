@@ -60,14 +60,14 @@ public class DatabaseController {
         return new Response().code(HttpStatus.OK);
     }
 
-    @GetMapping("/initialized/{unitId}")
+    @GetMapping("/initialization/status/{unitId}")
     public Response isUnitDatabaseInitialized(@NotBlank(message = RequestConstants.PARAM_ERROR)
                                               @PathVariable String unitId) {
         boolean initialized = this.databaseService.isUnitDatabaseInitialized(unitId);
         return new Response().code(HttpStatus.OK).data(initialized);
     }
 
-    @GetMapping("/name-illegally")
+    @PostMapping("/actions/validate-schema-name")
     public Response isDatabaseNameIllegally(@NotBlank(message = RequestConstants.PARAM_ERROR) String name) {
         boolean isIllegal = this.databaseService.isDatabaseNameIllegally(name);
         return new Response().code(HttpStatus.OK).data(isIllegal);

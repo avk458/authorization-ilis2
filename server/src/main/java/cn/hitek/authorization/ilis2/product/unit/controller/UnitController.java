@@ -54,7 +54,7 @@ public class UnitController {
         return new Response().code(HttpStatus.DELETE);
     }
 
-    @GetMapping("/validate/code")
+    @PostMapping("/actions/validate-uniq-code")
     public Response validateUniqCode(@NotBlank(message = RequestConstants.PARAM_ERROR) String code) {
         boolean exists = this.unitService.validateCode(code);
         return new Response().code(HttpStatus.OK).data(exists);
