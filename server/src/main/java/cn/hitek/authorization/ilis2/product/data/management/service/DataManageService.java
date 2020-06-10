@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.data.management.service;
 
+import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 
@@ -32,4 +33,10 @@ public interface DataManageService {
      * @return schema or null
      */
     String getConfigStandardDatabase(String configId);
+
+    /**
+     * 新增数据库脚本
+     * @param script sql
+     */
+    void insertDataScript(DataScript script);
 }

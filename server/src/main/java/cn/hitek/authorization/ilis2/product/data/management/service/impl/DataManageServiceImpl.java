@@ -3,9 +3,11 @@ package cn.hitek.authorization.ilis2.product.data.management.service.impl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.compare.Comparer;
+import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
 import cn.hitek.authorization.ilis2.product.data.management.domain.StandardDatabase;
 import cn.hitek.authorization.ilis2.product.data.management.domain.meta.MetaData;
+import cn.hitek.authorization.ilis2.product.data.management.mapper.DataScriptMapper;
 import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseDetailMapper;
 import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
@@ -42,6 +44,7 @@ public class DataManageServiceImpl implements DataManageService {
     private final ConfigService configService;
     private final StandardDatabaseMapper standardDatabaseMapper;
     private final StandardDatabaseDetailMapper standardDatabaseDetailMapper;
+    private final DataScriptMapper scriptMapper;
 
     @SneakyThrows
     @Override
@@ -157,5 +160,10 @@ public class DataManageServiceImpl implements DataManageService {
                 Wrappers.lambdaQuery(StandardDatabase.class)
                         .eq(StandardDatabase::getConfigId, configId));
         return standardDatabase != null ? standardDatabase.getSchemaName() : null;
+    }
+
+    @Override
+    public void insertDataScript(DataScript script) {
+        this.scriptMapper.insert(script);
     }
 }

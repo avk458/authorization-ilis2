@@ -30,3 +30,11 @@ export const getStandardSchemaViaConfigId = configId => {
     }
   })
 }
+
+export const postScript = data => {
+  return axios.request({
+    url: '/data-manage/data/script',
+    method: 'post',
+    data: data
+  })
+}

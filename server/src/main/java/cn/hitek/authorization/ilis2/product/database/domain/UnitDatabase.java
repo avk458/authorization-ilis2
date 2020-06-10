@@ -102,6 +102,12 @@ public class UnitDatabase extends BaseEntity implements Serializable {
 
     private String targetProfile;
 
+    /**
+     * 前三位代表ddl改动，后三位代表dml改动
+     * like 001.002
+     */
+    private String version;
+
 
     public DatabaseType getDatabaseEnum() {
         switch (databaseType) {

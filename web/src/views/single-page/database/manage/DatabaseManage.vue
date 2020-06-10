@@ -2,7 +2,7 @@
   <div>
     <Button type="primary" @click="handleColumnSync">数据库字段同步</Button>
     <Divider type="vertical" />
-    <Button type="info" @click="handleStandardDatabase">标准库维护</Button>
+    <Button type="success" @click="handleScriptModal">提交脚本</Button>
     <Divider/>
     <Row :gutter="16">
       <Col span="4" v-for="c in cards" :key="c.name">
@@ -55,16 +55,16 @@
       <Spin size="large" fix v-if="spinShow"></Spin>
     </Row>
     <column-sync-modal ref="syncModal"/>
-    <standard-database ref="standardModal"/>
+    <script-modal ref="scriptModal"/>
   </div>
 </template>
 <script>
 import { getTableData } from '@/api/data'
 import ColumnSyncModal from './components/sync-column-modal'
-import StandardDatabase from './components/standard/standard-database'
+import ScriptModal from './components/script/script-modal'
 
 export default {
-  components: { StandardDatabase, ColumnSyncModal },
+  components: { ScriptModal, ColumnSyncModal },
   data () {
     return {
       spinShow: true,
@@ -84,8 +84,8 @@ export default {
     handleColumnSync() {
       this.$refs.syncModal.showModal()
     },
-    handleStandardDatabase() {
-      this.$refs.standardModal.showModal()
+    handleScriptModal() {
+      this.$refs.scriptModal.showModal()
     }
   },
   mounted() {

@@ -186,7 +186,7 @@ export default [
           access: ['admin'],
           title: '标准库维护'
         },
-        component: () => import('@/views/single-page/database/manage/components/standard/standard-database.vue')
+        component: () => import('@/views/single-page/database/manage/components/script/script-modal.vue')
       }
     ]
   },

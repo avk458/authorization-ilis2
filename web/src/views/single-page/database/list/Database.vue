@@ -5,6 +5,7 @@
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
+          <Button type="info" size="small" style="margin-right: 5px" @click="edit(row)">升级</Button>
           <Button type="success" size="small" style="margin-right: 5px" @click="handleInit(row)" :disabled="row.isInitialized">初始化</Button>
           <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
           <Button type="error" size="small" @click="remove(row)" :disabled="row.isInitialized">删除</Button>
@@ -61,6 +62,7 @@ export default {
             ])
           }
         },
+        { title: '数据版本', key: 'version' },
         {
           title: '上一次修改人员',
           key: 'createBy',
@@ -70,7 +72,7 @@ export default {
             return h('span', person)
           }
         },
-        { title: '操作', slot: 'action', align: 'center', width: 200 }
+        { title: '操作', slot: 'action', align: 'center', width: 250 }
       ],
       data: [],
       loading: false
