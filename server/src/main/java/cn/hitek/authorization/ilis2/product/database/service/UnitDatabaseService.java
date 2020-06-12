@@ -2,7 +2,10 @@ package cn.hitek.authorization.ilis2.product.database.service;
 
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+
+import java.util.List;
 
 /**
  * @author chenlm
@@ -42,4 +45,11 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @return unit database id
      */
     String createUnitDatabaseInfo(Unit unit);
+
+    /**
+     * 更新单位数据库
+     * @param id 数据库id
+     * @return 执行结果
+     */
+    List<UpdateEchoLog> updateDatabase(String id);
 }

@@ -46,12 +46,6 @@ public class DataManageController {
         return new Response().code(HttpStatus.OK);
     }
 
-    @GetMapping("/config/standard-database")
-    public Response getConfigStandardDatabase(@NotBlank(message = "配置信息参数有误") String configId) {
-        String schema = this.dataManageService.getConfigStandardDatabase(configId);
-        return new Response().code(HttpStatus.OK).data(schema);
-    }
-
     @PostMapping("/data/script")
     public Response insertDataScript(@Valid @RequestBody DataScript script) {
         this.dataManageService.insertDataScript(script);

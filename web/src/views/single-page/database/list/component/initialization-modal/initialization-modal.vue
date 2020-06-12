@@ -45,7 +45,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'currentUserId'
+      'userId'
     ]),
     webSocketUrl() {
       const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     async initWebSocket() {
-      const broker = `${this.webSocketUrl}/messenger?token=${this.currentUserId}`
+      const broker = `${this.webSocketUrl}/messenger?token=${this.userId}`
       this.websocket = new WebSocket(broker)
       this.websocket.onmessage = this.onMessage
       this.websocket.onopen = this.onOpen

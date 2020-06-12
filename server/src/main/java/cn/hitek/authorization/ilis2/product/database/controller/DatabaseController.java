@@ -6,6 +6,7 @@ import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -71,5 +72,11 @@ public class DatabaseController {
     public Response isDatabaseNameIllegally(@NotBlank(message = RequestConstants.PARAM_ERROR) String name) {
         boolean isIllegal = this.databaseService.isDatabaseNameIllegally(name);
         return new Response().code(HttpStatus.OK).data(isIllegal);
+    }
+
+    @PostMapping("/actions/update/{id}")
+    public Response updateDatabase(@PathVariable String id) {
+        List<UpdateEchoLog> results = this.databaseService.updateDatabase(id);
+        return new Response().code(HttpStatus.OK).data(results);
     }
 }

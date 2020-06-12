@@ -5,11 +5,8 @@ import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.compare.Comparer;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.data.management.domain.StandardDatabase;
 import cn.hitek.authorization.ilis2.product.data.management.domain.meta.MetaData;
 import cn.hitek.authorization.ilis2.product.data.management.mapper.DataScriptMapper;
-import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseDetailMapper;
-import cn.hitek.authorization.ilis2.product.data.management.mapper.StandardDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
@@ -18,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,12 +36,7 @@ import static cn.hitek.authorization.ilis2.product.database.helper.SqlUtil.execu
 @AllArgsConstructor
 public class DataManageServiceImpl implements DataManageService {
 
-    private final static String SOURCE = "source";
-    private final static String TARGET = "target";
-
     private final ConfigService configService;
-    private final StandardDatabaseMapper standardDatabaseMapper;
-    private final StandardDatabaseDetailMapper standardDatabaseDetailMapper;
     private final DataScriptMapper scriptMapper;
 
     @SneakyThrows
@@ -154,16 +147,15 @@ public class DataManageServiceImpl implements DataManageService {
         return metaData;
     }
 
-    @Override
-    public String getConfigStandardDatabase(String configId) {
-        StandardDatabase standardDatabase = this.standardDatabaseMapper.selectOne(
-                Wrappers.lambdaQuery(StandardDatabase.class)
-                        .eq(StandardDatabase::getConfigId, configId));
-        return standardDatabase != null ? standardDatabase.getSchemaName() : null;
-    }
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void insertDataScript(DataScript script) {
         this.scriptMapper.insert(script);
+    }
+
+    @Override
+    public List<DataScript> getScriptRange(Long dataVersion) {
+        dataVersion = dataVersion == null ? 0L : dataVersion;
+        return this.scriptMapper.selectList(Wrappers.lambdaQuery(DataScript.class).gt(DataScript::getId, dataVersion));
     }
 }

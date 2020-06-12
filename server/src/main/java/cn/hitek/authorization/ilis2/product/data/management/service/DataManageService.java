@@ -28,15 +28,15 @@ public interface DataManageService {
     void sync(String mainProfileId, String targetProfileId, String sourceSchema, String targetSchemas);
 
     /**
-     * 根据配置获取标准库schema
-     * @param configId 配置id
-     * @return schema or null
-     */
-    String getConfigStandardDatabase(String configId);
-
-    /**
      * 新增数据库脚本
      * @param script sql
      */
     void insertDataScript(DataScript script);
+
+    /**
+     * 获取当前数据库数据版本到最新版本
+     * @param dataVersion 当前数据库数据库版本
+     * @return 脚本
+     */
+    List<DataScript> getScriptRange(Long dataVersion);
 }

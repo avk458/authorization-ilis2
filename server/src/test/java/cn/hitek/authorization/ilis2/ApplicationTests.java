@@ -9,8 +9,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.crypto.*;
 import javax.sql.DataSource;
@@ -231,36 +235,26 @@ class ApplicationTests {
 
 	@Test
 	public void do8() throws SQLException {
-		String url = "jdbc:mysql://127.0.0.1:3306/auth01?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
+		String url = "jdbc:mysql://127.0.0.1:3306/ilis_local?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false";
 		Connection con = DriverManager.getConnection(url, "root", "123456");
 		Statement statement = con.createStatement();
 		String batchSql = "INSERT INTO `t_s_base_user` VALUES ('297ed4995dd45eb7015dd46f56f90003', null, null, 'd92d5c5c1c6c2b33070537cc1e35d031', 'employee', null, '1', 'demo,普通用户', 'employee', null, '0');\n" +
 				"INSERT INTO `t_s_base_user` VALUES ('297ed4995dd475cd015dd478fa220007', null, null, 'ef50c4f58dab753f', 'zhuguan', null, '1', 'demo,主管', 'zhuguan', null, '0');\n" +
-				"INSERT INTO `t_s_base_user` VALUES ('297ed4995dd475cd015dd479551d000b', null, null, '71d8e4ace4bf7d4f', 'manager', null, '1', 'demo,经理角色', 'manager', null, '0');\n" +
+				"INSERT INTO `t_s_base_user` VALUES ('297ed4995dd475cd015dd478fa220007', null, null, '71d8e4ace4bf7d4f', 'manager', null, '1', 'demo,经理角色', 'manager', null, '0');\n" +
 				"INSERT INTO `t_s_base_user` VALUES ('402880e74d75c4dd014d75d44af30005', null, null, 'deec3ebf23191eee', 'demo', null, '1', 'demo', 'demo', null, '0');\n" +
 				"INSERT INTO `t_s_base_user` VALUES ('402881875988e889015988ec36770001', null, null, 'f68bb6f881b0ebe0', '7777', null, '1', 'demo', '777', null, '1');";
 		DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource(url, "root", "123456");
 		JdbcTemplate template = new JdbcTemplate(driverManagerDataSource);
-		String sql = "CREATE TABLE `t_s_base_user` (\n" +
-				"  `ID` varchar(32) NOT NULL COMMENT 'ID',\n" +
-				"  `activitiSync` smallint(6) DEFAULT NULL COMMENT '同步流程',\n" +
-				"  `browser` varchar(20) DEFAULT NULL COMMENT '浏览器',\n" +
-				"  `password` varchar(100) DEFAULT NULL COMMENT '密码',\n" +
-				"  `realname` varchar(50) DEFAULT NULL COMMENT '真实名字',\n" +
-				"  `signature` blob COMMENT '签名',\n" +
-				"  `status` smallint(6) DEFAULT NULL COMMENT '有效状态',\n" +
-				"  `userkey` varchar(200) DEFAULT NULL COMMENT '用户KEY',\n" +
-				"  `username` varchar(10) NOT NULL COMMENT '用户账号',\n" +
-				"  `departid` varchar(32) DEFAULT NULL COMMENT '部门ID',\n" +
-				"  `delete_flag` smallint(6) DEFAULT NULL COMMENT '删除状态',\n" +
-				"  PRIMARY KEY (`ID`),\n" +
-				"  KEY `FK_15jh1g4iem1857546ggor42et` (`departid`) USING BTREE,\n" +
-				"  KEY `index_login` (`password`,`username`) USING BTREE,\n" +
-				"  KEY `idx_deleteflg` (`delete_flag`) USING BTREE\n" +
-				") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 600064 kB; (`departid`) REFER `jeecg/t_s_depart';";
-		// int[] ints = template.batchUpdate(batchSql.split(";"));
-		// System.out.println(Arrays.toString(ints));
-		template.execute(sql);
+		DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager(driverManagerDataSource);
+		// TransactionStatus status = dataSourceTransactionManager.getTransaction(new DefaultTransactionDefinition());
+		try {
+			template.batchUpdate(batchSql.split(";"));
+			// dataSourceTransactionManager.commit(status);
+		} catch (DataAccessException e) {
+			e.printStackTrace();
+			// dataSourceTransactionManager.rollback(status);
+		}
+
 	}
 
 }

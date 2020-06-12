@@ -71,7 +71,7 @@ export default {
     messageUnreadCount: state => state.messageUnreadList.length,
     messageReadCount: state => state.messageReadList.length,
     messageTrashCount: state => state.messageTrashList.length,
-    currentUserId: state => state.userId
+    userId: state => state.userId
   },
   actions: {
     // 登录

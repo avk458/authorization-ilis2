@@ -2,10 +2,12 @@
   <div>
     <Card dis-hover>
       <Button type="primary" @click="handleModal" disabled>新增数据库</Button>
+      <Divider type="vertical" />
+      <Button type="success" @click="handleScriptModal">提交脚本</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
-          <Button type="info" size="small" style="margin-right: 5px" @click="edit(row)">升级</Button>
+          <Button type="info" size="small" style="margin-right: 5px" @click="update(row)">升级</Button>
           <Button type="success" size="small" style="margin-right: 5px" @click="handleInit(row)" :disabled="row.isInitialized">初始化</Button>
           <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
           <Button type="error" size="small" @click="remove(row)" :disabled="row.isInitialized">删除</Button>
@@ -14,15 +16,19 @@
     </Card>
     <DatabaseModal ref="databaseModal" @on-success-valid="submit"/>
     <InitializationModal ref="initializationModal" @success-init="fetchData"/>
+    <update-echo-log ref="updateEchoLog" :unit-db="unitDb" @success-update="fetchData"/>
+    <script-modal ref="scriptModal"/>
   </div>
 </template>
 <script>
 import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseInfo } from '@/api/unit-database'
 import DatabaseModal from './component/database-modal/'
 import InitializationModal from './component/initialization-modal/'
+import UpdateEchoLog from './component/update-echo-modal'
+import ScriptModal from '@/views/single-page/database/manage/components/script'
 
 export default {
-  components: { DatabaseModal, InitializationModal },
+  components: { DatabaseModal, InitializationModal, UpdateEchoLog, ScriptModal },
   data () {
     return {
       columns: [
@@ -62,7 +68,14 @@ export default {
             ])
           }
         },
-        { title: '数据版本', key: 'version' },
+        {
+          title: '数据版本',
+          key: 'dataVersion',
+          render: (h, p) => {
+            const ver = p.row.dataVersion || 0
+            return h('span', 'V' + ver)
+          }
+        },
         {
           title: '上一次修改人员',
           key: 'createBy',
@@ -75,7 +88,8 @@ export default {
         { title: '操作', slot: 'action', align: 'center', width: 250 }
       ],
       data: [],
-      loading: false
+      loading: false,
+      unitDb: {}
     }
   },
   methods: {
@@ -123,6 +137,13 @@ export default {
     },
     handleInit(val) {
       this.$refs.initializationModal.showModal(val.id)
+    },
+    update(row) {
+      this.$refs.updateEchoLog.showModal()
+      this.unitDb = row
+    },
+    handleScriptModal() {
+      this.$refs.scriptModal.showModal()
     }
   },
   mounted() {

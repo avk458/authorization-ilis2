@@ -51,3 +51,10 @@ export const initUnitDatabase = id => {
     method: 'post'
   })
 }
+
+export const updateDatabase = id => {
+  return axios.request({
+    url: `/database/actions/update/${id}`,
+    method: 'post'
+  })
+}

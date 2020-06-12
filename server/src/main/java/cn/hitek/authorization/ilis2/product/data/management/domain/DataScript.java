@@ -31,6 +31,8 @@ public class DataScript {
     @NotBlank(message = "数据库脚本不能为空")
     private String script;
 
+    private String remark;
+
     public enum Type {
         /**
          * dml

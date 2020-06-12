@@ -5,8 +5,13 @@ import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
+import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
+import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
+import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
+import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
+import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporters;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
@@ -14,8 +19,6 @@ import cn.hitek.authorization.ilis2.product.database.helper.LogType;
 import cn.hitek.authorization.ilis2.product.database.manager.Messenger;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
-import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
-import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.service.InitFileService;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
@@ -25,18 +28,22 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.ResourceUtils;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -49,6 +56,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     private final InitFileService initFileService;
     private final ConfigService configService;
+    private final DataManageService manageService;
 
     @SneakyThrows
     @Override
@@ -112,7 +120,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             Statement statement = connection.createStatement();
             statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
             // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
-            statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema +".* " + "TO " + user);
+            statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema + ".* " + "TO " + user);
             statement.execute("FLUSH PRIVILEGES ");
             statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
         } finally {
@@ -257,5 +265,65 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         ud.setTargetProfileId(targetProfile.getId());
         save(ud);
         return ud.getId();
+    }
+
+    @Override
+    public List<UpdateEchoLog> updateDatabase(String id) {
+        UnitDatabase database = getById(id);
+        DataSource dataSource = initTargetDataSource(database);
+        JdbcTemplate template = new JdbcTemplate(dataSource);
+        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
+        ArrayList<UpdateEchoLog> results = new ArrayList<>(0);
+        List<DataScript> scripts = this.manageService.getScriptRange(database.getDataVersion());
+        for (DataScript script : scripts) {
+            UpdateEchoLog execute = executeScript(manager, template, script.getScript(), script.getType());
+            results.add(execute);
+            if (!execute.getSuccess()) {
+                break;
+            }
+            database.setDataVersion(script.getId());
+        }
+        super.updateById(database);
+        return results;
+    }
+
+    private DataSource initTargetDataSource(UnitDatabase database) {
+        TargetSourceProfile profile = this.configService.getTargetProfileViaId(database.getTargetProfileId());
+        return new DriverManagerDataSource(
+                ConnectionHandler.getTargetPath(database),
+                profile.getUsername(),
+                EncryptUtils.decrypt(profile.getPassword()));
+    }
+
+    private UpdateEchoLog executeScript(DataSourceTransactionManager manager,
+                                        JdbcTemplate template,
+                                        String script,
+                                        DataScript.Type type) {
+        UpdateEchoLog log = new UpdateEchoLog(script);
+        TransactionStatus status = null;
+        try {
+            switch (type) {
+                case DDL:
+                    template.execute(script);
+                    log.setSuccess(Boolean.TRUE);
+                    break;
+                case DML:
+                    status = manager.getTransaction(new DefaultTransactionDefinition());
+                    template.batchUpdate(script.split(";"));
+                    log.setSuccess(Boolean.TRUE);
+                    manager.commit(status);
+                    break;
+                default:
+            }
+        } catch (DataAccessException e) {
+            log.setSuccess(Boolean.FALSE);
+            e.printStackTrace();
+            SQLException se = (SQLException) e.getCause();
+            log.setMsg(se.getMessage());
+            if (status != null) {
+                manager.rollback(status);
+            }
+        }
+        return log;
     }
 }

@@ -49,6 +49,15 @@ public class ConnectionHandler {
         return DriverManager.getConnection(path, config.getUsername(), config.getDecryptPassword());
     }
 
+    public static String getTargetPath(UnitDatabase unitDatabase) {
+        DatabasePathLinear linear = DatabasePathLinear.getInstance();
+        return linear.setHost(unitDatabase.getHost())
+                .setPort(unitDatabase.getPort())
+                .setSchema(unitDatabase.getDatabaseName())
+                .setParams(Constant.PARAMS)
+                .getPath();
+    }
+
     private static class DatabasePathLinear {
 
         private static DatabasePathLinear instance;
