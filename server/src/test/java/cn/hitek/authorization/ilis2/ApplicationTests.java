@@ -1,11 +1,7 @@
 package cn.hitek.authorization.ilis2;
 
-import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
-import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
-import cn.hitek.authorization.ilis2.product.data.management.mapper.DataScriptMapper;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,15 +9,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import javax.crypto.*;
-import javax.sql.DataSource;
 import java.io.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;

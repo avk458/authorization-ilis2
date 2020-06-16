@@ -8,8 +8,8 @@ import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
-import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
-import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
+import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
+import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
@@ -56,7 +56,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     private final InitFileService initFileService;
     private final ConfigService configService;
-    private final DataManageService manageService;
+    private final DataScriptService scriptService;
 
     @SneakyThrows
     @Override
@@ -274,7 +274,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         JdbcTemplate template = new JdbcTemplate(dataSource);
         DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
         ArrayList<UpdateEchoLog> results = new ArrayList<>(0);
-        List<DataScript> scripts = this.manageService.getScriptRange(database.getDataVersion());
+        List<DataScript> scripts = this.scriptService.getScriptRange(database.getDataVersion());
         for (DataScript script : scripts) {
             UpdateEchoLog execute = executeScript(manager, template, script.getScript(), script.getType());
             results.add(execute);

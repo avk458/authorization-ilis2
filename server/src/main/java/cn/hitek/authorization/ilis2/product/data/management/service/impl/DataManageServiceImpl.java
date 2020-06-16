@@ -3,19 +3,15 @@ package cn.hitek.authorization.ilis2.product.data.management.service.impl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.compare.Comparer;
-import cn.hitek.authorization.ilis2.product.data.management.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.management.domain.DatabaseInfo;
 import cn.hitek.authorization.ilis2.product.data.management.domain.meta.MetaData;
-import cn.hitek.authorization.ilis2.product.data.management.mapper.DataScriptMapper;
 import cn.hitek.authorization.ilis2.product.data.management.service.DataManageService;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -37,7 +33,6 @@ import static cn.hitek.authorization.ilis2.product.database.helper.SqlUtil.execu
 public class DataManageServiceImpl implements DataManageService {
 
     private final ConfigService configService;
-    private final DataScriptMapper scriptMapper;
 
     @SneakyThrows
     @Override
@@ -147,15 +142,4 @@ public class DataManageServiceImpl implements DataManageService {
         return metaData;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void insertDataScript(DataScript script) {
-        this.scriptMapper.insert(script);
-    }
-
-    @Override
-    public List<DataScript> getScriptRange(Long dataVersion) {
-        dataVersion = dataVersion == null ? 0L : dataVersion;
-        return this.scriptMapper.selectList(Wrappers.lambdaQuery(DataScript.class).gt(DataScript::getId, dataVersion));
-    }
 }

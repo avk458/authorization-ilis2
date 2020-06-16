@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.data.management.domain;
+package cn.hitek.authorization.ilis2.product.data.script.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
@@ -23,7 +23,19 @@ public class DataScript {
     private String createBy;
 
     @TableField(fill = FieldFill.INSERT)
+    private String createName;
+
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.UPDATE)
+    private String updateBy;
+
+    @TableField(fill = FieldFill.UPDATE)
+    private String updateName;
+
+    @TableField(fill = FieldFill.UPDATE)
+    private LocalDateTime updateTime;
 
     @TableField(jdbcType = JdbcType.VARCHAR)
     private Type type;
@@ -32,6 +44,10 @@ public class DataScript {
     private String script;
 
     private String remark;
+
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT, select = false)
+    private Boolean isDeleted;
 
     public enum Type {
         /**

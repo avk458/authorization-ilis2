@@ -19,19 +19,19 @@ import java.util.List;
 public class MySqlDumper implements Exporter {
 
     @Override
-    public InitFile export(MainSourceProfile config) throws Exception {
+    public InitFile export(MainSourceProfile profile) throws Exception {
         long millis = System.currentTimeMillis();
-        List<String> command = commandBuilder(config);
+        List<String> command = commandBuilder(profile);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
-        String sqlFilePath = getCurrentWorkDirectory(InitFile.SQL_FILE, millis, config.getPath());
-        String errorLogPath = getCurrentWorkDirectory(InitFile.LOG_FILE, millis, config.getPath());
+        String sqlFilePath = getCurrentWorkDirectory(InitFile.SQL_FILE, millis, profile.getPath());
+        String errorLogPath = getCurrentWorkDirectory(InitFile.LOG_FILE, millis, profile.getPath());
         File sqlFile = new File(sqlFilePath);
         File error = new File(errorLogPath);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(sqlFile));
         processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(error));
         Process process = processBuilder.start();
         process.waitFor();
-        return createInitFile(config, sqlFilePath, errorLogPath);
+        return createInitFile(profile, sqlFilePath, errorLogPath);
     }
 
     @Override

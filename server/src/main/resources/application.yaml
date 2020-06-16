@@ -12,6 +12,8 @@ server:
 # do not change those config, unless you know what are u doing.
 spring:
   datasource:
+    host: 127.0.0.1
+    port: 3306
     url: jdbc:p6spy:mysql://127.0.0.1:3306/auth01?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
     username: root
     password: 123456

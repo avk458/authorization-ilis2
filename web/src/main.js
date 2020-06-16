@@ -5,9 +5,11 @@ import store from './store'
 import ViewUI from 'view-design'
 import 'view-design/dist/styles/iview.css'
 import config from '@/config'
+import axios from 'axios'
 
 // register custom config
 Vue.prototype.$config = config
+Vue.prototype.$axios = axios
 Vue.config.productionTip = false
 Vue.use(ViewUI)
 new Vue({

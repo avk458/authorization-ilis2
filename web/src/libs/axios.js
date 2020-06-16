@@ -35,7 +35,7 @@ class HttpRequest {
     return {
       baseURL: this.baseUrl,
       headers: {
-        Authorization: 'Bearer' + token
+        Authorization: 'Bearer ' + token
       }
     }
   }

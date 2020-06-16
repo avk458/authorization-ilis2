@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.hitek.authorization.ilis2.product.data.management.mapper.DataScriptMapper">
+<mapper namespace="cn.hitek.authorization.ilis2.product.data.script.mapper.DataScriptMapper">
 
     <select id="getLastId" resultType="long">
         SELECT MAX(id) FROM t_data_script

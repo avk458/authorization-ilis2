@@ -1,5 +1,5 @@
 <template>
-  <Modal title="数据库脚本" v-model="scriptVisible" :closable="false" width="60">
+  <Modal title="数据库脚本" v-model="scriptVisible" :closable="false" :mask-closable="false" width="60">
     <Alert slot="header" type="warning" show-icon :closable="false">
       注意
       <template slot="desc">
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { postScript } from '@/api/data'
+import { postScript, updateScript } from '@/api/script'
 
 export default {
   name: 'standard-database',
@@ -44,13 +44,19 @@ export default {
     return {
       scriptVisible: false,
       sql: '',
-      remark: ''
+      remark: '',
+      id: ''
     }
   },
   methods: {
     async fetchData() {
     },
-    showModal() {
+    showModal(data) {
+      if (data) {
+        this.remark = data.remark
+        this.sql = data.script
+        this.id = data.id
+      }
       this.scriptVisible = true
     },
     async handelSubmit() {
@@ -68,12 +74,21 @@ export default {
       }
     },
     async submit(data) {
-      const res = await postScript(data)
-      this.$Message.success(res.message)
+      if (data.id) {
+        updateScript(data).then(res => {
+          this.$Message.success(res.message)
+          this.$emit('success-submit')
+        })
+      } else {
+        const res = await postScript(data)
+        this.$Message.success(res.message)
+        this.$emit('success-submit')
+      }
     },
     handelClose() {
       this.scriptVisible = false
       this.sql = ''
+      this.remark = ''
     },
     handelPostData() {
       if (!this.sql) {
@@ -110,6 +125,7 @@ export default {
         this.remark = ''
       }
       return {
+        id: this.id,
         script: this.sql,
         type: type,
         remark: remarkCache || null

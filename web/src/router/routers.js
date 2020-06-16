@@ -60,7 +60,7 @@ export default [
           icon: 'md-notifications',
           title: '消息中心'
         },
-        component: () => import('@/views/single-page/message/index.vue')
+        component: () => import('@/views/single-page/system/message/index.vue')
       }
     ]
   },
@@ -90,7 +90,7 @@ export default [
     component: Main,
     meta: {
       icon: 'md-people',
-      title: '用户',
+      title: '单位用户',
       hideInBread: true
     },
     children: [
@@ -102,7 +102,7 @@ export default [
           access: ['admin'],
           title: '用户管理'
         },
-        component: () => import('@/views/single-page/customer/Customer.vue')
+        component: () => import('@/views/single-page/system/customer/Customer.vue')
       },
       {
         path: '/customer/list2',
@@ -112,7 +112,7 @@ export default [
           // access: ['admin'],
           title: '用户管理2'
         },
-        component: () => import('@/views/single-page/customer/Customer.vue')
+        component: () => import('@/views/single-page/system/customer/Customer.vue')
       }
     ]
   },
@@ -145,6 +145,16 @@ export default [
           title: '单位数据管理'
         },
         component: () => import('@/views/single-page/database/manage/DatabaseManage.vue')
+      },
+      {
+        path: '/database/script',
+        name: 'database_script',
+        meta: {
+          icon: 'md-document',
+          access: ['admin'],
+          title: '数据脚本管理'
+        },
+        component: () => import('@/views/single-page/database/script/ScriptManage.vue')
       }
     ]
   },
@@ -166,7 +176,7 @@ export default [
           access: ['admin'],
           title: '数据源配置管理'
         },
-        component: () => import('@/views/single-page/configuration/ProfilesManage.vue')
+        component: () => import('@/views/single-page/system/configuration/ProfilesManage.vue')
       },
       {
         path: '/database/init-file',
@@ -176,7 +186,7 @@ export default [
           access: ['admin'],
           title: '初始化文件管理'
         },
-        component: () => import('@/views/single-page/database/init-file/InitFileManage.vue')
+        component: () => import('@/views/single-page/system/init-file/InitFileManage.vue')
       },
       {
         path: '/database/standard_database',
@@ -186,7 +196,7 @@ export default [
           access: ['admin'],
           title: '标准库维护'
         },
-        component: () => import('@/views/single-page/database/manage/components/script/script-modal.vue')
+        component: () => import('@/views/single-page/database/script/components/script/script-modal.vue')
       }
     ]
   },

@@ -25,7 +25,7 @@ import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseIn
 import DatabaseModal from './component/database-modal/'
 import InitializationModal from './component/initialization-modal/'
 import UpdateEchoLog from './component/update-echo-modal'
-import ScriptModal from '@/views/single-page/database/manage/components/script'
+import ScriptModal from '@/views/single-page/database/script/components/script'
 
 export default {
   components: { DatabaseModal, InitializationModal, UpdateEchoLog, ScriptModal },
@@ -73,7 +73,7 @@ export default {
           key: 'dataVersion',
           render: (h, p) => {
             const ver = p.row.dataVersion || 0
-            return h('span', 'V' + ver)
+            return h('span', 'v' + ver)
           }
         },
         {
@@ -104,8 +104,7 @@ export default {
       this.$refs.databaseModal.showModal()
     },
     edit(row) {
-      const data = {}
-      Object.assign(data, row)
+      const data = { ...row }
       this.$refs.databaseModal.showModal(data)
     },
     async remove(val) {
