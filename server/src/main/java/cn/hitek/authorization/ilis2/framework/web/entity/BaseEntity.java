@@ -37,6 +37,12 @@ public class BaseEntity {
     private String createBy;
 
     /**
+     * 创建人姓名
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private String createName;
+
+    /**
      * 修改日期
      */
     @TableField(fill = FieldFill.UPDATE)
@@ -47,4 +53,10 @@ public class BaseEntity {
      */
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
+
+    /**
+     * 修改人姓名
+     */
+    @TableField(fill = FieldFill.UPDATE)
+    private String updateName;
 }

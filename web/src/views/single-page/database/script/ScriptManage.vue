@@ -90,5 +90,8 @@ export default {
 </script>
 
 <style scoped>
-
+  .pagination{
+    margin-top: 20px;
+    text-align: right;
+  }
 </style>

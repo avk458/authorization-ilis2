@@ -14,7 +14,7 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class ExecutorConfig {
 
-    @Bean("dataMangeExecutor")
+    @Bean("dataManageExecutor")
     public Executor databaseInfoExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(9);

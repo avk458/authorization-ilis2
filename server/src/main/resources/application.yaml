@@ -25,10 +25,10 @@ spring:
       idle-timeout: 60000
       connection-timeout: 20000
       minimum-idle: 1
-#    redis:
-#      port: 6379
-#      host: 127.0.0.1
-#      password:123456
+  redis:
+    port: 6379
+    host: 127.0.0.1
+    password:
   aop:
     auto: true
     proxy-target-class: true
@@ -38,6 +38,11 @@ spring:
       max-request-size:  20MB
   profiles:
     active: dev
+  security:
+    auth0:
+      public-key: 'ilis2.authorization.dlfjgdkfg832423j4.s.df98sdf'
+      # minutes
+      expires-at: 120
 
 mybatis-plus:
   configuration:
@@ -63,4 +68,3 @@ mybatis-plus:
   type-enums-package: cn.hitek.authorization.ilis2.common.enums
   type-aliases-package:
   type-handlers-package:
-

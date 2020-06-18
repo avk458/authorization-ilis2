@@ -1,7 +1,9 @@
 package cn.hitek.authorization.ilis2.common.mybatisplus;
 
+import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 
@@ -37,27 +39,24 @@ public class CommonMetaDataHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         strictInsertFill(metaObject, CREATE_TIME, LocalDateTime.class, LocalDateTime.now());
         strictInsertFill(metaObject, UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
-        strictInsertFill(metaObject, CREATE_BY, String.class, CurrentUserProvider.getCurrentUser());
-        strictInsertFill(metaObject, CREATE_NAME, String.class, CurrentUserProvider.getCurrentUserName());
-        strictInsertFill(metaObject, UPDATE_BY, String.class, CurrentUserProvider.getCurrentUser());
-        strictInsertFill(metaObject, UPDATE_NAME, String.class, CurrentUserProvider.getCurrentUserName());
+        strictInsertFill(metaObject, CREATE_BY, String.class, CurrentUserProvider.getCurrentUser().getUsername());
+        strictInsertFill(metaObject, CREATE_NAME, String.class, CurrentUserProvider.getCurrentUser().getRealName());
+        strictInsertFill(metaObject, UPDATE_BY, String.class, CurrentUserProvider.getCurrentUser().getUsername());
+        strictInsertFill(metaObject, UPDATE_NAME, String.class, CurrentUserProvider.getCurrentUser().getRealName());
         strictInsertFill(metaObject, DELETED, Boolean.class, Boolean.FALSE);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        strictUpdateFill(metaObject, UPDATE_BY, String.class, CurrentUserProvider.getCurrentUser());
-        strictUpdateFill(metaObject, UPDATE_NAME, String.class, CurrentUserProvider.getCurrentUserName());
+        strictUpdateFill(metaObject, UPDATE_BY, String.class, CurrentUserProvider.getCurrentUser().getUsername());
+        strictUpdateFill(metaObject, UPDATE_NAME, String.class, CurrentUserProvider.getCurrentUser().getRealName());
         strictUpdateFill(metaObject, UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
     }
 
     public static class CurrentUserProvider {
 
-        public static String getCurrentUser() {
-            return "admin";
-        }
-        public static String getCurrentUserName() {
-            return "管理员";
+        public static UserDetail getCurrentUser() {
+            return  (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         }
     }
 }

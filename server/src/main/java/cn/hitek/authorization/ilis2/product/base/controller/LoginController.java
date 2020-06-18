@@ -2,27 +2,33 @@ package cn.hitek.authorization.ilis2.product.base.controller;
 
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import cn.hitek.authorization.ilis2.framework.web.controller.BaseController;
+import cn.hitek.authorization.ilis2.product.base.domain.User;
+import cn.hitek.authorization.ilis2.product.base.service.UserService;
+import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author kano
  */
 @RestController
-public class LoginController {
+@RequestMapping("user")
+@AllArgsConstructor
+public class LoginController extends BaseController {
 
-    @PostMapping("user/login")
-    public Response login() {
-        Map<String, String> token = new HashMap<>(0);
-        token.put("token", "admin");
-        return new Response().code(HttpStatus.OK).data(token);
+    private final UserService userService;
+
+    @PostMapping("/login")
+    public Response login(@RequestBody User loginUser) {
+        String token = this.userService.handleLogin(loginUser);
+        return result(HttpStatus.OK, token);
     }
 
-    @GetMapping("user/info")
+    @PreAuthorize("hasAuthority('user:info')")
+    @GetMapping("/info")
     public Response getUserInfo() {
         HashMap<String, Object> result = new HashMap<>(0);
         result.put("name:", "super_admin");
@@ -38,7 +44,7 @@ public class LoginController {
         return new Response().code(HttpStatus.OK).data(3);
     }
 
-    @PostMapping("user/logout")
+    @PostMapping("/logout")
     public Response logout() {
         return new Response().code(HttpStatus.OK);
     }
