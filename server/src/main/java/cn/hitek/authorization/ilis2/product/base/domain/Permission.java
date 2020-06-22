@@ -17,5 +17,5 @@ public class Permission extends BaseEntity implements GrantedAuthority {
     private static final long serialVersionUID = -3228742050105342067L;
     @NonNull
     private String authority;
-    private String desc;
+    private String description;
 }

@@ -51,7 +51,7 @@ export default {
     const usernameValidator = async (rule, value, callback) => {
       if (!value || value.length < 4) {
         callback(new Error('用户名不能少于4位'))
-      } else if (await this.validateUsername(value)) {
+      } else if (!this.isEdit && await this.validateUsername(value)) {
         callback(new Error('检测到有重复用户名，请重新输入'))
       } else {
         callback()

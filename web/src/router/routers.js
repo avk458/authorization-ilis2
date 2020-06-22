@@ -199,24 +199,24 @@ export default [
         component: () => import('@/views/single-page/system/user/UserManage.vue')
       },
       {
-        path: '/user-manage',
-        name: 'user_manage',
+        path: '/role-manage',
+        name: 'role_manage',
         meta: {
           icon: 'md-person-add',
           access: ['ROLE_ADMIN'],
           title: '角色管理'
         },
-        component: () => import('@/views/single-page/system/user/UserManage.vue')
+        component: () => import('@/views/single-page/system/role/RoleManage.vue')
       },
       {
-        path: '/user-manage',
-        name: 'user_manage',
+        path: '/menu-manage',
+        name: 'menu_manage',
         meta: {
           icon: 'md-apps',
           access: ['ROLE_ADMIN'],
           title: '菜单管理'
         },
-        component: () => import('@/views/single-page/system/user/UserManage.vue')
+        component: () => import('@/views/single-page/system/menus/MenuManage.vue')
       }
     ]
   },

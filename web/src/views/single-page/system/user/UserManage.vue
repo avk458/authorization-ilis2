@@ -75,7 +75,7 @@ export default {
       getUsers().then(res => {
         this.loading = false
         this.data = res.data
-      }).catch(err => {
+      }).catch(() => {
         this.$Message.error('获取用户列表失败')
         this.loading = false
       })
