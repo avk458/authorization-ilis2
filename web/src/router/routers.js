@@ -84,38 +84,38 @@ export default [
       }
     ]
   },
-  // {
-  //   path: '/customer',
-  //   name: 'customer',
-  //   component: Main,
-  //   meta: {
-  //     icon: 'md-people',
-  //     title: '单位用户',
-  //     hideInBread: true
-  //   },
-  //   children: [
-  //     {
-  //       path: '/customer/list',
-  //       name: 'customer_list',
-  //       meta: {
-  //         icon: 'md-people',
-  //         access: ['ROLE_ADMIN'],
-  //         title: '用户管理'
-  //       },
-  //       component: () => import('@/views/single-page/system/customer/Customer.vue')
-  //     },
-  //     {
-  //       path: '/customer/list2',
-  //       name: 'customer_list2',
-  //       meta: {
-  //         icon: 'md-people',
-  //         // access: ['ROLE_ADMIN'],
-  //         title: '用户管理2'
-  //       },
-  //       component: () => import('@/views/single-page/system/customer/Customer.vue')
-  //     }
-  //   ]
-  // },
+  {
+    path: '/customer',
+    name: 'customer',
+    component: Main,
+    meta: {
+      icon: 'md-people',
+      title: '单位用户',
+      hideInBread: true
+    },
+    children: [
+      {
+        path: '/customer/list',
+        name: 'customer_list',
+        meta: {
+          icon: 'md-people',
+          access: ['ROLE_ADMIN'],
+          title: '用户管理'
+        },
+        component: () => import('@/views/single-page/customer/Customer.vue')
+      },
+      {
+        path: '/customer/list2',
+        name: 'customer_list2',
+        meta: {
+          icon: 'md-people',
+          // access: ['ROLE_ADMIN'],
+          title: '用户管理2'
+        },
+        component: () => import('@/views/single-page/customer/Customer.vue')
+      }
+    ]
+  },
   {
     path: '/database',
     name: 'database',
@@ -196,7 +196,7 @@ export default [
           access: ['ROLE_ADMIN'],
           title: '标准库维护'
         },
-        component: () => import('@/views/single-page/database/script/components/script/script-modal.vue')
+        component: () => import('@/views/single-page/system/init-file/InitFileManage.vue')
       }
     ]
   },

@@ -2,7 +2,6 @@ import Cookies from 'js-cookie'
 import config from '@/config'
 
 import { forEach, hasOneOf, objEqual } from '@/libs/tools'
-import Main from '@@/main'
 
 const { title, cookieExpires, useI18n } = config
 
@@ -184,19 +183,20 @@ export const canTurnTo = (name, access, routes) => {
   return routePermissionJudge(routes)
 }
 
-export const parseRouters = (list) => {
-  const routers = []
-  list.forEach(r => {
-    const re = { ...r }
-    // re.component = () => r.component === 'Layout' ? () => import('@/components/main') : () => import('@/views/single-page/customer')
-    re.component = () => r.component === 'Layout' ? require('@/components/main/main.vue').default : require('@/views/single-page/customer/Customer.vue').default
-    if (r.children && r.children.length > 0) {
-      re.children = parseRouters(r.children)
-    }
-    routers.push(re)
-  })
-  return routers
-}
+// export const parseRouters = (list) => {
+//   const routers = []
+//   list.forEach(r => {
+//     const re = { ...r }
+//     re.component = () => r.component === 'Layout' ? () => import('@/components/main') : () => import('@/views/single-page/customer/Customer.vue')
+//     // re.component = () => r.component === 'Layout' ? require('@/components/main/main.vue').default : require('@/views/single-page/customer/Customer.vue').default
+//     // re.component = resolve => r.component === 'Layout' ? require(['@/layout'], resolve) : require([`@/views/${r.component}`], resolve)
+//     if (r.children && r.children.length > 0) {
+//       re.children = parseRouters(r.children)
+//     }
+//     routers.push(re)
+//   })
+//   return routers
+// }
 
 /**
  * @param {String} url

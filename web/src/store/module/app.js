@@ -12,6 +12,7 @@ import {
   localRead
 } from '@/libs/util'
 import router from '@/router'
+import routers from '@/router/routers'
 import config from '@/config'
 const { homeName } = config
 
@@ -33,7 +34,7 @@ export default {
     hasReadErrorPage: false
   },
   getters: {
-    menuList: (state, getters, rootState) => getMenuByRouter(rootState.user.routers, rootState.user.access),
+    menuList: (state, getters, rootState) => getMenuByRouter(routers, rootState.user.access),
     errorCount: state => state.errorList.length
   },
   mutations: {

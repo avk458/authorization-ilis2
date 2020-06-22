@@ -66,7 +66,7 @@ public class LoginController {
         Router router1 = new Router();
         router1.setPath("/customer/list");
         router1.setName("customer_list");
-        router1.setComponent("system/customer/Customer.vue");
+        router1.setComponent("customer/Customer.vue");
         RouterMeta meta1 = new RouterMeta();
         meta1.setTitle("用户管理");
         meta1.setIcon("md-people");
@@ -75,7 +75,7 @@ public class LoginController {
         Router router2 = new Router();
         router2.setPath("/customer/list1");
         router2.setName("customer_list1");
-        router2.setComponent("system/customer/Customer.vue");
+        router2.setComponent("customer/Customer.vue");
         RouterMeta meta2 = new RouterMeta();
         meta2.setTitle("用户管理1");
         meta2.setIcon("md-people");
