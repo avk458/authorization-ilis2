@@ -159,8 +159,8 @@ export default [
     ]
   },
   {
-    path: '/system-config',
-    name: 'system-config',
+    path: '/system',
+    name: 'system',
     component: Main,
     meta: {
       hideInBread: true,
@@ -169,8 +169,8 @@ export default [
     },
     children: [
       {
-        path: '/database/config',
-        name: 'database_init_config',
+        path: '/source/config',
+        name: 'source_config',
         meta: {
           icon: 'ios-cloud',
           access: ['ROLE_ADMIN'],
@@ -179,8 +179,8 @@ export default [
         component: () => import('@/views/single-page/system/configuration/ProfilesManage.vue')
       },
       {
-        path: '/database/init-file',
-        name: 'database_init_file',
+        path: '/init-file',
+        name: 'init_file',
         meta: {
           icon: 'md-albums',
           access: ['ROLE_ADMIN'],
@@ -189,14 +189,34 @@ export default [
         component: () => import('@/views/single-page/system/init-file/InitFileManage.vue')
       },
       {
-        path: '/database/standard_database',
-        name: 'database_standard_database',
+        path: '/user-manage',
+        name: 'user_manage',
         meta: {
-          icon: 'md-cloud-circle',
+          icon: 'md-body',
           access: ['ROLE_ADMIN'],
-          title: '标准库维护'
+          title: '系统用户'
         },
-        component: () => import('@/views/single-page/system/init-file/InitFileManage.vue')
+        component: () => import('@/views/single-page/system/user/UserManage.vue')
+      },
+      {
+        path: '/user-manage',
+        name: 'user_manage',
+        meta: {
+          icon: 'md-person-add',
+          access: ['ROLE_ADMIN'],
+          title: '角色管理'
+        },
+        component: () => import('@/views/single-page/system/user/UserManage.vue')
+      },
+      {
+        path: '/user-manage',
+        name: 'user_manage',
+        meta: {
+          icon: 'md-apps',
+          access: ['ROLE_ADMIN'],
+          title: '菜单管理'
+        },
+        component: () => import('@/views/single-page/system/user/UserManage.vue')
       }
     ]
   },

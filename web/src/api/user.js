@@ -6,7 +6,7 @@ export const login = ({ username, password }) => {
     password
   }
   return axios.request({
-    url: '/user/login',
+    url: '/auth/login',
     data,
     method: 'post'
   })
@@ -31,7 +31,7 @@ export const getRouters = (userId) => {
 
 export const logout = (token) => {
   return axios.request({
-    url: '/user/logout',
+    url: '/auth/logout',
     method: 'post'
   })
 }
@@ -80,6 +80,56 @@ export const restoreTrash = msgId => {
     method: 'post',
     data: {
       msgId
+    }
+  })
+}
+
+export const addUser = data => {
+  return axios.request({
+    url: '/user',
+    method: 'post',
+    data: data
+  })
+}
+
+export const updateUser = data => {
+  return axios.request({
+    url: '/user',
+    method: 'put',
+    data: data
+  })
+}
+
+export const deleteUser = userId => {
+  return axios.request({
+    url: `/user/${userId}`,
+    method: 'delete'
+  })
+}
+
+export const getUsers = () => {
+  return axios.request({
+    url: '/user/list',
+    method: 'get'
+  })
+}
+
+export const updateStatus = userId => {
+  return axios.request({
+    url: '/user/actions/update-active-state',
+    method: 'post',
+    params: {
+      userId: userId
+    }
+  })
+}
+
+export const validateUsername = username => {
+  return axios.request({
+    url: '/user/actions/validate-username',
+    method: 'post',
+    params: {
+      username: username
     }
   })
 }

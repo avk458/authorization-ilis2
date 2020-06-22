@@ -5,6 +5,8 @@ import cn.hitek.authorization.ilis2.product.base.domain.User;
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.base.domain.dto.UserInfo;
 
+import java.util.List;
+
 /**
  * @author chenlm
  */
@@ -36,4 +38,23 @@ public interface UserService extends BaseService<User> {
      * @param header 请求头
      */
     void handleLogout(String header);
+
+    /**
+     * 获取用户列表
+     * @return 用户列表
+     */
+    List<User> getUsers();
+
+    /**
+     * 验证新增用户时，用户名是否合法/重复
+     * @param username 用户输入的用户名
+     * @return 验证结果
+     */
+    boolean validateUsername(String username);
+
+    /**
+     * 设置用户启用状态
+     * @param userId 用户id
+     */
+    void updateActiveStatus(String userId);
 }

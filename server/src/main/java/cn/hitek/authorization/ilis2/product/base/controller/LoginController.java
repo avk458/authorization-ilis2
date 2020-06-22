@@ -5,11 +5,9 @@ import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
 import cn.hitek.authorization.ilis2.product.base.domain.dto.Router;
 import cn.hitek.authorization.ilis2.product.base.domain.dto.RouterMeta;
-import cn.hitek.authorization.ilis2.product.base.domain.dto.UserInfo;
 import cn.hitek.authorization.ilis2.product.base.service.UserService;
 import cn.hutool.http.Header;
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +18,7 @@ import java.util.Collections;
  * @author kano
  */
 @RestController
-@RequestMapping("user")
+@RequestMapping("auth")
 @AllArgsConstructor
 public class LoginController {
 
@@ -30,14 +28,6 @@ public class LoginController {
     public Response login(@RequestBody User loginUser) {
         String token = this.userService.handleLogin(loginUser);
         return new Response().code(HttpStatus.OK).data(token);
-    }
-
-    @PreAuthorize("hasAuthority('user:info')")
-    @GetMapping("/info")
-    public Response getUserInfo(HttpServletRequest request) {
-        String header = request.getHeader(Header.AUTHORIZATION.getValue());
-        UserInfo info = this.userService.getUserInfo(header);
-        return new Response().code(HttpStatus.OK).data(info);
     }
 
     @GetMapping("/message/count")

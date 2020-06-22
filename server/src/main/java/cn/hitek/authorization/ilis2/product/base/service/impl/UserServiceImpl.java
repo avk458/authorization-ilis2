@@ -19,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author chenlm
  */
@@ -77,5 +79,22 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     public void handleLogout(String header) {
         UserDetail userDetail = verify(header);
         tokenStorage().delete(userDetail.getUsername());
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return query().list();
+    }
+
+    @Override
+    public boolean validateUsername(String username) {
+        return query().eq(User::getUsername, username).exist();
+    }
+
+    @Override
+    public void updateActiveStatus(String userId) {
+        User user = getById(userId);
+        user.setActive(!user.getActive());
+        super.updateById(user);
     }
 }
