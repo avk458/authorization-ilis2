@@ -2,14 +2,19 @@ package cn.hitek.authorization.ilis2.product.base.controller;
 
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
-import cn.hitek.authorization.ilis2.framework.web.controller.BaseController;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
+import cn.hitek.authorization.ilis2.product.base.domain.dto.Router;
+import cn.hitek.authorization.ilis2.product.base.domain.dto.RouterMeta;
+import cn.hitek.authorization.ilis2.product.base.domain.dto.UserInfo;
 import cn.hitek.authorization.ilis2.product.base.service.UserService;
+import cn.hutool.http.Header;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author kano
@@ -17,26 +22,22 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("user")
 @AllArgsConstructor
-public class LoginController extends BaseController {
+public class LoginController {
 
     private final UserService userService;
 
     @PostMapping("/login")
     public Response login(@RequestBody User loginUser) {
         String token = this.userService.handleLogin(loginUser);
-        return result(HttpStatus.OK, token);
+        return new Response().code(HttpStatus.OK).data(token);
     }
 
     @PreAuthorize("hasAuthority('user:info')")
     @GetMapping("/info")
-    public Response getUserInfo() {
-        HashMap<String, Object> result = new HashMap<>(0);
-        result.put("name:", "super_admin");
-        result.put("userId", "123123");
-        result.put("access", new String[]{"super_admin", "admin"});
-        result.put("token", "super_admin");
-        result.put("avatar", "https://i.loli.net/2020/05/13/dzGrXugK6pCqncN.png");
-        return new Response().code(HttpStatus.OK).data(result);
+    public Response getUserInfo(HttpServletRequest request) {
+        String header = request.getHeader(Header.AUTHORIZATION.getValue());
+        UserInfo info = this.userService.getUserInfo(header);
+        return new Response().code(HttpStatus.OK).data(info);
     }
 
     @GetMapping("/message/count")
@@ -45,7 +46,42 @@ public class LoginController extends BaseController {
     }
 
     @PostMapping("/logout")
-    public Response logout() {
+    public Response logout(HttpServletRequest request) {
+        String header = request.getHeader(Header.AUTHORIZATION.getValue());
+        this.userService.handleLogout(header);
         return new Response().code(HttpStatus.OK);
+    }
+
+    @GetMapping("/routers")
+    public Response getRouters(String userId) {
+        Router router = new Router();
+        router.setPath("/customer");
+        router.setName("customer");
+        router.setComponent("Layout");
+        RouterMeta meta = new RouterMeta();
+        meta.setTitle("单位用户");
+        meta.setIcon("md-people");
+        meta.setHideInBread(true);
+        router.setMeta(meta);
+        Router router1 = new Router();
+        router1.setPath("/customer/list");
+        router1.setName("customer_list");
+        router1.setComponent("system/customer/Customer.vue");
+        RouterMeta meta1 = new RouterMeta();
+        meta1.setTitle("用户管理");
+        meta1.setIcon("md-people");
+        meta1.setAccess(Collections.singletonList("ROLE_ADMIN"));
+        router1.setMeta(meta1);
+        Router router2 = new Router();
+        router2.setPath("/customer/list1");
+        router2.setName("customer_list1");
+        router2.setComponent("system/customer/Customer.vue");
+        RouterMeta meta2 = new RouterMeta();
+        meta2.setTitle("用户管理1");
+        meta2.setIcon("md-people");
+        meta2.setAccess(Collections.singletonList("ROLE_ADMIN"));
+        router2.setMeta(meta2);
+        router.setChildren(Arrays.asList(router1, router2));
+        return new Response().code(HttpStatus.OK).data(Collections.singleton(router));
     }
 }

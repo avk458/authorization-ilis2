@@ -23,7 +23,9 @@ export default {
     messageUnreadList: [],
     messageReadList: [],
     messageTrashList: [],
-    messageContentStore: {}
+    messageContentStore: {},
+    init: false,
+    routers: []
   },
   mutations: {
     setAvatar (state, avatarPath) {
@@ -65,6 +67,12 @@ export default {
       const msgItem = state[from].splice(index, 1)[0]
       msgItem.loading = false
       state[to].unshift(msgItem)
+    },
+    initUserState(state, status) {
+      state.init = status
+    },
+    setUserRouters(state, routers) {
+      state.routers = routers
     }
   },
   getters: {
@@ -82,8 +90,7 @@ export default {
           username,
           password
         }).then(res => {
-          const token = res.data
-          commit('setToken', token)
+          commit('setToken', res.data)
           resolve()
         }).catch(err => {
           reject(err)
@@ -96,6 +103,8 @@ export default {
         logout(state.token).then(() => {
           commit('setToken', '')
           commit('setAccess', [])
+          commit('initUserState', false)
+          commit('setUserRouters', [])
           resolve()
         }).catch(err => {
           reject(err)

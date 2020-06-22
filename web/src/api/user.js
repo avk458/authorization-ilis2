@@ -6,7 +6,7 @@ export const login = ({ username, password }) => {
     password
   }
   return axios.request({
-    url: 'user/login',
+    url: '/user/login',
     data,
     method: 'post'
   })
@@ -14,35 +14,45 @@ export const login = ({ username, password }) => {
 
 export const getUserInfo = () => {
   return axios.request({
-    url: 'user/info',
+    url: '/user/info',
     method: 'get'
+  })
+}
+
+export const getRouters = (userId) => {
+  return axios.request({
+    url: '/user/routers',
+    method: 'get',
+    params: {
+      userId: userId
+    }
   })
 }
 
 export const logout = (token) => {
   return axios.request({
-    url: 'user/logout',
+    url: '/user/logout',
     method: 'post'
   })
 }
 
 export const getUnreadCount = () => {
   return axios.request({
-    url: 'message/count',
+    url: '/user/message/count',
     method: 'get'
   })
 }
 
 export const getMessage = () => {
   return axios.request({
-    url: 'message/list',
+    url: '/user/message/list',
     method: 'get'
   })
 }
 
 export const getContentByMsgId = msgId => {
   return axios.request({
-    url: 'message/content',
+    url: '/user/message/content',
     method: 'get',
     params: {
       msgId

@@ -5,10 +5,11 @@ import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.base.service.UserService;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,11 +23,12 @@ import java.io.IOException;
  * @author chenlm
  */
 @Component
-@AllArgsConstructor
 public class AuthenticationTokenFilter extends OncePerRequestFilter {
 
-    private final UserService userService;
-    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,23 +37,22 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
             // verify token
             try {
                 UserDetail userDetail = this.userService.verify(header);
-                setAuthentication2Context(userDetail);
+                setAuthentication2Context(userDetail, request);
             } catch (AuthenticationException e) {
                 SecurityContextHolder.clearContext();
                 authenticationEntryPoint.commence(request, response, e);
             }
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         }
         filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication2Context(UserDetail userDetail) {
+    private void setAuthentication2Context(UserDetail userDetail, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetail.getUsername(),
+                userDetail,
                 userDetail.getPassword(),
                 userDetail.getAuthorities()
         );
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 }

@@ -3,22 +3,61 @@ import Router from 'vue-router'
 import routes from './routers'
 import ViewUI from 'view-design'
 import store from '@/store'
-import { setToken, getToken, canTurnTo, setTitle } from '@/libs/util'
+import { canTurnTo, getToken, parseRouters, setTitle, setToken } from '@/libs/util'
 import config from '@/config'
+import { getRouters } from '@/api/user'
+
 const { homeName } = config
 
 Vue.use(Router)
 
-const router = new Router({
-  routes,
-  mode: 'history'
-})
+// const router = new Router({
+//   routes,
+//   mode: 'history'
+// })
+
+const createRouter = () =>
+  new Router({
+    mode: 'history', // require service support
+    scrollBehavior: () => ({ y: 0 }),
+    routes: routes
+  })
+
+const router = createRouter()
+
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher // reset router
+}
 
 const LOGIN_PAGE_NAME = 'login'
 
-const turnTo = (to, access, next) => {
+const turnTo = async (to, access, next) => {
+  if (!store.state.user.init) {
+    console.log('get async router')
+    asyncGetRouters(to, next)
+  }
+  console.log(to)
   if (canTurnTo(to.name, access, routes)) next()
   else next({ replace: true, name: 'error_401' })
+}
+
+const asyncGetRouters = (to, next, userId) => {
+  getRouters(userId)
+    .then(res => {
+      return parseRouters(res.data)
+    })
+    .then(asyncRouters => {
+      console.log('asyncRouters', asyncRouters)
+      const mergedRouters = routes.concat(asyncRouters)
+      router.options.routes = mergedRouters
+      router.addRoutes(asyncRouters)
+      console.log('mergedRouters', mergedRouters)
+      store.commit('initUserState', true)
+      store.commit('setUserRouters', mergedRouters)
+      resetRouter()
+      next({ ...to, replace: true })
+    })
 }
 
 router.beforeEach((to, from, next) => {

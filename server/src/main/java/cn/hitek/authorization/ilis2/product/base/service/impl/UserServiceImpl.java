@@ -5,6 +5,7 @@ import cn.hitek.authorization.ilis2.common.jwt.TokenProvider;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
+import cn.hitek.authorization.ilis2.product.base.domain.dto.UserInfo;
 import cn.hitek.authorization.ilis2.product.base.mapper.UserMapper;
 import cn.hitek.authorization.ilis2.product.base.service.UserService;
 import cn.hutool.core.util.StrUtil;
@@ -46,6 +47,9 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     @Override
     public UserDetail verify(String header) {
         String token = extractBearerToken(header);
+        if (StrUtil.isBlank(token)) {
+            throw new TokenAuthenticationException("非法请求");
+        }
         String username = this.tokenProvider.getUsernameFormToken(token);
         UserDetail userDetail =  (UserDetail) tokenStorage().get(username);
         if (userDetail == null) {
@@ -61,5 +65,17 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
             tokenStr = token.substring(bearer.length());
         }
         return tokenStr;
+    }
+
+    @Override
+    public UserInfo getUserInfo(String header) {
+        UserDetail userDetail = verify(header);
+        return new UserInfo(userDetail);
+    }
+
+    @Override
+    public void handleLogout(String header) {
+        UserDetail userDetail = verify(header);
+        tokenStorage().delete(userDetail.getUsername());
     }
 }

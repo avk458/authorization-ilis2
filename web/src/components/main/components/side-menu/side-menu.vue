@@ -87,7 +87,7 @@ export default {
   },
   computed: {
     textColor () {
-      return this.theme === 'dark' ? '#fff' : '#495060'
+      return this.theme === 'dark' ? '#fff' : '#323439'
     }
   },
   watch: {

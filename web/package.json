@@ -61,7 +61,13 @@
           "x-invalid-end-tag": false
         }
       ],
-      "space-before-function-paren": 0
+      "space-before-function-paren": 0,
+      "template-curly-spacing": "off",
+      "indent": ["error", 2, {
+        "ignoredNodes": [
+          "TemplateLiteral"
+        ]
+      }]
     },
     "overrides": [
       {

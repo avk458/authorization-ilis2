@@ -17,6 +17,7 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     private String realName;
+    private String avatar;
     @TableLogic
     private Boolean isDeleted;
 }

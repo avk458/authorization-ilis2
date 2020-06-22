@@ -4,6 +4,8 @@ import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -58,5 +60,17 @@ public class AuthorityExceptionAdvice {
                 .stream()
                 .map(ConstraintViolation::getMessageTemplate)
                 .findFirst().orElse(bem));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public Response handlingLoginValidate(BadCredentialsException e) {
+        log.warn(e.getMessage());
+        return new Response().code(HttpStatus.FAIL).message("用户名或者密码错误");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public Response handlingUnAuthorizedException(AuthenticationException e) {
+        log.warn(e.getMessage());
+        return new Response().code(HttpStatus.NO_AUTH).message("您没有访问这个资源的权限");
     }
 }

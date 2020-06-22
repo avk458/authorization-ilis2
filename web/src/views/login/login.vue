@@ -28,8 +28,9 @@ export default {
       'getUserInfo'
     ]),
     handleSubmit ({ username, password }) {
-      this.handleLogin({ username, password }).then(res => {
-        this.getUserInfo().then(res => {
+      const store = this
+      store.handleLogin({ username, password }).then(res => {
+        store.getUserInfo().then(res => {
           this.$router.push({
             name: this.$config.homeName
           })

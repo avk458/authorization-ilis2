@@ -16,6 +16,10 @@ public abstract class BaseController {
         return new Response().code(status).data(data);
     }
 
+    protected Response result(HttpStatus status, String msg) {
+        return new Response().code(status).message(msg);
+    }
+
     protected Response result(HttpStatus status, Object data, String msg) {
         return new Response().code(status).data(data).message(msg);
     }

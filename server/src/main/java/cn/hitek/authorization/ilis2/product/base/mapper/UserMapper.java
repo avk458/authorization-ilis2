@@ -1,7 +1,6 @@
 package cn.hitek.authorization.ilis2.product.base.mapper;
 
 import cn.hitek.authorization.ilis2.product.base.domain.Permission;
-import cn.hitek.authorization.ilis2.product.base.domain.Role;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -21,7 +20,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param userId 用户id
      * @return 用户角色集合
      */
-    List<Role> getUserRole(@Param("userId") String userId);
+    List<String> getUserRole(@Param("userId") String userId);
 
     /**
      * 根据用户id获取用户权限

@@ -32,12 +32,15 @@ class HttpRequest {
 
   getInsideConfig () {
     const token = getToken()
-    return {
-      baseURL: this.baseUrl,
-      headers: {
+    const config = {
+      baseURL: this.baseUrl
+    }
+    if (token) {
+      config.headers = {
         Authorization: 'Bearer ' + token
       }
     }
+    return config
   }
 
   destroy (url) {

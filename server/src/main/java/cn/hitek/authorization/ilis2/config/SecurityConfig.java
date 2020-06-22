@@ -2,7 +2,8 @@ package cn.hitek.authorization.ilis2.config;
 
 import cn.hitek.authorization.ilis2.common.entrypoint.JwtAuthenticationEntryPoint;
 import cn.hitek.authorization.ilis2.common.jwt.AuthenticationTokenFilter;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,13 +24,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-    private final AuthenticationTokenFilter authenticationTokenFilter;
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private AuthenticationTokenFilter authenticationTokenFilter;
+
+    @Qualifier("userDetailServiceImpl")
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
