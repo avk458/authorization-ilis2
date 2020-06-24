@@ -9,7 +9,7 @@ export const getUnitList = () => {
 
 export const saveUnitInfo = unit => {
   return axios.request({
-    url: '/unit/info',
+    url: '/unit',
     method: 'post',
     data: unit
   })
@@ -17,7 +17,7 @@ export const saveUnitInfo = unit => {
 
 export const updateUnitInfo = unit => {
   return axios.request({
-    url: '/unit/info',
+    url: '/unit',
     method: 'put',
     data: unit
   })

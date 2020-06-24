@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="visible" title="角色"  :footer-hide="true" :mask-closable="false">
+  <Modal v-model="visible" title="角色" :footer-hide="true" :mask-closable="false">
     <Form ref="roleForm" :model="formData" :rules="ruleValidate" label-position="right" :label-width="90">
       <FormItem label="角色名称" prop="roleName">
         <Input  v-model="formData.roleName" placeholder="请输入角色名称"></Input>
@@ -25,6 +25,15 @@
 export default {
   name: 'role-modal',
   data() {
+    const roleCodeValidator = (rule, value, callback) => {
+      if (!value || value.length < 5) {
+        callback(new Error('非法角色标识'))
+      } else if (!value.startsWith('ROLE_')) {
+        callback(new Error('角色标识必须以ROLE_开头'))
+      } else {
+        callback()
+      }
+    }
     return {
       visible: false,
       formData: {
@@ -35,8 +44,8 @@ export default {
         active: true
       },
       ruleValidate: {
-        role: [{ required: true }],
-        roleName: [{ required: true }]
+        role: [{ required: true, validator: roleCodeValidator }],
+        roleName: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -60,6 +69,7 @@ export default {
       this.$refs.roleForm.resetFields()
       this.isEdit = false
       this.visible = false
+      this.formData.id = null
     }
   }
 }

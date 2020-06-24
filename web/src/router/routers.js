@@ -69,7 +69,9 @@ export default [
     name: 'unit',
     component: Main,
     meta: {
-      hideInBread: true
+      hideInBread: true,
+      icon: 'logo-buffer',
+      access: ['ROLE_ADMIN', 'ROLE_OPS']
     },
     children: [
       {
@@ -77,8 +79,7 @@ export default [
         name: 'unit_list',
         meta: {
           icon: 'logo-buffer',
-          title: '单位信息管理',
-          access: ['ROLE_ADMIN']
+          title: '单位信息管理'
         },
         component: () => import('@/views/single-page/unit/UnitList.vue')
       }
@@ -131,7 +132,7 @@ export default [
         name: 'database_list',
         meta: {
           icon: 'md-cube',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_DEV', 'ROLE_OPS'],
           title: '单位数据库信息'
         },
         component: () => import('@/views/single-page/database/list/Database.vue')
@@ -141,7 +142,7 @@ export default [
         name: 'database_manage',
         meta: {
           icon: 'ios-pulse',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_DEV', 'ROLE_OPS'],
           title: '单位数据管理'
         },
         component: () => import('@/views/single-page/database/manage/DatabaseManage.vue')
@@ -151,7 +152,7 @@ export default [
         name: 'database_script',
         meta: {
           icon: 'md-document',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_DEV'],
           title: '数据脚本管理'
         },
         component: () => import('@/views/single-page/database/script/ScriptManage.vue')
@@ -173,7 +174,7 @@ export default [
         name: 'source_config',
         meta: {
           icon: 'ios-cloud',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_DEV', 'ROLE_OPS'],
           title: '数据源配置管理'
         },
         component: () => import('@/views/single-page/system/configuration/ProfilesManage.vue')
@@ -183,7 +184,7 @@ export default [
         name: 'init_file',
         meta: {
           icon: 'md-albums',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_DEV', 'ROLE_OPS'],
           title: '初始化文件管理'
         },
         component: () => import('@/views/single-page/system/init-file/InitFileManage.vue')

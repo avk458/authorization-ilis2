@@ -9,6 +9,7 @@ import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,18 +37,21 @@ public class UnitController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
-    @PostMapping("/info")
+    @PreAuthorize("hasAuthority('unit:add')")
+    @PostMapping
     public Response createUnit(@Validated(OnCreate.class) @RequestBody Unit unit) {
         String unitDatabaseId = this.unitService.insertUnitInfo(unit);
         return new Response().code(HttpStatus.ADD).data(unitDatabaseId);
     }
 
-    @PutMapping("/info")
+    @PreAuthorize("hasAuthority('unit:update')")
+    @PutMapping
     public Response updateUnit(@Validated(OnUpdate.class) @RequestBody Unit unit) {
         this.unitService.updateById(unit);
         return new Response().code(HttpStatus.UPDATE);
     }
 
+    @PreAuthorize("hasAuthority('unit:del')")
     @DeleteMapping("/{unitId}")
     public Response deleteUnit(@PathVariable String unitId) {
         this.unitService.removeUnitInfoAndDatabaseInfoViaUnitId(unitId);

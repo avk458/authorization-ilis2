@@ -11,6 +11,7 @@ import cn.hitek.authorization.ilis2.product.configuration.domain.vo.Folder;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
 import cn.hutool.core.util.StrUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +50,7 @@ public class ConfigController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
+    @PreAuthorize("hasAuthority('profile:main:add')")
     @PostMapping("/main/profile")
     public Response insertMainProfile(@Validated(OnCreate.class) @RequestBody MainSourceProfile profile) {
         this.configService.saveMainProfile(profile);
@@ -61,18 +63,21 @@ public class ConfigController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
+    @PreAuthorize("hasAuthority('profile:main:active')")
     @PutMapping("/actions/active/{profileId}")
     public Response activeMainProfile(@PathVariable String profileId) {
         this.configService.activeProfile(profileId);
         return new Response().code(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('profile:main:del')")
     @DeleteMapping("/main/{profileId}")
     public Response deleteConfigInfo(@PathVariable String profileId) {
         this.configService.removeById(profileId);
         return new Response().code(HttpStatus.DELETE);
     }
 
+    @PreAuthorize("hasAuthority('profile:main:update')")
     @PutMapping("/main/profile")
     public Response updateMainProfile(@Validated(OnUpdate.class) @RequestBody MainSourceProfile profile) {
         this.configService.updateById(profile);
@@ -92,18 +97,21 @@ public class ConfigController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
+    @PreAuthorize("hasAuthority('profile:target:add')")
     @PostMapping("/target/profile")
     public Response insertTargetProfile(@Validated(OnCreate.class) @RequestBody TargetSourceProfile targetProfile) {
         this.configService.insertTargetProfile(targetProfile);
         return new Response().code(HttpStatus.ADD);
     }
 
+    @PreAuthorize("hasAuthority('profile:target:update')")
     @PutMapping("/target/profile")
     public Response updateTargetProfile(@Validated(OnUpdate.class) @RequestBody TargetSourceProfile targetProfile) {
         this.configService.updateTargetProfile(targetProfile);
         return new Response().code(HttpStatus.UPDATE);
     }
 
+    @PreAuthorize("hasAuthority('profile:target:del')")
     @DeleteMapping("/target/{profileId}")
     public Response deleteTargetProfile(@PathVariable String profileId) {
         this.configService.deleteTargetProfile(profileId);

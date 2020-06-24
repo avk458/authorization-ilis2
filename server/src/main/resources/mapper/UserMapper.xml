@@ -2,8 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.hitek.authorization.ilis2.product.base.mapper.UserMapper">
 
-    <select id="getUserRole" parameterType="String" resultType="String">
-        select r.role
+    <select id="getUserRole" parameterType="String" resultType="cn.hitek.authorization.ilis2.product.base.domain.Role">
+        select
+        r.id,
+        r.role,
+        r.role_name,
+        r.description,
+        r.active
         from t_s_user u
                  left join t_s_user_role ur on u.id = ur.user_id
                  left join t_s_role r on ur.role_id = r.id
@@ -17,4 +22,55 @@
                           left join t_s_user u on ur.user_id = u.id
         where u.id = #{userId}
     </select>
+    <resultMap id="userWithRoles" type="cn.hitek.authorization.ilis2.product.base.domain.User">
+        <id property="id" column="id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createName" column="create_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateName" column="update_name"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="username" column="username"/>
+        <result property="realName" column="real_name"/>
+        <result property="avatar" column="avatar"/>
+        <result property="active" column="active"/>
+        <collection property="roles" ofType="cn.hitek.authorization.ilis2.product.base.domain.Role">
+            <id property="id" column="roleId"/>
+            <result property="role" column="role"/>
+            <result property="roleName" column="role_name"/>
+            <result property="description" column="description"/>
+        </collection>
+    </resultMap>
+    <select id="getUserWithRolesList" resultMap="userWithRoles">
+        select
+            tsu.id,
+            tsu.create_by,
+            tsu.create_name,
+            tsu.create_time,
+            tsu.update_by,
+            tsu.update_name,
+            tsu.update_time,
+            tsu.username,
+            tsu.avatar,
+            tsu.real_name,
+            tsu.active,
+            tsr.id roleId,
+            tsr.role,
+            tsr.role_name,
+            tsr.description
+        from t_s_user tsu
+                          left join t_s_user_role tsur on tsu.id = tsur.user_id
+                          left join t_s_role tsr on tsr.id = tsur.role_id
+        where tsu.is_deleted = false
+    </select>
+    <delete id="deleteUserRoles">
+        delete from t_s_user_role where user_id = #{userId}
+    </delete>
+    <insert id="insertUserRoles">
+        insert into t_s_user_role (user_id, role_id)
+            values
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
 </mapper>

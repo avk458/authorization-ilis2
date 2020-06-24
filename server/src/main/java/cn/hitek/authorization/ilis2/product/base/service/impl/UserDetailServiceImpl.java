@@ -1,6 +1,7 @@
 package cn.hitek.authorization.ilis2.product.base.service.impl;
 
 import cn.hitek.authorization.ilis2.product.base.domain.Permission;
+import cn.hitek.authorization.ilis2.product.base.domain.Role;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.base.mapper.UserMapper;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenlm
@@ -28,8 +30,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if (sysUser == null) {
             throw new UsernameNotFoundException("Can't find User via given username");
         }
-        List<String> roles = this.userMapper.getUserRole(sysUser.getId());
+        List<Role> roles = this.userMapper.getUserRole(sysUser.getId());
         List<Permission> permissions = this.userMapper.getUserPermission(sysUser.getId());
-        return new UserDetail(sysUser, permissions, roles);
+        return new UserDetail(sysUser, permissions, roles.stream().map(Role::getRole).collect(Collectors.toList()));
     }
 }

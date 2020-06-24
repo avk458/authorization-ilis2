@@ -2,6 +2,7 @@ package cn.hitek.authorization.ilis2.product.base.domain;
 
 
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author chenlm
@@ -31,5 +33,8 @@ public class Role extends BaseEntity {
 
     @TableLogic
     private Boolean isDeleted;
+
+    @TableField(exist = false)
+    private List<Permission> permissions;
 
 }

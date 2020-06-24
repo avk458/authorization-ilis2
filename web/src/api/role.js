@@ -29,3 +29,21 @@ export const deleteRole = roleId => {
     method: 'delete'
   })
 }
+
+export const updateRoleActiveState = roleId => {
+  return axios.request({
+    url: '/role/actions/update-active-state',
+    method: 'post',
+    params: {
+      roleId: roleId
+    }
+  })
+}
+
+export const addRolePermissions = data => {
+  return axios.request({
+    url: '/role/permissions',
+    method: 'post',
+    data: data
+  })
+}

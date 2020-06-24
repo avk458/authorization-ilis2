@@ -4,6 +4,8 @@ import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.base.domain.dto.UserInfo;
+import cn.hitek.authorization.ilis2.product.base.domain.vo.PostUserPwd;
+import cn.hitek.authorization.ilis2.product.base.domain.vo.PostUserRoles;
 
 import java.util.List;
 
@@ -57,4 +59,22 @@ public interface UserService extends BaseService<User> {
      * @param userId 用户id
      */
     void updateActiveStatus(String userId);
+
+    /**
+     * 关联用户角色
+     * @param userRoles 封装对象
+     */
+    void setUserRoles(PostUserRoles userRoles);
+
+    /**
+     * 删除用户
+     * @param userId user id
+     */
+    void deleteUser(String userId);
+
+    /**
+     * 用户修改密码
+     * @param userPwd 参数封装
+     */
+    void changeUserPassword(PostUserPwd userPwd);
 }

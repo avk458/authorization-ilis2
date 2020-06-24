@@ -13,7 +13,7 @@ import { setToken, getToken } from '@/libs/util'
 
 export default {
   state: {
-    userName: '',
+    username: '',
     userId: '',
     avatarImgPath: '',
     token: getToken(),
@@ -34,8 +34,8 @@ export default {
     setUserId (state, id) {
       state.userId = id
     },
-    setUserName (state, name) {
-      state.userName = name
+    setUsername (state, name) {
+      state.username = name
     },
     setAccess (state, access) {
       state.access = access
@@ -79,7 +79,8 @@ export default {
     messageUnreadCount: state => state.messageUnreadList.length,
     messageReadCount: state => state.messageReadList.length,
     messageTrashCount: state => state.messageTrashList.length,
-    userId: state => state.userId
+    userId: state => state.userId,
+    username: state => state.username
   },
   actions: {
     // 登录
@@ -122,7 +123,7 @@ export default {
           getUserInfo().then(res => {
             const data = res.data
             commit('setAvatar', data.avatar)
-            commit('setUserName', data.name)
+            commit('setUsername', data.username)
             commit('setUserId', data.userId)
             commit('setAccess', data.access)
             commit('setHasGetInfo', true)

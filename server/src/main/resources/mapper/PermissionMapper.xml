@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.hitek.authorization.ilis2.product.base.mapper.PermissionMapper">
+    <select id="existsUsingPermission" resultType="int">
+        select count(tsrp.id) from t_s_role_permission tsrp
+            left join t_s_permission tsp on tsrp.permission_id = tsp.id
+        where
+            <foreach collection="perm" item="item" index="i" separator="or">
+                tsp.authority = #{item}
+            </foreach>
+    </select>
+</mapper>

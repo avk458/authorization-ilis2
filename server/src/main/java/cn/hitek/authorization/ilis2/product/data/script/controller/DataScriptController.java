@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,18 +26,21 @@ public class DataScriptController {
 
     private final DataScriptService dataScriptService;
 
-    @PostMapping("/info")
+    @PreAuthorize("hasAuthority('script:add')")
+    @PostMapping
     public Response insertDataScript(@Valid @RequestBody DataScript script) {
         this.dataScriptService.save(script);
         return new Response().code(HttpStatus.ADD);
     }
 
-    @PutMapping("/info")
+    @PreAuthorize("hasAuthority('script:update')")
+    @PutMapping
     public Response updateDataScript(@Valid @RequestBody DataScript script) {
         this.dataScriptService.updateById(script);
         return new Response().code(HttpStatus.UPDATE);
     }
 
+    @PreAuthorize("hasAuthority('script:del')")
     @DeleteMapping("/{id}")
     public Response deleteDataScript(@PathVariable String id) {
         this.dataScriptService.removeById(id);
@@ -48,6 +52,7 @@ public class DataScriptController {
         return this.dataScriptService.selectPage(page);
     }
 
+    @PreAuthorize("hasAuthority('script:export')")
     @GetMapping("/actions/export")
     public ResponseEntity<Object> exportScript() {
         return this.dataScriptService.exportScript();
@@ -59,6 +64,7 @@ public class DataScriptController {
         return new Response().code(HttpStatus.OK).data(ver);
     }
 
+    @PreAuthorize("hasAuthority('script:upload')")
     @PostMapping("/file")
     public Response uploadDataScript(@RequestParam("file") MultipartFile multipartFile) {
         this.dataScriptService.importScriptFile(multipartFile);

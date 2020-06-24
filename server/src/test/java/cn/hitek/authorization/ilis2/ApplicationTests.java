@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @SpringBootTest
@@ -244,6 +245,11 @@ class ApplicationTests {
 			// dataSourceTransactionManager.rollback(status);
 		}
 
+	}
+
+	@Test
+	public void do9() {
+		System.out.println(LocalDateTime.now());
 	}
 
 }

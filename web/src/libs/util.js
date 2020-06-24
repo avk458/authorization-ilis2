@@ -18,7 +18,7 @@ export const getToken = () => {
 }
 
 export const hasChild = (item) => {
-  return item.children && item.children.length !== 0
+  return item.children && item.children.length > 0
 }
 
 const showThisMenuEle = (item, access) => {

@@ -7,6 +7,7 @@ import cn.hitek.authorization.ilis2.product.data.management.service.DataManageSe
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ public class DataManageController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
+    @PreAuthorize("hasAuthority('database:sync')")
     @PostMapping("/actions/sync-columns")
     public Response syncSchemasColumns(@NotBlank(message = "配置参数有误") String mainProfileId,
                                        @NotBlank(message = "配置参数有误") String targetProfileId,

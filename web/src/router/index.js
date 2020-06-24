@@ -31,7 +31,7 @@ const router = new Router({
 
 const LOGIN_PAGE_NAME = 'login'
 
-const turnTo = async (to, access, next) => {
+const turnTo = (to, access, next) => {
   // if (!store.state.user.init) {
   //   console.log('get async router')
   //   asyncGetRouters(to, next)

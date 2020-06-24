@@ -2,7 +2,7 @@ import axios from '@/libs/api.request'
 
 export const postScript = data => {
   return axios.request({
-    url: '/script/info',
+    url: '/script',
     method: 'post',
     data: data
   })
@@ -17,7 +17,7 @@ export const getLastId = () => {
 
 export const updateScript = data => {
   return axios.request({
-    url: '/script/info',
+    url: '/script',
     method: 'put',
     data: data
   })

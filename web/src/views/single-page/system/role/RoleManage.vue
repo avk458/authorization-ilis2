@@ -4,22 +4,24 @@
     <Divider/>
     <Table :data="data" :columns="columns" border :loading="loading">
       <template slot-scope="{ row }" slot="action">
-        <Button type="success" size="small" style="margin-right: 5px" @click="edit(row)">设置权限</Button>
+        <Button type="success" size="small" style="margin-right: 5px" @click="handleAuth(row)">设置权限</Button>
         <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
         <Button type="error" size="small" @click="handleDelete(row)">删除</Button>
       </template>
     </Table>
     <role-modal ref="roleModal" @success-valid="submit"/>
+    <auth-modal ref="authModal" @success-submit="fetchData"/>
   </Card>
 </template>
 
 <script>
-import { getRoles, addRole, updateRole, deleteRole } from '@/api/role'
+import { getRoles, addRole, updateRole, deleteRole, updateRoleActiveState } from '@/api/role'
 import RoleModal from './components/role-modal'
+import AuthModal from '@/views/single-page/system/role/components/auth-modal'
 
 export default {
   name: 'RoleManage',
-  components: { RoleModal },
+  components: { AuthModal, RoleModal },
   data() {
     return {
       data: [],
@@ -27,9 +29,32 @@ export default {
         { title: '角色名称', key: 'roleName' },
         { title: '角色标识', key: 'role' },
         { title: '角色描述', key: 'description' },
-        { title: '是否启用', key: 'active' },
-        { title: '创建人', key: 'createName' },
-        { title: '创建/修改时间', key: 'createTime' },
+        {
+          title: '是否启用',
+          key: 'active',
+          render: (h, p) => {
+            return h('i-switch', {
+              props: {
+                size: 'small',
+                value: p.row.active
+              },
+              on: {
+                'on-change': () => {
+                  this.handleActive(p.row.id)
+                }
+              }
+            })
+          }
+        },
+        { title: '创建', key: 'createName' },
+        {
+          title: '创建/修改时间',
+          key: 'createTime',
+          render: (h, p) => {
+            const val = p.row.updateTime ? p.row.updateTime : p.row.createTime
+            return h('span', val)
+          }
+        },
         { title: '操作', slot: 'action', align: 'center', width: 220 }
       ],
       loading: false
@@ -50,7 +75,7 @@ export default {
       this.$refs.roleModal.showModal()
     },
     submit(data) {
-      if (data.id) {
+      if (!data.id) {
         addRole(data).then(res => {
           this.$Message.success(res.message)
           this.fetchData()
@@ -79,6 +104,15 @@ export default {
           })
         }
       })
+    },
+    handleActive(id) {
+      updateRoleActiveState(id).then(res => {
+        this.$Message.success(res.message)
+        this.fetchData()
+      })
+    },
+    handleAuth(row) {
+      this.$refs.authModal.showModal(row)
     }
   },
   mounted() {

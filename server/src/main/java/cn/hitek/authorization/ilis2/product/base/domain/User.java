@@ -13,6 +13,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author chenlm
@@ -41,4 +42,7 @@ public class User extends BaseEntity {
 
     @TableLogic
     private Boolean isDeleted;
+
+    @TableField(exist = false)
+    private List<Role> roles;
 }

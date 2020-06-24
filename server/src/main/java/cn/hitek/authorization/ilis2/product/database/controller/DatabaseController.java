@@ -8,6 +8,7 @@ import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,19 +35,22 @@ public class DatabaseController {
         return new Response().code(HttpStatus.OK).data(list);
     }
 
-    @PostMapping("/info")
+    @PreAuthorize("hasAuthority('database:add')")
+    @PostMapping
     public Response insertUnitDatabase(@Validated(OnCreate.class) @RequestBody UnitDatabase database) {
         this.databaseService.save(database);
         return new Response().code(HttpStatus.ADD);
     }
 
-    @PutMapping("/info")
+    @PreAuthorize("hasAuthority('database:update')")
+    @PutMapping
     public Response updateUnitDatabase(@Validated(OnUpdate.class)
                                        @RequestBody UnitDatabase database) {
         this.databaseService.updateById(database);
         return new Response().code(HttpStatus.UPDATE);
     }
 
+    @PreAuthorize("hasAuthority('database:del')")
     @DeleteMapping("/{unitDatabaseId}")
     public Response deleteUnitDatabase(@NotBlank(message = RequestConstants.PARAM_ERROR)
                                        @PathVariable String unitDatabaseId) {
@@ -54,6 +58,7 @@ public class DatabaseController {
         return new Response().code(HttpStatus.DELETE);
     }
 
+    @PreAuthorize("hasAuthority('database:init')")
     @PostMapping("/init/{unitDatabaseId}")
     public Response initUnitDatabase(@NotBlank(message = RequestConstants.PARAM_ERROR)
                                      @PathVariable String unitDatabaseId) {
@@ -61,6 +66,7 @@ public class DatabaseController {
         return new Response().code(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('database:active')")
     @GetMapping("/initialization/status/{unitId}")
     public Response isUnitDatabaseInitialized(@NotBlank(message = RequestConstants.PARAM_ERROR)
                                               @PathVariable String unitId) {
@@ -74,6 +80,7 @@ public class DatabaseController {
         return new Response().code(HttpStatus.OK).data(isIllegal);
     }
 
+    @PreAuthorize("hasAuthority('database:update')")
     @PostMapping("/actions/update/{id}")
     public Response updateDatabase(@PathVariable String id) {
         List<UpdateEchoLog> results = this.databaseService.updateDatabase(id);

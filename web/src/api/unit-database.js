@@ -9,7 +9,7 @@ export const getDatabaseList = () => {
 
 export const saveDatabaseInfo = database => {
   return axios.request({
-    url: '/database/info',
+    url: '/database',
     method: 'post',
     data: database
   })
@@ -17,7 +17,7 @@ export const saveDatabaseInfo = database => {
 
 export const updateDatabaseInfo = database => {
   return axios.request({
-    url: '/database/info',
+    url: '/database',
     method: 'put',
     data: database
   })

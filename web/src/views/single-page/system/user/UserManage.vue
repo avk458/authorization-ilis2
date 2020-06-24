@@ -4,21 +4,24 @@
     <Divider/>
     <Table border :data="data" :loading="loading" :columns="columns">
       <template slot-scope="{ row }" slot="action">
+        <Button type="success" size="small" style="margin-right: 5px" @click="handleRelateRole(row)">关联角色</Button>
         <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
         <Button type="error" size="small" @click="handleDelete(row)">删除</Button>
       </template>
     </Table>
     <form-modal ref="formModal" @success-valid="submit"/>
+    <set-role-modal ref="setRoleModal" @success-submit="fetchData"/>
   </Card>
 </template>
 
 <script>
 import FormModal from './components/form-modal'
 import { addUser, updateUser, deleteUser, getUsers, updateStatus } from '@/api/user'
+import SetRoleModal from '@/views/single-page/system/user/components/set-role-modal'
 
 export default {
   name: 'UserManage',
-  components: { FormModal },
+  components: { SetRoleModal, FormModal },
   data() {
     return {
       data: [],
@@ -64,7 +67,7 @@ export default {
             return h('span', date)
           }
         },
-        { title: '操作', slot: 'action', align: 'center', width: 170 }
+        { title: '操作', slot: 'action', align: 'center', width: 220 }
       ],
       loading: false
     }
@@ -119,6 +122,9 @@ export default {
         this.$Message.success(res.message)
         this.fetchData()
       })
+    },
+    handleRelateRole(row) {
+      this.$refs.setRoleModal.showModal(row)
     }
   },
   mounted() {

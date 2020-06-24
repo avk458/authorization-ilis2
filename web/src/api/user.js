@@ -133,3 +133,19 @@ export const validateUsername = username => {
     }
   })
 }
+
+export const setUerRoles = data => {
+  return axios.request({
+    url: '/user/roles',
+    method: 'post',
+    data: data
+  })
+}
+
+export const updateUserPwd = data => {
+  return axios.request({
+    url: '/user/password',
+    method: 'put',
+    data: data
+  })
+}

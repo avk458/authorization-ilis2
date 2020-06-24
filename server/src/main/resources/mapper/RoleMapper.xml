@@ -3,8 +3,63 @@
 <mapper namespace="cn.hitek.authorization.ilis2.product.base.mapper.RoleMapper">
 
     <select id="roleReference" resultType="integer">
-        select count(r.id) from t_s_role r
-                                    left join t_s_user_role ur on r.id = ur.role_id
-        where r.id = #{roleId}
+        select count(*) from t_s_user_role where role_id = #{roleId}
     </select>
+
+    <select id="getRolePermissions" resultType="cn.hitek.authorization.ilis2.product.base.domain.Permission">
+        select tsp.* from t_s_permission tsp
+                          left join t_s_role_permission tsrp on tsp.id = tsrp.permission_id
+        where tsrp.role_id = #{roleId}
+    </select>
+    <insert id="insertRolePermissions">
+        insert into t_s_role_permission (role_id, permission_id)
+        values
+        <foreach collection="permissionIds" item="permId" separator=",">
+            (#{roleId}, #{permId})
+        </foreach>
+    </insert>
+
+    <resultMap id="RolePermissionMap" type="cn.hitek.authorization.ilis2.product.base.domain.Role">
+        <id property="id" column="id"/>
+        <result property="role" column="role"/>
+        <result property="roleName" column="role_name"/>
+        <result property="active" column="active"/>
+        <result property="description" column="description"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createName" column="create_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateName" column="update_name"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="permissions" ofType="cn.hitek.authorization.ilis2.product.base.domain.Permission">
+            <id property="id" column="permissionId"/>
+            <result property="authority" column="authority"/>
+            <result property="description" column="PermissionDescription"/>
+        </collection>
+    </resultMap>
+    <select id="getRolePermissionsBatch" resultMap="RolePermissionMap">
+        select
+        tsr.id,
+        tsr.role,
+        tsr.role_name,
+        tsr.active,
+        tsr.description,
+        tsr.create_by,
+        tsr.create_name,
+        tsr.create_time,
+        tsr.update_by,
+        tsr.update_name,
+        tsr.update_time,
+        tsp.id permissionId,
+        tsp.authority,
+        tsp.description PermissionDescription
+        from t_s_role tsr
+                          left join t_s_role_permission tsrp on tsrp.role_id = tsr.id
+                          left join t_s_permission tsp on tsp.id = tsrp.permission_id
+        where tsr.is_deleted = false
+    </select>
+
+    <delete id="deletePermissionByRoleId">
+        delete from t_s_role_permission where role_id = #{roleId}
+    </delete>
 </mapper>
