@@ -16,7 +16,7 @@
 <script>
 import CommonIcon from '@@/common-icon'
 export default {
-  name: 'InforCard',
+  name: 'InfoCard',
   components: {
     CommonIcon
   },
