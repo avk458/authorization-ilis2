@@ -6,6 +6,7 @@ import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenlm
@@ -52,4 +53,19 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @return 执行结果
      */
     List<UpdateEchoLog> updateDatabase(String id);
+
+    /**
+     * 获取当前单位数据库数据版本以及数据库脚本版本
+     * @param unit 单位信息实体
+     * @return 查询结果
+     */
+    Map<String, String> getDatabaseVersionAndScriptVersion(Unit unit);
+
+
+    /**
+     * ilis主程序升级数据库回执
+     * @param unitId 单位id
+     * @param version 执行成功脚本id
+     */
+    void updateDatabaseDataVersion(String unitId, Long version);
 }

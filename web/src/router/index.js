@@ -11,8 +11,8 @@ const { homeName } = config
 Vue.use(Router)
 
 const router = new Router({
-  routes,
-  mode: 'history'
+  routes
+  // mode: 'history'
 })
 
 // const createRouter = () =>

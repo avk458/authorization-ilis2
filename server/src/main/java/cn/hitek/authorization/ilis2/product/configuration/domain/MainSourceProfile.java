@@ -1,6 +1,6 @@
 package cn.hitek.authorization.ilis2.product.configuration.domain;
 
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.framework.web.entity.BaseEntity;
@@ -74,6 +74,6 @@ public class MainSourceProfile extends BaseEntity {
 
     @JsonIgnore
     public String getDecryptPassword() {
-        return EncryptUtils.decrypt(password);
+        return EncryptUtil.decrypt(password);
     }
 }

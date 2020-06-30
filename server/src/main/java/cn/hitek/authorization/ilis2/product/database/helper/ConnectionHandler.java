@@ -1,11 +1,12 @@
 package cn.hitek.authorization.ilis2.product.database.helper;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,7 +27,7 @@ public class ConnectionHandler {
         return DriverManager.getConnection(
                 path,
                 profile.getUsername(),
-                EncryptUtils.decrypt(profile.getPassword()));
+                EncryptUtil.decrypt(profile.getPassword()));
     }
 
     public static Connection getConnection(UnitDatabase unitDatabase) throws SQLException {
@@ -36,7 +37,7 @@ public class ConnectionHandler {
                 .setSchema(unitDatabase.getDatabaseName())
                 .setParams(unitDatabase.getParams())
                 .getPath();
-        return DriverManager.getConnection(path, EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()), EncryptUtils.decrypt(unitDatabase.getDatabasePwd()));
+        return DriverManager.getConnection(path, EncryptUtil.decrypt(unitDatabase.getDatabaseUsername()), EncryptUtil.decrypt(unitDatabase.getDatabasePwd()));
     }
 
     public static Connection getConnection(MainSourceProfile config) throws SQLException {
@@ -102,9 +103,9 @@ public class ConnectionHandler {
         }
 
         String getPath() {
-            String path = Constant.MYSQL_PATH_PREFIX + this.host + Constant.COLON + this.port;
+            String path = Constant.MYSQL_PATH_PREFIX + this.host + StringPool.COLON + this.port;
             if (StrUtil.isNotBlank(schema)) {
-                path += Constant.SLASH + schema;
+                path += StringPool.SLASH + schema;
             }
             return this.params == null ? path : path + this.params;
         }

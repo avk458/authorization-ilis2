@@ -1,7 +1,11 @@
 package cn.hitek.authorization.ilis2;
 
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitInfo;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -147,20 +151,6 @@ class ApplicationTests {
 		return temp.toString();
 	}
 
-	@Autowired
-	private UnitService unitService;
-
-	@Test
-	public void do3() {
-		Unit unit = new Unit();
-		unit.setName("testset");
-		unit.setUniqCode("ttttt");
-		unit.setExpireDate(LocalDate.parse("2020-05-30"));
-		unit.setId("1252423990724759554");
-		boolean update = this.unitService.updateById(unit);
-		// this.unitService.save(unit);
-	}
-
 	@Test
 	public void do4() {
 		File file = new File("C:\\");
@@ -248,8 +238,12 @@ class ApplicationTests {
 	}
 
 	@Test
-	public void do9() {
-		System.out.println(LocalDateTime.now());
+	public void do9() throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		String str = "4J9wHW1j+Gcwtcm3fSLMIwx4gsRC07uG/GTyLwElX6tVpOC08f60v74cdMwIpJREOLhsBIyQ2UAke/1k3r+TEilpOv0WDfIV3WUVxD+y4/HFP4r6BlkbW87ar6fOGmPPR38WwZrpBA5NqaKsoivID/FeT56j4o5Vr+jwG9Ix8KR8tbL93AYzUKPkKm/wNIn/0a+0nAhPWKLawYWCvLzD1FlZHHeg5qTaK4HEe9Lsyvc=";
+		String decrypt = EncryptUtil.decrypt(str);
+		UnitInfo unitInfo = mapper.readValue(decrypt, UnitInfo.class);
+		System.out.println(unitInfo);
 	}
 
 }

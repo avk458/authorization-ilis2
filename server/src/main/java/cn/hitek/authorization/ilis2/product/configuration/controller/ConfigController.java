@@ -2,7 +2,7 @@ package cn.hitek.authorization.ilis2.product.configuration.controller;
 
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
@@ -44,7 +44,7 @@ public class ConfigController {
         if (StrUtil.isNotBlank(config.getId())) {
             config = this.configService.getById(config.getId());
         } else {
-            config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+            config.setPassword(EncryptUtil.encrypt(config.getPassword()));
         }
         List<Map<String, String>> list = this.configService.getTableList(config);
         return new Response().code(HttpStatus.OK).data(list);
@@ -86,7 +86,7 @@ public class ConfigController {
 
     @GetMapping("/connection/databases")
     public Response getDatabases(MainSourceProfile config) {
-        config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+        config.setPassword(EncryptUtil.encrypt(config.getPassword()));
         List<Map<String, String>> databases = this.configService.getDatabases(config);
         return new Response().code(HttpStatus.OK).data(databases);
     }

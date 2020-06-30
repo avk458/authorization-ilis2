@@ -28,6 +28,7 @@ import java.util.Random;
 @RestController
 @RequestMapping("user")
 @AllArgsConstructor
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -77,7 +78,6 @@ public class UserController {
         return new Response().code(HttpStatus.OK).data(users);
     }
 
-    @Validated
     @PostMapping("/actions/validate-username")
     public Response validateUsername(@NotBlank(message = "请求参数有误") String username) {
         boolean valid = this.userService.validateUsername(username);
@@ -85,7 +85,6 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('user:active')")
-    @Validated
     @PostMapping("/actions/update-active-state")
     public Response updateActiveStatus(@NotBlank(message = "请求参数有误") String userId) {
         this.userService.updateActiveStatus(userId);

@@ -15,26 +15,43 @@
       </Table>
     </Card>
     <info-modal ref="infoModal" @on-success-valid="submit"></info-modal>
-    <InitializationModal ref="initializationModal" @success-init="fetchData" @websocket-init="handleDatabaseInit"/>
   </div>
 </template>
 
 <script>
-import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo } from '@/api/unit'
+import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo, updateUnitLoginPolicy } from '@/api/unit'
 import InfoModal from './component/unit-info-modal'
-import InitializationModal from '@/views/single-page/database/list/component/initialization-modal'
+import mixin from '@/views/single-page/database/list/component/initialization-modal/mixin'
+
 export default {
   name: 'unit-info',
-  components: { InfoModal, InitializationModal },
+  components: { InfoModal },
+  mixins: [mixin],
   data() {
     return {
       columns: [
-        { title: '名称', key: 'name', sortable: true },
+        { title: '名称', key: 'name', sortable: true, width: 150 },
         { title: '简称', key: 'unitShortName' },
         { title: '唯一码', key: 'uniqCode' },
         { title: '过期时间', key: 'expireDate' },
         { title: '最大用户数', key: 'maxAccount' },
         { title: '最大在线用户数', key: 'maxOnlineAccount' },
+        {
+          title: '单点登录',
+          render: (h, p) => {
+            return h('i-switch', {
+              props: {
+                size: 'small',
+                value: p.row.singleLogin
+              },
+              on: {
+                'on-change': () => {
+                  this.handleActive(p.row.id)
+                }
+              }
+            })
+          }
+        },
         { title: '目标数据源', key: 'targetSource' },
         {
           title: '是否已授权',
@@ -54,7 +71,7 @@ export default {
           },
           width: 200
         },
-        { title: '操作', slot: 'action', align: 'center', width: 300 }
+        { title: '操作', slot: 'action', align: 'center', width: 230 }
       ],
       data: [],
       loading: false
@@ -99,18 +116,18 @@ export default {
         saveUnitInfo(data).then(res => {
           this.$Message.success(res.message)
           this.$refs.infoModal.handleCancel()
-          this.handleUnitDatabaseInit(res.data)
+          this.initDatabase({ id: res.data, unitName: data.name })
         })
       }
     },
-    async handleUnitDatabaseInit(unitDatabaseId) {
-      await this.$refs.initializationModal.showModal(unitDatabaseId)
-    },
-    handleDatabaseInit() {
-      this.$refs.initializationModal.handelInitialize()
-    },
     applyForAuthorization(row) {
       console.log(row)
+    },
+    handleActive(id) {
+      updateUnitLoginPolicy(id).then(res => {
+        this.$Message.success(res.message)
+        this.fetchData()
+      })
     }
   },
   mounted() {

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * @author chenlm
  */
-public class EncryptUtils {
+public class EncryptUtil {
 
     private static final String KEY = "ilisdatabasesalt";
     private static final String ALGORITHM_STR = "AES/ECB/PKCS5Padding";

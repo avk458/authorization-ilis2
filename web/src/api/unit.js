@@ -37,3 +37,11 @@ export const validateUniqCode = code => {
     params: { code: code }
   })
 }
+
+export const updateUnitLoginPolicy = id => {
+  return axios.request({
+    url: '/unit/actions/unit/login-policy',
+    method: 'post',
+    params: { unitId: id }
+  })
+}

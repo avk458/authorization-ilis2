@@ -22,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("role")
 @AllArgsConstructor
+@Validated
 public class RoleController {
 
     private final RoleService roleService;

@@ -18,6 +18,9 @@
       <FormItem label="最大在线用户数" prop="maxOnlineAccount">
         <InputNumber :max="1000" :min="1" v-model="formData.maxOnlineAccount" style="width: 100%"></InputNumber>
       </FormItem>
+      <FormItem label="单点登录" prop="singleLogin">
+        <i-switch v-model="formData.singleLogin" size="large" true-color="#13ce66" false-color="#ff4949"/>
+      </FormItem>
       <FormItem label="过期时间" prop="expireDate">
         <DatePicker type="date" format="yyyy-MM-dd" placeholder="选择日期" :value="formData.expireDate" @on-change="handleDateChange"></DatePicker>
       </FormItem>
@@ -71,7 +74,8 @@ export default {
         maxOnlineAccount: 0,
         targetSourceId: '',
         targetSource: '',
-        unitShortName: ''
+        unitShortName: '',
+        singleLogin: true
       },
       modalTitle: '新增单位信息',
       ruleValidate: {

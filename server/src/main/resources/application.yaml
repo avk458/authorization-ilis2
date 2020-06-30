@@ -7,10 +7,30 @@ server:
     worker-threads: 32
     buffer-size: 1024
     direct-buffers: true
-
 #logging:
 # do not change those config, unless you know what are u doing.
 spring:
+  profiles:
+    active: dev
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/static
+  aop:
+    auto: true
+    proxy-target-class: true
+  servlet:
+    multipart:
+      max-file-size:  10MB
+      max-request-size:  20MB
+  security:
+    auth0:
+      public-key: 'ilis2.authorization.dlfjgdkfg832423j4.s.df98sdf'
+      # minutes
+      expires-at: 120
+---
+spring:
+  profiles: dev
   datasource:
     host: 127.0.0.1
     port: 3306
@@ -30,20 +50,28 @@ spring:
     host: 127.0.0.1
     password:
     database: 1
-  aop:
-    auto: true
-    proxy-target-class: true
-  servlet:
-    multipart:
-      max-file-size:  10MB
-      max-request-size:  20MB
-  profiles:
-    active: dev
-  security:
-    auth0:
-      public-key: 'ilis2.authorization.dlfjgdkfg832423j4.s.df98sdf'
-      # minutes
-      expires-at: 120
+---
+spring:
+  profiles: test
+  datasource:
+    host: 192.168.2.3
+    port: 3306
+    url: jdbc:p6spy:mysql://192.168.2.3:3306/auth01?characterEncoding=utf8&serverTimezone=CTT&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 4
+      max-lifetime: 80000
+      idle-timeout: 60000
+      connection-timeout: 20000
+      minimum-idle: 1
+  redis:
+    port: 6379
+    host: 127.0.0.1
+    password:
+    database: 1
 
 mybatis-plus:
   configuration:

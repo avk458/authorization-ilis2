@@ -2,7 +2,7 @@ package cn.hitek.authorization.ilis2.product.configuration.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
@@ -38,7 +38,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
 
     @Override
     public void saveMainProfile(MainSourceProfile config) {
-        config.setPassword(EncryptUtils.encrypt(config.getPassword()));
+        config.setPassword(EncryptUtil.encrypt(config.getPassword()));
         if (MainSourceProfile.ACTIVE == config.getActive()) {
             setOtherConfigInactive();
         }
@@ -122,7 +122,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         }
         String password = entity.getPassword();
         if (StrUtil.isNotBlank(password)) {
-            entity.setPassword(EncryptUtils.encrypt(password));
+            entity.setPassword(EncryptUtil.encrypt(password));
         }
         return super.updateById(entity);
     }
@@ -154,7 +154,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
 
     @Override
     public void insertTargetProfile(TargetSourceProfile targetProfile) {
-        targetProfile.setPassword(EncryptUtils.encrypt(targetProfile.getPassword()));
+        targetProfile.setPassword(EncryptUtil.encrypt(targetProfile.getPassword()));
         this.targetSourceProfileMapper.insert(targetProfile);
     }
 
@@ -163,7 +163,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         TargetSourceProfile db = this.targetSourceProfileMapper.selectById(targetProfile.getId());
         String password = targetProfile.getPassword();
         if (StrUtil.isNotBlank(password)) {
-            targetProfile.setPassword(EncryptUtils.encrypt(password));
+            targetProfile.setPassword(EncryptUtil.encrypt(password));
         }
         // if any of the profile's host,port,username,password has been changed, then need redo connection valid
         touchProfileAvailable(db, targetProfile);
@@ -194,7 +194,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         if (StrUtil.isNotBlank(profile.getId())) {
             profile = this.targetSourceProfileMapper.selectById(profile.getId());
         } else {
-            profile.setPassword(EncryptUtils.encrypt(profile.getPassword()));
+            profile.setPassword(EncryptUtil.encrypt(profile.getPassword()));
         }
         boolean connected;
         try (Connection ignored = ConnectionHandler.getTargetConnection(profile)) {

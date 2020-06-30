@@ -1,6 +1,5 @@
 package cn.hitek.authorization.ilis2.product.database.manager;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -13,7 +12,7 @@ import java.security.Principal;
  * 处理服务端和客户端握手挥手
  * @author chenlm
  */
-@Component
+// @Component
 public class WebSocketDecoratorFactory implements WebSocketHandlerDecoratorFactory {
 
     @Override

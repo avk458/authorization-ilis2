@@ -63,4 +63,10 @@ public class UnitController {
         boolean exists = this.unitService.validateCode(code);
         return new Response().code(HttpStatus.OK).data(exists);
     }
+
+    @PostMapping("/actions/unit/login-policy")
+    public Response updateUnitLoginPolicy(@NotBlank(message = RequestConstants.PARAM_ERROR) String unitId) {
+        this.unitService.updateUnitLoginPolicy(unitId);
+        return new Response().code(HttpStatus.UPDATE);
+    }
 }

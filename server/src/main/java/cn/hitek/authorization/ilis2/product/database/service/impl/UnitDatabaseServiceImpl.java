@@ -3,7 +3,7 @@ package cn.hitek.authorization.ilis2.product.database.service.impl;
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.enums.DatabaseType;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
-import cn.hitek.authorization.ilis2.common.utils.EncryptUtils;
+import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
@@ -15,8 +15,6 @@ import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporters;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
-import cn.hitek.authorization.ilis2.product.database.helper.LogType;
-import cn.hitek.authorization.ilis2.product.database.manager.Messenger;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
@@ -34,6 +32,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.ResourceUtils;
 
@@ -63,60 +62,42 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     public void initUnitDatabase(String unitDatabaseId) {
         InitFile initFile = null;
         try {
-            Messenger.sendMessage(LogType.NORMAL, "准备获取单位数据库信息");
             UnitDatabase database = getById(unitDatabaseId);
             Objects.requireNonNull(database, "database info error");
-            Messenger.sendMessage(LogType.SUCCESS, "获取单位数据库信息成功");
             detectUnitDatabaseQualified(database);
-            Messenger.sendMessage(LogType.SUCCESS, "单位数据库验证成功");
-            Messenger.sendMessage(LogType.NORMAL, "准备获取单位配置信息");
             MainSourceProfile mainProfile = this.configService.getActiveConfig();
             Objects.requireNonNull(mainProfile, "can't find active database initial configuration");
-            Messenger.sendMessage(LogType.SUCCESS, "获取单位配置信息成功");
-            Messenger.sendMessage(LogType.NORMAL, "准备主数据源");
             Exporter dumper = Exporters.init(database.getDatabaseEnum());
             // 1. export
-            Messenger.sendMessage(LogType.NORMAL, "正在从主数据源导出数据");
             initFile = dumper.export(mainProfile);
             readProcessLogAndSent2Client(initFile);
-            Messenger.sendMessage(LogType.SUCCESS,
-                    String.format("从主数据源导出数据成功，sql文件：%s，日志文件：%s",
-                            initFile.getSqlFilePath(),
-                            initFile.getProcessLogPath()));
             initFile.setUnitDatabaseId(database.getId());
             initFile.setUnitDatabaseName(database.getDatabaseName());
-            Messenger.sendMessage(LogType.NORMAL, "开始新增数据库用户信息");
             TargetSourceProfile targetProfile = this.configService.getTargetProfileViaId(database.getTargetProfileId());
             initializeDatabaseUser(ConnectionHandler.getTargetConnection(targetProfile), database);
-            Messenger.sendMessage(LogType.SUCCESS, "新增数据库用户信息成功");
             // 2. initialize
-            Messenger.sendMessage(LogType.NORMAL, "开始初始化目标数据库");
             dumper.restore(targetProfile, database, initFile);
-            Messenger.sendMessage(LogType.SUCCESS, String.format("数据库：%s 初始化成功！", database.getDatabaseName()));
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
             super.updateById(database);
         } catch (BusinessException | SQLException e) {
-            Messenger.sendMessage(LogType.ERROR, String.format("操作失败：%s", e.getMessage()));
             if (null != initFile) {
                 File sql = new File(initFile.getSqlFilePath());
                 if (sql.exists()) {
                     deleteFileWhenCatchException(sql.getParent());
                 }
             }
-            Messenger.sendMessage(LogType.NORMAL, "工作文件夹已清空");
             throw e;
         } catch (Exception e) {
-            Messenger.sendMessage(LogType.ERROR, String.format("程序异常：%s", e.getMessage()));
-            throw e;
+            throw new BusinessException("数据库初始化失败！");
         }
     }
 
     public void initializeDatabaseUser(Connection connection, UnitDatabase unitDatabase) throws SQLException {
         try {
             final String schema = unitDatabase.getDatabaseName();
-            final String user = EncryptUtils.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
-            final String decryptPwd = EncryptUtils.decrypt(unitDatabase.getDatabasePwd());
+            final String user = EncryptUtil.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
+            final String decryptPwd = EncryptUtil.decrypt(unitDatabase.getDatabasePwd());
             Statement statement = connection.createStatement();
             statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
             // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
@@ -133,10 +114,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         List<String> logs = fileReader.readLines();
         for (String log : logs) {
             if (log.contains("error") || log.contains("ERROR")) {
-                Messenger.sendMessage(LogType.ERROR, log);
                 throw new BusinessException("Got error");
-            } else {
-                Messenger.sendMessage(LogType.WARN, log);
             }
         }
     }
@@ -200,8 +178,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public boolean save(UnitDatabase entity) {
-        entity.setDatabaseUsername(EncryptUtils.encrypt(entity.getDatabaseUsername()));
-        entity.setDatabasePwd(EncryptUtils.encrypt(entity.getDatabasePwd()));
+        entity.setDatabaseUsername(EncryptUtil.encrypt(entity.getDatabaseUsername()));
+        entity.setDatabasePwd(EncryptUtil.encrypt(entity.getDatabasePwd()));
         return super.save(entity);
     }
 
@@ -211,12 +189,12 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         String databaseUsername = entity.getDatabaseUsername();
         String databasePwd = entity.getDatabasePwd();
         if (StrUtil.isNotBlank(databaseUsername)) {
-            renameDatabaseUsername(EncryptUtils.decrypt(dbEntity.getDatabaseUsername()), databaseUsername, entity.getTargetProfileId());
-            databaseUsername = EncryptUtils.encrypt(databaseUsername);
+            renameDatabaseUsername(EncryptUtil.decrypt(dbEntity.getDatabaseUsername()), databaseUsername, entity.getTargetProfileId());
+            databaseUsername = EncryptUtil.encrypt(databaseUsername);
         }
         if (StrUtil.isNotBlank(databasePwd)) {
             alterDatabasePassword(dbEntity, entity, entity.getTargetProfileId());
-            databasePwd = EncryptUtils.encrypt(databasePwd);
+            databasePwd = EncryptUtil.encrypt(databasePwd);
         }
         entity.setDatabaseUsername(databaseUsername);
         entity.setDatabasePwd(databasePwd);
@@ -225,7 +203,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     private void alterDatabasePassword(UnitDatabase dbEntity, UnitDatabase entity, String profileId) {
         try (Connection connection = this.configService.getTargetSourceConnection(profileId)) {
-            String username = EncryptUtils.decrypt(dbEntity.getDatabaseUsername()).equals(entity.getDatabaseUsername())
+            String username = EncryptUtil.decrypt(dbEntity.getDatabaseUsername()).equals(entity.getDatabaseUsername())
                     ? dbEntity.getDatabaseUsername() : entity.getDatabaseUsername();
             Statement statement = connection.createStatement();
             statement.execute("ALTER USER '" + username + "'@'%' IDENTIFIED BY '" + entity.getDatabasePwd() + "'");
@@ -292,7 +270,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         return new DriverManagerDataSource(
                 ConnectionHandler.getTargetPath(database),
                 profile.getUsername(),
-                EncryptUtils.decrypt(profile.getPassword()));
+                EncryptUtil.decrypt(profile.getPassword()));
     }
 
     private UpdateEchoLog executeScript(DataSourceTransactionManager manager,
@@ -325,5 +303,23 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             }
         }
         return log;
+    }
+
+    @Override
+    public Map<String, String> getDatabaseVersionAndScriptVersion(Unit unit) {
+        String version = this.scriptService.getLastDataScriptId();
+        UnitDatabase database = query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
+        HashMap<String, String> result = new HashMap<>(0);
+        result.put("databaseVersion", database.getDataVersion().toString());
+        result.put("scriptVersion", version);
+        return result;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateDatabaseDataVersion(String unitId, Long version) {
+        UnitDatabase database = query().eq(UnitDatabase::getUnitId, unitId).getOne();
+        database.setDataVersion(version);
+        baseMapper.updateDataVersion(database.getId(), version);
     }
 }

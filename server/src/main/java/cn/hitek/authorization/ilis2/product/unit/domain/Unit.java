@@ -62,6 +62,8 @@ public class Unit extends BaseEntity implements Serializable {
 
     private Boolean isAuthorized;
 
+    private Boolean singleLogin;
+
     private String authorizationCode;
 
     private String unitShortName;

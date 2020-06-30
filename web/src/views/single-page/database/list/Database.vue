@@ -15,7 +15,7 @@
       </Table>
     </Card>
     <DatabaseModal ref="databaseModal" @on-success-valid="submit"/>
-    <InitializationModal ref="initializationModal" @success-init="fetchData"/>
+<!--    <InitializationModal ref="initializationModal" @success-init="fetchData"/>-->
     <update-echo-log ref="updateEchoLog" :unit-db="unitDb" @success-update="fetchData"/>
     <script-modal ref="scriptModal"/>
   </div>
@@ -23,12 +23,13 @@
 <script>
 import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseInfo } from '@/api/unit-database'
 import DatabaseModal from './component/database-modal/'
-import InitializationModal from './component/initialization-modal/'
 import UpdateEchoLog from './component/update-echo-modal'
 import ScriptModal from '@/views/single-page/database/script/components/script'
+import InitMixin from './component/initialization-modal/mixin'
 
 export default {
-  components: { DatabaseModal, InitializationModal, UpdateEchoLog, ScriptModal },
+  components: { DatabaseModal, UpdateEchoLog, ScriptModal },
+  mixins: [InitMixin],
   data () {
     return {
       columns: [
@@ -135,7 +136,7 @@ export default {
       }
     },
     handleInit(val) {
-      this.$refs.initializationModal.showModal(val.id)
+      this.initDatabase(val)
     },
     update(row) {
       this.$refs.updateEchoLog.showModal()
