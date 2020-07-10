@@ -5,7 +5,7 @@
       <Divider type="vertical" />
       <Button type="success" @click="handleScriptModal">提交脚本</Button>
       <Divider type="vertical"/>
-      <Button type="warning" @click="handleScriptModal">批量升级</Button>
+      <Button type="warning" @click="batchUpdateDatabase">批量升级</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
@@ -27,7 +27,7 @@ import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseIn
 import DatabaseModal from './component/database-modal/'
 import UpdateEchoLog from './component/update-echo-modal'
 import ScriptModal from '@/views/single-page/database/script/components/script'
-import InitMixin from './component/initialization-modal/mixin'
+import InitMixin from '@/mixins/mixin'
 
 export default {
   components: { DatabaseModal, UpdateEchoLog, ScriptModal },
@@ -76,8 +76,26 @@ export default {
           key: 'dataVersion',
           render: (h, p) => {
             const ver = p.row.dataVersion || 0
-            return h('span', 'v' + ver)
+            return h('Tag', {
+              props: {
+                color: 'blue'
+              }
+            }, 'v.' + ver)
           }
+        },
+        {
+          title: '可否管理',
+          render: (h, p) => {
+            const m = p.row.manageAble
+            return h('Icon', {
+              props: {
+                type: m ? 'md-checkmark-circle' : 'md-close-circle',
+                color: m ? 'green' : 'red'
+              }
+            })
+          },
+          align: 'center',
+          width: 95
         },
         {
           title: '上一次修改人员',
@@ -147,6 +165,13 @@ export default {
     },
     handleScriptModal() {
       this.$refs.scriptModal.showModal()
+    },
+    batchUpdateDatabase() {
+      this.$Modal.confirm({
+        title: '批量升级确认',
+        content: '您确定要将所有能管理的单位数据库都升级到最新版本吗？',
+        onOk: () => {}
+      })
     }
   },
   mounted() {

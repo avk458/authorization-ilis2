@@ -94,6 +94,8 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     @Digits(integer = 211, fraction = 233, message = "数据库类型不合法", groups = {OnCreate.class, OnUpdate.class})
     private Integer databaseType;
 
+    private Boolean manageAble;
+
     /**
      * 是否已初始化
      */

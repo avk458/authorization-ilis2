@@ -1,7 +1,7 @@
 <template>
   <Modal v-model="logVisible" title="数据库升级">
     <div v-if="!updated">
-      <p>数据库：{{ unitDb.databaseName }}当前数据版本为：v{{ unitDb.dataVersion }}</p>
+      <p>数据库：{{ unitDb.databaseName }}当前数据版本为：v.{{ unitDb.dataVersion || 0 }}</p>
       <p>您确定要升级至最新版吗？</p>
     </div>
     <div v-else>

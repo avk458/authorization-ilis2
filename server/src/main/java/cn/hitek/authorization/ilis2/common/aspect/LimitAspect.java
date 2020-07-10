@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -33,6 +34,7 @@ import java.util.Objects;
 @Aspect
 @Component
 @AllArgsConstructor
+@Profile("prod")
 public class LimitAspect {
 
     private final RedisTemplate<String, Serializable> redis;

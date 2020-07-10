@@ -84,6 +84,8 @@ import { getLastId } from '@/api/script'
 import ColumnSyncModal from './components/sync-column-modal'
 import ScriptModal from '../script/components/script/script-modal'
 import config from '@/config'
+import { getToken } from '@/libs/util'
+import mixin from '@/mixins/mixin'
 
 export default {
   components: { ScriptModal, ColumnSyncModal },
@@ -95,6 +97,7 @@ export default {
       ]
     }
   },
+  mixins: [mixin],
   methods: {
     fetchData() {
       getDatabases().then(res => {
@@ -108,22 +111,6 @@ export default {
     },
     handleScriptModal() {
       this.$refs.scriptModal.showModal()
-    },
-    async handleExportDataScript() {
-      const baseUrl = !this.prod ? config.baseUrl.dev : config.baseUrl.pro
-      this.$axios.get(baseUrl + '/script/actions/export')
-        .then(res => {
-          const fileName = res.headers['content-disposition']
-          const url = window.URL.createObjectURL(new Blob([res.data]))
-          const link = document.createElement('a')
-          link.href = url
-          link.setAttribute('download', fileName)
-          document.body.appendChild(link)
-          link.click()
-        })
-        .catch(() => {
-          this.$Message.error('导出失败')
-        })
     },
     handleUpload (file) {
       this.upload(file)

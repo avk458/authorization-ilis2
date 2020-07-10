@@ -7,6 +7,7 @@ import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
+import cn.hitek.authorization.ilis2.product.configuration.event.UpdateDatabaseEvent;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
@@ -26,10 +27,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -241,10 +244,20 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         ud.setUnitName(unit.getName());
         ud.setTargetProfile(targetProfile.getProfileName());
         ud.setTargetProfileId(targetProfile.getId());
-        // 有前置保障，每次提交脚本都会在标准库执行
+        // 有前置保障，每次升级数据库都会在标准库执行
         ud.setDataVersion(this.scriptService.getLastDataScriptId());
+        ud.setManageAble(targetProfile.getAvailable());
         save(ud);
         return ud.getId();
+    }
+
+    @Async
+    @EventListener
+    public void updateDatabaseManageAbleListener(UpdateDatabaseEvent event) {
+        String targetProfileId = event.getTargetProfileId();
+        List<UnitDatabase> list = query().eq(UnitDatabase::getTargetProfileId, targetProfileId).list();
+        list.stream().filter(ud -> !ud.getManageAble()).forEach(ud -> ud.setManageAble(true));
+        super.updateBatchById(list);
     }
 
     @Override

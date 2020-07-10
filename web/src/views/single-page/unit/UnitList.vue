@@ -21,7 +21,7 @@
 <script>
 import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo, updateUnitLoginPolicy } from '@/api/unit'
 import InfoModal from './component/unit-info-modal'
-import mixin from '@/views/single-page/database/list/component/initialization-modal/mixin'
+import mixin from '@/mixins/mixin'
 
 export default {
   name: 'unit-info',

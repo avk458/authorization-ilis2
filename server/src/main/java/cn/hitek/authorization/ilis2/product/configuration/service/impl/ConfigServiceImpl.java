@@ -7,6 +7,7 @@ import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.configuration.domain.MainSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.TargetSourceProfile;
 import cn.hitek.authorization.ilis2.product.configuration.domain.vo.Folder;
+import cn.hitek.authorization.ilis2.product.configuration.event.UpdateDatabaseEvent;
 import cn.hitek.authorization.ilis2.product.configuration.mapper.MainSourceProfileMapper;
 import cn.hitek.authorization.ilis2.product.configuration.mapper.TargetSourceProfileMapper;
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
@@ -15,6 +16,7 @@ import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ import static cn.hitek.authorization.ilis2.product.database.helper.SqlUtil.execu
 public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, MainSourceProfile> implements ConfigService {
 
     private final TargetSourceProfileMapper targetSourceProfileMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void saveMainProfile(MainSourceProfile config) {
@@ -165,6 +168,10 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         }
         // if any of the profile's host,port,username,password has been changed, then need redo connection valid
         touchProfileAvailable(db, targetProfile);
+        if (targetProfile.getAvailable()) {
+            UpdateDatabaseEvent event = new UpdateDatabaseEvent(this, targetProfile.getId());
+            eventPublisher.publishEvent(event);
+        }
         this.targetSourceProfileMapper.updateById(targetProfile);
     }
 
