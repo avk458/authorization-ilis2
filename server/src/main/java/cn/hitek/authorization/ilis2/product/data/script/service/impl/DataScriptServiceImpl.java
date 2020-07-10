@@ -2,10 +2,11 @@ package cn.hitek.authorization.ilis2.product.data.script.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
+import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.mapper.DataScriptMapper;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
-import cn.hitek.authorization.ilis2.product.database.helper.DataSourceProperties;
+import cn.hitek.authorization.ilis2.common.properties.DataSourceProperties;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +44,11 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
     public List<DataScript> getScriptRange(Long dataVersion) {
         dataVersion = dataVersion == null ? 0L : dataVersion;
         return query().gt(DataScript::getId, dataVersion).list();
+    }
+
+    @Override
+    public List<DataScript> getScriptRange(Long dataVersion, Long updateVersion) {
+        return query().gt(DataScript::getId, dataVersion).le(DataScript::getId, updateVersion).list();
     }
 
     @SneakyThrows
@@ -96,7 +103,7 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
     }
 
     @Override
-    public String getLastDataScriptId() {
+    public String getLastDataScriptVersion() {
         return generateFileName(baseMapper.getLastId());
     }
 
@@ -118,7 +125,18 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
         return baseMapper.selectPage(
                 page,
                 Wrappers.lambdaQuery(DataScript.class)
-                        .orderByDesc(DataScript::getCreateTime)
+                        .orderByDesc(DataScript::getId)
         );
+    }
+
+    @Override
+    public Long getLastDataScriptId() {
+        return baseMapper.getLastId();
+    }
+
+    @Override
+    public void scriptExchange(String id1, String id2) {
+        UserDetail principal = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        baseMapper.scriptExchange(id1, id2, principal);
     }
 }

@@ -15,6 +15,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -31,6 +32,7 @@ dependencies {
 	compile group: 'p6spy', name: 'p6spy', version: '3.9.0'
 	compile 'cn.hutool:hutool-all:5.3.5'
 	implementation 'com.auth0:java-jwt:3.10.3'
+	compile group: 'org.lionsoul', name: 'ip2region', version: '1.7.2'
 }
 
 test {

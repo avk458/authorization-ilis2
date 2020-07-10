@@ -24,10 +24,43 @@ spring:
       max-file-size:  10MB
       max-request-size:  20MB
   security:
+    white-list:
+      - /
+      - /auth/**
+      - /js/**
+      - /css/**
+      - /img/**
+      - /fonts/**
+      - /favicon.ico
+      - /online/**
     auth0:
       public-key: 'ilis2.authorization.dlfjgdkfg832423j4.s.df98sdf'
       # minutes
       expires-at: 120
+mybatis-plus:
+  configuration:
+    cache-enabled: false
+    default-executor-type: reuse
+    jdbc-type-for-null: 'null'
+    lazy-loading-enabled: true
+    local-cache-scope: session
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+  mapper-locations: classpath:mapper/**/*Mapper.xml
+  global-config:
+    db-config:
+      id-type: assign_id
+      table-prefix: t_
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      insert-strategy:
+      update-strategy: not_null
+      select-strategy: not_empty
+    banner: false
+    super-mapper-class: com.baomidou.mybatisplus.core.mapper.BaseMapper
+  type-enums-package: cn.hitek.authorization.ilis2.common.enums
+  type-aliases-package:
+  type-handlers-package:
 ---
 spring:
   profiles: dev
@@ -72,28 +105,3 @@ spring:
     host: 127.0.0.1
     password:
     database: 1
-
-mybatis-plus:
-  configuration:
-    cache-enabled: false
-    default-executor-type: reuse
-    jdbc-type-for-null: 'null'
-    lazy-loading-enabled: true
-    local-cache-scope: session
-    map-underscore-to-camel-case: true
-    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
-  mapper-locations: classpath:mapper/**/*Mapper.xml
-  global-config:
-    db-config:
-      id-type: assign_id
-      table-prefix: t_
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      insert-strategy:
-      update-strategy: not_null
-      select-strategy: not_empty
-    banner: false
-    super-mapper-class: com.baomidou.mybatisplus.core.mapper.BaseMapper
-  type-enums-package: cn.hitek.authorization.ilis2.common.enums
-  type-aliases-package:
-  type-handlers-package:

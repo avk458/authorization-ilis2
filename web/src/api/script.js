@@ -37,3 +37,14 @@ export const getScripts = params => {
     params: params
   })
 }
+
+export const changeScript = (x, y) => {
+  return axios.request({
+    url: '/script/actions/exchange',
+    method: 'post',
+    params: {
+      id1: x,
+      id2: y
+    }
+  })
+}

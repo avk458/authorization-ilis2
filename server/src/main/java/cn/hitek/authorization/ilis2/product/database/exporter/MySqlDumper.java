@@ -75,7 +75,6 @@ public class MySqlDumper implements Exporter {
         command.add("-P" + config.getPort());
         command.add("-u" + config.getUsername());
         command.add("-p" + password);
-        command.add("-d");
         // make sure this progress will not hang in metadata lock
         command.add("--single-transaction");
         command.add(config.getSourceSchema());

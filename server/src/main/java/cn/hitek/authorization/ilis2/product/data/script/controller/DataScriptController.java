@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.data.script.controller;
 
+import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 /**
  * @author chenlm
@@ -60,7 +62,7 @@ public class DataScriptController {
 
     @GetMapping("/last/version")
     public Response getLastVersion() {
-        String ver = this.dataScriptService.getLastDataScriptId();
+        String ver = this.dataScriptService.getLastDataScriptVersion();
         return new Response().code(HttpStatus.OK).data(ver);
     }
 
@@ -69,5 +71,12 @@ public class DataScriptController {
     public Response uploadDataScript(@RequestParam("file") MultipartFile multipartFile) {
         this.dataScriptService.importScriptFile(multipartFile);
         return new Response().code(HttpStatus.OK);
+    }
+
+    @PostMapping("/actions/exchange")
+    public Response changeScript(@NotBlank(message = RequestConstants.PARAM_ERROR) String id1,
+                                 @NotBlank(message = RequestConstants.PARAM_ERROR) String id2) {
+        this.dataScriptService.scriptExchange(id1, id2);
+        return new Response().code(HttpStatus.UPDATE);
     }
 }

@@ -1,6 +1,8 @@
-package cn.hitek.authorization.ilis2.product.database.manager;
+package cn.hitek.authorization.ilis2.framework.socket.manager;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
@@ -8,8 +10,8 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 /**
  * @author chenlm
  */
-// @Configuration
-// @EnableWebSocketMessageBroker
+@Configuration
+@EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketDecoratorFactory webSocketDecoratorFactory;
@@ -29,9 +31,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/messenger")
+        registry.addEndpoint("/online")
                 .setAllowedOrigins("*")
-                .setHandshakeHandler(principalHandshakeHandler);
+                .setHandshakeHandler(principalHandshakeHandler)
+                .withSockJS();
     }
 
     @Override

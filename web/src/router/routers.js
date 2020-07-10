@@ -65,33 +65,12 @@ export default [
     ]
   },
   {
-    path: '/unit',
-    name: 'unit',
-    component: Main,
-    meta: {
-      hideInBread: true,
-      icon: 'logo-buffer',
-      access: ['ROLE_ADMIN', 'ROLE_OPS']
-    },
-    children: [
-      {
-        path: '/unit/list',
-        name: 'unit_list',
-        meta: {
-          icon: 'logo-buffer',
-          title: '单位信息管理'
-        },
-        component: () => import('@/views/single-page/unit/UnitList.vue')
-      }
-    ]
-  },
-  {
     path: '/customer',
     name: 'customer',
     component: Main,
     meta: {
       icon: 'md-people',
-      title: '单位用户',
+      title: '用户单位',
       hideInBread: true
     },
     children: [
@@ -100,20 +79,20 @@ export default [
         name: 'customer_list',
         meta: {
           icon: 'md-people',
-          access: ['ROLE_ADMIN'],
+          access: ['ROLE_ADMIN', 'ROLE_OPS'],
           title: '用户管理'
         },
-        component: () => import('@/views/single-page/customer/Customer.vue')
+        component: () => import('@/views/single-page/unit/customer/Customer.vue')
       },
       {
-        path: '/customer/list2',
-        name: 'customer_list2',
+        path: '/unit/list',
+        name: 'unit_list',
         meta: {
-          icon: 'md-people',
-          // access: ['ROLE_ADMIN'],
-          title: '用户管理2'
+          icon: 'logo-buffer',
+          access: ['ROLE_ADMIN', 'ROLE_OPS'],
+          title: '单位信息管理'
         },
-        component: () => import('@/views/single-page/customer/Customer.vue')
+        component: () => import('@/views/single-page/unit/UnitList.vue')
       }
     ]
   },

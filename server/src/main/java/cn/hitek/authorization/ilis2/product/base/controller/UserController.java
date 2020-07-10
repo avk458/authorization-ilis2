@@ -41,6 +41,11 @@ public class UserController {
         return new Response().code(HttpStatus.OK).data(info);
     }
 
+    @GetMapping("/message/count")
+    public Response getMessageCount() {
+        return new Response().code(HttpStatus.OK).data(3);
+    }
+
     @PreAuthorize("hasAuthority('user:add')")
     @PostMapping
     public Response addUser(@Validated(OnCreate.class) @RequestBody User user) {

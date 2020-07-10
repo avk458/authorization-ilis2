@@ -5,10 +5,14 @@ import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
+import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +72,17 @@ public class UnitController {
     public Response updateUnitLoginPolicy(@NotBlank(message = RequestConstants.PARAM_ERROR) String unitId) {
         this.unitService.updateUnitLoginPolicy(unitId);
         return new Response().code(HttpStatus.UPDATE);
+    }
+
+    @GetMapping("/accounts")
+    public Response getUnitAccountData() {
+        List<UnitAccount> data = this.unitService.getUnitAccountData();
+        return new Response().code(HttpStatus.OK).data(data);
+    }
+
+    @GetMapping("/login/log/{unitCode}")
+    public Response getUnitLoginLog(@PathVariable String unitCode, Page<LoginInfo> page) {
+        IPage<LoginInfo> logs = this.unitService.getUnitLoginLog(unitCode, page);
+        return new Response().code(HttpStatus.OK).data(logs);
     }
 }

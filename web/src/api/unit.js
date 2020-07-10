@@ -45,3 +45,18 @@ export const updateUnitLoginPolicy = id => {
     params: { unitId: id }
   })
 }
+
+export const getUnitAccount = () => {
+  return axios.request({
+    url: '/unit/accounts',
+    method: 'get'
+  })
+}
+
+export const getUnitLoginLog = (unitCode, params) => {
+  return axios.request({
+    url: `/unit/login/log/${unitCode}`,
+    method: 'get',
+    params: params
+  })
+}

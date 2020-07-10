@@ -40,13 +40,13 @@ public class ConfigController {
     }
 
     @GetMapping("/tables")
-    public Response getTableListFormDatabase(MainSourceProfile config) throws SQLException {
-        if (StrUtil.isNotBlank(config.getId())) {
-            config = this.configService.getById(config.getId());
+    public Response getTableListFormDatabase(MainSourceProfile profile) throws SQLException {
+        if (StrUtil.isNotBlank(profile.getId())) {
+            profile = this.configService.getById(profile.getId());
         } else {
-            config.setPassword(EncryptUtil.encrypt(config.getPassword()));
+            profile.setPassword(EncryptUtil.encrypt(profile.getPassword()));
         }
-        List<Map<String, String>> list = this.configService.getTableList(config);
+        List<Map<String, String>> list = this.configService.getTableList(profile);
         return new Response().code(HttpStatus.OK).data(list);
     }
 
@@ -85,9 +85,14 @@ public class ConfigController {
     }
 
     @GetMapping("/connection/databases")
-    public Response getDatabases(MainSourceProfile config) {
-        config.setPassword(EncryptUtil.encrypt(config.getPassword()));
-        List<Map<String, String>> databases = this.configService.getDatabases(config);
+    public Response getDatabases(MainSourceProfile profile) {
+        if (StrUtil.isNotBlank(profile.getId())) {
+            profile = this.configService.getById(profile.getId());
+            profile.setSourceSchema(null);
+        } else {
+            profile.setPassword(EncryptUtil.encrypt(profile.getPassword()));
+        }
+        List<Map<String, String>> databases = this.configService.getDatabases(profile);
         return new Response().code(HttpStatus.OK).data(databases);
     }
 

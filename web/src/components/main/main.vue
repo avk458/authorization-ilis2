@@ -39,8 +39,8 @@ import ABackTop from './components/a-back-top'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { getNewTagList, routeEqual } from '@/libs/util'
 import routers from '@/router/routers'
-import minLogo from '@/assets/logo-mini.png'
-import maxLogo from '@/assets/logo.png'
+import minLogo from '@/assets/hitek-mini.png'
+import maxLogo from '@/assets/hitek.png'
 import './main.less'
 
 export default {

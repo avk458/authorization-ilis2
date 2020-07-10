@@ -5,4 +5,21 @@
     <select id="getLastId" resultType="long">
         SELECT MAX(id) FROM t_data_script
     </select>
+    <update id="scriptExchange">
+        update t_data_script x
+        join t_data_script y
+        on (x.id = #{id1} and y.id = #{id2}) or (x.id = #{id2} and y.id = #{id1})
+        set x.script = y.script, y.script = x.script,
+            x.type = y.type, y.type = x.type,
+            x.remark = y.remark, y.remark = x.remark,
+            x.create_by = y.create_by, y.create_by = x.create_by,
+            x.create_name = y.create_name, y.create_name = x.create_name,
+            x.create_time = y.create_time, y.create_time = x.create_time,
+            x.update_by = #{userDetail.username},
+            y.update_by = #{userDetail.username},
+            x.update_name = #{userDetail.realName},
+            y.update_name = #{userDetail.realName},
+            x.update_time = now(),
+            y.update_time = now()
+    </update>
 </mapper>

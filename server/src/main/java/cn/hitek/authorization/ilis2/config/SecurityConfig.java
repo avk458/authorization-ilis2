@@ -2,8 +2,10 @@ package cn.hitek.authorization.ilis2.config;
 
 import cn.hitek.authorization.ilis2.common.entrypoint.JwtAuthenticationEntryPoint;
 import cn.hitek.authorization.ilis2.common.jwt.AuthenticationTokenFilter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,12 +21,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 /**
  * @author chenlm
  */
+@Setter
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@ConfigurationProperties(prefix = "spring.security")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -36,6 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Qualifier("userDetailServiceImpl")
     @Autowired
     private UserDetailsService userDetailsService;
+
+    private List<String> whiteList;
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -53,7 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-                .antMatchers("/auth/**", "/", "/js/**", "/css/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
+                .antMatchers(whiteList.toArray(new String[0])).permitAll()
                 .anyRequest().authenticated()
             .and()
             .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)

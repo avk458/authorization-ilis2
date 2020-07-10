@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.database.helper;
+package cn.hitek.authorization.ilis2.common.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

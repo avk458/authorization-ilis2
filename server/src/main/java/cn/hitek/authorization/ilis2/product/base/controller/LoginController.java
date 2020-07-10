@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.base.controller;
 
+import cn.hitek.authorization.ilis2.common.annotations.Limit;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.base.domain.User;
@@ -24,15 +25,11 @@ public class LoginController {
 
     private final UserService userService;
 
+    @Limit(name = "用户登录", key = "login", prefix = "limit", period = 60, count = 20)
     @PostMapping("/login")
     public Response login(@RequestBody User loginUser) {
         String token = this.userService.handleLogin(loginUser);
         return new Response().code(HttpStatus.OK).data(token);
-    }
-
-    @GetMapping("/message/count")
-    public Response getMessageCount() {
-        return new Response().code(HttpStatus.OK).data(3);
     }
 
     @PostMapping("/logout")

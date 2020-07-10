@@ -38,13 +38,12 @@ export default {
   data() {
     return {
       mainColumns: [
-        { title: '配置名称', key: 'profileName', width: 120 },
+        { title: '配置名称', key: 'profileName', width: 160 },
         { title: 'Host', key: 'host', width: 160 },
         { title: '端口', key: 'port', width: 80 },
-        { title: '用户名', key: 'username', width: 100 },
+        { title: '用户名', key: 'username', width: 180 },
         { title: '文件存放位置', key: 'path', ellipsis: true },
-        { title: 'Source Schema', key: 'sourceSchema', width: 150 },
-        { title: 'Standard Schema', key: 'standardSchema', width: 160 },
+        { title: 'Source Schema', key: 'sourceSchema', width: 250 },
         {
           title: '是否启用',
           key: 'active',
@@ -64,7 +63,7 @@ export default {
           align: 'center',
           width: 100
         },
-        { title: '操作', slot: 'action', align: 'center', width: 170 }
+        { title: '操作', slot: 'action', align: 'center', width: 200 }
       ],
       mainProfiles: [],
       targetProfiles: [],

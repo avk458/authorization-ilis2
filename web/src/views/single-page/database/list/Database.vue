@@ -4,6 +4,8 @@
       <Button type="primary" @click="handleModal" disabled>新增数据库</Button>
       <Divider type="vertical" />
       <Button type="success" @click="handleScriptModal">提交脚本</Button>
+      <Divider type="vertical"/>
+      <Button type="warning" @click="handleScriptModal">批量升级</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
@@ -33,7 +35,7 @@ export default {
   data () {
     return {
       columns: [
-        { title: '所属单位', key: 'unitName' },
+        { title: '所属单位', key: 'unitName', width: 150 },
         { title: '数据库名', key: 'databaseName' },
         { title: 'Host', key: 'host' },
         { title: '端口', key: 'port' },
@@ -84,7 +86,8 @@ export default {
             const row = p.row
             const person = row.updateBy ? row.updateBy : row.createBy
             return h('span', person)
-          }
+          },
+          width: 150
         },
         { title: '操作', slot: 'action', align: 'center', width: 250 }
       ],

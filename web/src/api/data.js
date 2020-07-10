@@ -1,8 +1,8 @@
 import axios from '@/libs/api.request'
 
-export const getTableData = () => {
+export const getDatabases = () => {
   return axios.request({
-    url: '/data-manage/database/list',
+    url: '/data-manage/databases',
     method: 'get'
   })
 }
@@ -17,16 +17,6 @@ export const syncSchemaColumns = data => {
       targetProfileId: targetProfileId,
       sourceSchema: sourceSchema,
       targetSchemas: targetSchemas
-    }
-  })
-}
-
-export const getStandardSchemaViaConfigId = configId => {
-  return axios.request({
-    url: 'data-manage/config/standard-database',
-    method: 'get',
-    params: {
-      configId: configId
     }
   })
 }

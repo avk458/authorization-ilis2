@@ -79,7 +79,7 @@
   </div>
 </template>
 <script>
-import { getTableData } from '@/api/data'
+import { getDatabases } from '@/api/data'
 import { getLastId } from '@/api/script'
 import ColumnSyncModal from './components/sync-column-modal'
 import ScriptModal from '../script/components/script/script-modal'
@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     fetchData() {
-      getTableData().then(res => {
+      getDatabases().then(res => {
         this.cards = res.data
         this.spinShow = false
         // eslint-disable-next-line no-return-assign

@@ -2,6 +2,7 @@ package cn.hitek.authorization.ilis2.config;
 
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
+import cn.hitek.authorization.ilis2.common.exception.CustomException;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -30,7 +31,11 @@ public class AuthorityExceptionAdvice {
     public Response handlingUnexpectedException(Exception e) {
         e.printStackTrace();
         log.warn("系统异常：{}", e.getMessage());
-        return new Response().code(HttpStatus.FAIL).message("程序异常：" + e.getMessage());
+        String msg = "程序异常";
+        if (e.getCause() instanceof CustomException) {
+            msg = "程序异常" + "：" + e.getMessage();
+        }
+        return new Response().code(HttpStatus.FAIL).message(msg);
     }
 
     @ExceptionHandler(BusinessException.class)

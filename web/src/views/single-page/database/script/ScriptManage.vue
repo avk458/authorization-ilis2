@@ -2,7 +2,7 @@
  <Card dis-hover>
    <Button type="success" @click="handleScriptModal">提交脚本</Button>
    <Divider/>
-   <Table border :data="data" :columns="columns">
+   <Table border :data="data" :columns="columns" :draggable="true" @on-drag-drop="handleDrag">
      <template slot-scope="{ row }" slot="action">
        <Button size="small" type="primary" style="margin-right: 4px" @click="edit(row)">编辑</Button>
        <Button size="small" type="error" @click="remove(row)">删除</Button>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getScripts, deleteScript } from '@/api/script'
+import { getScripts, deleteScript, changeScript } from '@/api/script'
 import ScriptModal from './components/script/'
 
 export default {
@@ -81,6 +81,15 @@ export default {
     edit(row) {
       const data = { ...row }
       this.$refs.scriptModal.showModal(data)
+    },
+    handleDrag(a, b) {
+      const x = this.data[a]
+      const y = this.data[b]
+      this.data.splice(b, 1, ...this.data.splice(a, 1, y))
+      changeScript(x.id, y.id).then(res => {
+        this.$Message.success(res.message)
+        this.fetchData()
+      })
     }
   },
   mounted() {

@@ -82,13 +82,11 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         try (Connection connection = ConnectionHandler.getConnection(config)) {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SHOW TABLES ");
-            int count = 0;
             while (rs.next()) {
                 HashMap<String, String> table = new HashMap<>(8);
-                table.put("value", count + "");
+                table.put("value", rs.getString(1));
                 table.put("label", rs.getString(1));
                 tables.add(table);
-                count++;
             }
         }
         return tables;

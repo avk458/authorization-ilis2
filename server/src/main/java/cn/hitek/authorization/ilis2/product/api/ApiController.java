@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.api;
 
+import cn.hitek.authorization.ilis2.common.annotations.Limit;
 import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
@@ -33,6 +34,7 @@ public class ApiController {
     private final UnitDatabaseService databaseService;
     private final DataScriptService dataScriptService;
 
+    @Limit(name = "单位用户登录", key = "clientLogin", prefix = "limit", period = 60, count = 10)
     @GetMapping("/unit/info")
     public String getUnitInfo(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR) String code) {
         return this.unitService.getUnitInfo(code);
@@ -43,20 +45,23 @@ public class ApiController {
         this.unitService.logUserLogin(loginInfo);
     }
 
+    @Limit(name = "获取数据库数据版本", key = "dataVersion", prefix = "limit", period = 60, count = 20)
     @GetMapping("/data/version")
     public Response getDatabaseVersionAndScriptVersion(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, code).getOne();
         Objects.requireNonNull(unit, "未获取到对应单位信息");
-        Map<String, String> result = this.databaseService.getDatabaseVersionAndScriptVersion(unit);
+        Map<String, Long> result = this.databaseService.getDatabaseVersionAndScriptVersion(unit);
         return new Response().code(HttpStatus.OK).data(result);
     }
 
-    @GetMapping("/data/script")
-    public Response getDataScriptRange(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code) {
+    @Limit(name = "获取数据库数据脚本", key = "dataScript", prefix = "limit", period = 60, count = 20)
+    @GetMapping("/data/script/{updateVer}")
+    public Response getDataScriptRange(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code,
+                                       @PathVariable Long updateVer) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, code).getOne();
         Objects.requireNonNull(unit, "未获取到对应单位信息");
         UnitDatabase database = this.databaseService.query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
-        List<DataScript> scripts = this.dataScriptService.getScriptRange(database.getDataVersion());
+        List<DataScript> scripts = this.dataScriptService.getScriptRange(database.getDataVersion(), updateVer);
         return new Response().code(HttpStatus.OK).data(scripts);
     }
 

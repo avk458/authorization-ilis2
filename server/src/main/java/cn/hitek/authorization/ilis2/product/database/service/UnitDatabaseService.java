@@ -59,7 +59,7 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param unit 单位信息实体
      * @return 查询结果
      */
-    Map<String, String> getDatabaseVersionAndScriptVersion(Unit unit);
+    Map<String, Long> getDatabaseVersionAndScriptVersion(Unit unit);
 
 
     /**

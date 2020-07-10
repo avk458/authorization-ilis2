@@ -241,6 +241,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         ud.setUnitName(unit.getName());
         ud.setTargetProfile(targetProfile.getProfileName());
         ud.setTargetProfileId(targetProfile.getId());
+        // 有前置保障，每次提交脚本都会在标准库执行
+        ud.setDataVersion(this.scriptService.getLastDataScriptId());
         save(ud);
         return ud.getId();
     }
@@ -306,11 +308,11 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     }
 
     @Override
-    public Map<String, String> getDatabaseVersionAndScriptVersion(Unit unit) {
-        String version = this.scriptService.getLastDataScriptId();
+    public Map<String, Long> getDatabaseVersionAndScriptVersion(Unit unit) {
+        Long version = this.scriptService.getLastDataScriptId();
         UnitDatabase database = query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
-        HashMap<String, String> result = new HashMap<>(0);
-        result.put("databaseVersion", database.getDataVersion().toString());
+        HashMap<String, Long> result = new HashMap<>(0);
+        result.put("databaseVersion", database.getDataVersion());
         result.put("scriptVersion", version);
         return result;
     }

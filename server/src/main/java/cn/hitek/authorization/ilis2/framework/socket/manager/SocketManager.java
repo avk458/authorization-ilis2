@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.database.manager;
+package cn.hitek.authorization.ilis2.framework.socket.manager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SocketManager {
 
-    private static final ConcurrentHashMap<String, WebSocketSession> SESSION_CONTAINER = new ConcurrentHashMap<String, WebSocketSession>();
+    private static final ConcurrentHashMap<String, WebSocketSession> SESSION_CONTAINER = new ConcurrentHashMap<>();
 
     public static void add(String key, WebSocketSession webSocketSession) {
         SESSION_CONTAINER.put(key, webSocketSession);

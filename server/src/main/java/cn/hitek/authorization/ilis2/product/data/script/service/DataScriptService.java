@@ -24,6 +24,14 @@ public interface DataScriptService extends BaseService<DataScript> {
     List<DataScript> getScriptRange(Long dataVersion);
 
     /**
+     * 获取当前数据库数据版本到指定的版本的数据库脚本
+     * @param dataVersion 当前数据库数据版本
+     * @param updateVersion 要升级到的数据库版本
+     * @return 指定范围内的脚本数据
+     */
+    List<DataScript> getScriptRange(Long dataVersion, Long updateVersion);
+
+    /**
      * 导出数据脚本
      * @return file output stream
      */
@@ -33,7 +41,7 @@ public interface DataScriptService extends BaseService<DataScript> {
      * 获取数据脚本最新id
      * @return id
      */
-    String getLastDataScriptId();
+    String getLastDataScriptVersion();
 
     /**
      * 导入数据库脚本
@@ -47,4 +55,17 @@ public interface DataScriptService extends BaseService<DataScript> {
      * @return pagination
      */
     IPage<DataScript> selectPage(Page<DataScript> page);
+
+    /**
+     * 获取最新的数据脚本id
+     * @return id
+     */
+    Long getLastDataScriptId();
+
+    /**
+     * 交换数据脚本顺序
+     * @param id1 id1
+     * @param id2 id2
+     */
+    void scriptExchange(String id1, String id2);
 }

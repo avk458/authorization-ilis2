@@ -69,9 +69,6 @@ public class MainSourceProfile extends BaseEntity {
     @NotBlank(message = "SourceSchema不能为空", groups = {OnUpdate.class, OnCreate.class})
     private String sourceSchema;
 
-    @NotBlank(message = "StandardSchema不能为空", groups = {OnUpdate.class, OnCreate.class})
-    private String standardSchema;
-
     @JsonIgnore
     public String getDecryptPassword() {
         return EncryptUtil.decrypt(password);

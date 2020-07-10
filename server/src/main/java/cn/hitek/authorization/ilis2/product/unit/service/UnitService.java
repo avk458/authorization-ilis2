@@ -3,6 +3,12 @@ package cn.hitek.authorization.ilis2.product.unit.service;
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenlm
@@ -47,4 +53,43 @@ public interface UnitService extends BaseService<Unit>{
      * @param loginInfo 登录信息
      */
     void logUserLogin(LoginInfo loginInfo);
+
+    /**
+     * 所有单位累计用户数
+     * @param type 类型 '.total' | '.online'
+     * @return 所有单位累计用户数
+     */
+    Long combineUnitUsers(String type);
+
+    /**
+     * 单位用户占比
+     * @return 用户占比数据
+     */
+    List<Map<String, Object>> getUnitUserPie();
+
+    /**
+     * 获取周活跃用户
+     * @return 统计数据
+     */
+    Map<String, Integer> getWeekOnlineStatisticData();
+
+    /**
+     * 获取当前各单位在线人数
+     * @return 各单位在线人数统计
+     */
+    Map<String, int[]> getCurrentOnlineData();
+
+    /**
+     * 获取单位用户相关数据
+     * @return 单位用户相关数据
+     */
+    List<UnitAccount> getUnitAccountData();
+
+    /**
+     * 根据单位编码获取单位登录记录
+     * @param unitCode 单位编码
+     * @param page 翻页参数
+     * @return 登录记录
+     */
+    IPage<LoginInfo> getUnitLoginLog(String unitCode, Page<LoginInfo> page);
 }

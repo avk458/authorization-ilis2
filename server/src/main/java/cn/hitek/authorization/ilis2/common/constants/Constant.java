@@ -15,5 +15,8 @@ public class Constant {
     public static final String MYSQL_DUMP = "mysqldump";
     public static final String MYSQL = "mysql";
     public static final String PARAMS = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai";
-    public static final String UNIT_USER_LOGIN_LOG_PREFIX = "login.log.";
+    public static final String ILIS_LOGIN_ONLINE_PREFIX = "ilis.login.log.online.";
+    public static final String ILIS_LOGIN_OFFLINE_PREFIX = "ilis.login.log.offline.";
+    public static final String ILIS_LOGIN_TOTAL_PREFIX = "ilis.login.log.total.";
+    public static final String USER_ONLINE_SUFFIX = ".user.online.log";
 }

@@ -30,8 +30,8 @@ public class DataManageController {
     private final DataManageService dataManageService;
     private final UnitDatabaseService unitDatabaseService;
 
-    @GetMapping("/database/list")
-    public Response getUnitDatabaseInfoList() {
+    @GetMapping("/databases")
+    public Response getUnitDatabases() {
         List<UnitDatabase> databaseList = this.unitDatabaseService.list();
         List<DatabaseInfo> list = this.dataManageService.getUnitDatabaseList(databaseList);
         return new Response().code(HttpStatus.OK).data(list);

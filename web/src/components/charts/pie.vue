@@ -5,8 +5,40 @@
 <script>
 import echarts from 'echarts'
 import tdTheme from './theme.json'
-import { on, off } from '@/libs/tools'
+import { off, on } from '@/libs/tools'
+
 echarts.registerTheme('tdTheme', tdTheme)
+const option = {
+  title: {
+    text: '',
+    subtext: '',
+    x: 'center'
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{b} : {c} ({d}%)'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    data: ''
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: '55%',
+      center: ['50%', '60%'],
+      data: [],
+      itemStyle: {
+        emphasis: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+}
 export default {
   name: 'ChartPie',
   props: {
@@ -24,42 +56,20 @@ export default {
       this.dom.resize()
     }
   },
+  watch: {
+    value(val) {
+      option.legend.data = val.map(_ => _.name)
+      option.series[0].data = val
+      this.dom.setOption(option)
+    }
+  },
   mounted () {
     this.$nextTick(() => {
-      const legend = this.value.map(_ => _.name)
-      const option = {
-        title: {
-          text: this.text,
-          subtext: this.subtext,
-          x: 'center'
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{b} : {c} ({d}%)'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          data: legend
-        },
-        series: [
-          {
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '60%'],
-            data: this.value,
-            itemStyle: {
-              emphasis: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            }
-          }
-        ]
-      }
+      option.legend.data = this.value.map(_ => _.name)
+      option.series[0].data = this.text
+      option.title.text = this.text
       this.dom = echarts.init(this.$refs.dom, 'tdTheme')
-      this.dom.setOption(option)
+      // this.dom.setOption(option)
       on(window, 'resize', this.resize)
     })
   },

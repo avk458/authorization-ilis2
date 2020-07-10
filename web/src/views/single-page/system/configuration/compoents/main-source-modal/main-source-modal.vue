@@ -29,15 +29,7 @@
             <Option v-for="item in databases" :value="item.label" :key="item.value">{{ item.label }}</Option>
           </Select>
         </FormItem>
-        <FormItem label="Standard Schema" prop="standardSchema">
-          <Select
-            v-model="formData.standardSchema"
-            style="width: 100%"
-          >
-            <Option v-for="item in databases" :value="item.label" :key="item.value">{{ item.label }}</Option>
-          </Select>
-        </FormItem>
-        <FormItem v-if="!isEdit" label="文件存放路径" prop="path">
+        <FormItem v-if="editPath" label="文件存放路径" prop="path">
           <Cascader
             :data="pathData"
             :load-data="asyncLoadSystemPath"
@@ -49,7 +41,7 @@
           <Input disabled v-model="formData.path">
             <template slot="append">
               <Poptip trigger="hover" content="如需修改文件存放路径，请点击">
-                <Button icon="ios-backspace" style="color: #f13030" @click="() => this.isEdit = false"></Button>
+                <Button icon="ios-backspace" style="color: #f13030" @click="() => this.editPath = true"></Button>
               </Poptip>
             </template>
           </Input>
@@ -104,8 +96,7 @@ export default {
         password: '',
         path: [],
         sourceSchema: '',
-        active: true,
-        standardSchema: ''
+        active: true
       },
       pathData: [],
       usernameHolder: '请输入数据库用户名',
@@ -122,6 +113,7 @@ export default {
       tableList: [],
       modalTitle: '新增主数据源配置信息',
       isEdit: false,
+      editPath: false,
       databases: []
     }
   },
@@ -134,6 +126,8 @@ export default {
         this.modalTitle = `编辑${data.profileName}信息`
         this.usernameHolder = '如需修改，请输入数据库用户名。留空则不修改用户名'
         this.passwordHolder = '如需修改，请输入数据库密码。留空则不修改密码'
+      } else {
+        this.editPath = true
       }
       loadSystemPath().then(res => {
         this.pathData = res.data

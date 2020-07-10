@@ -19,13 +19,17 @@ export default {
       dom: null
     }
   },
+  watch: {
+    value() {
+      this.charts()
+      this.resize()
+    }
+  },
   methods: {
     resize () {
       this.dom.resize()
-    }
-  },
-  mounted () {
-    this.$nextTick(() => {
+    },
+    charts() {
       const xAxisData = Object.keys(this.value)
       const seriesData = Object.values(this.value)
       const option = {
@@ -33,6 +37,10 @@ export default {
           text: this.text,
           subtext: this.subtext,
           x: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b} : {c}'
         },
         xAxis: {
           type: 'category',
@@ -49,7 +57,10 @@ export default {
       this.dom = echarts.init(this.$refs.dom, 'tdTheme')
       this.dom.setOption(option)
       on(window, 'resize', this.resize)
-    })
+    }
+  },
+  mounted () {
+    this.charts()
   },
   beforeDestroy () {
     off(window, 'resize', this.resize)

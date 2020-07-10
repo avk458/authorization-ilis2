@@ -1,4 +1,4 @@
-package cn.hitek.authorization.ilis2.product.database.manager;
+package cn.hitek.authorization.ilis2.framework.socket.manager;
 
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.database.helper.LogType;
