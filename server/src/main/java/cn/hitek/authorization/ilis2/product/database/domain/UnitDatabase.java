@@ -26,6 +26,7 @@ import java.io.Serializable;
 public class UnitDatabase extends BaseEntity implements Serializable {
 
     public static final boolean INITIALIZED = true;
+    public static final boolean MANAGE_ABLE = true;
     private static final long serialVersionUID = 4651993794161153629L;
     /**
      * 是否删除
@@ -106,6 +107,13 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     private String targetProfile;
 
     private Long dataVersion;
+
+    /**
+     * 用于构建标准库
+     */
+    @TableField(exist = false)
+    @JsonIgnore
+    private boolean standardSchema;
 
 
     public DatabaseType getDatabaseEnum() {

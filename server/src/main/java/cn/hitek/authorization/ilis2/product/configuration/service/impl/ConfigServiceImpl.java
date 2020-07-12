@@ -71,7 +71,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
         }
         if (null != files) {
             for (File file : files) {
-                if (file.isDirectory() && file.canWrite() && !file.isHidden()) {
+                if (file.isDirectory() && !file.isHidden()) {
                     folders.add(new Folder(file));
                 }
             }

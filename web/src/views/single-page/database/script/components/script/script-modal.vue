@@ -89,6 +89,7 @@ export default {
       this.scriptVisible = false
       this.sql = ''
       this.remark = ''
+      this.id = ''
     },
     handelPostData() {
       if (!this.sql) {

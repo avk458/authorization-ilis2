@@ -5,6 +5,7 @@ import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
+import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
@@ -27,19 +28,34 @@ import javax.validation.constraints.NotBlank;
 public class DataScriptController {
 
     private final DataScriptService dataScriptService;
+    private final UnitDatabaseService unitDatabaseService;
 
     @PreAuthorize("hasAuthority('script:add')")
     @PostMapping
     public Response insertDataScript(@Valid @RequestBody DataScript script) {
-        this.dataScriptService.save(script);
-        return new Response().code(HttpStatus.ADD);
+        Response res = new Response();
+        boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
+        if (executeSuccess) {
+            this.dataScriptService.save(script);
+            res.code(HttpStatus.ADD);
+        } else {
+            res.code(HttpStatus.FAIL).message("脚本执行失败，请检查");
+        }
+        return res;
     }
 
     @PreAuthorize("hasAuthority('script:update')")
     @PutMapping
     public Response updateDataScript(@Valid @RequestBody DataScript script) {
-        this.dataScriptService.updateById(script);
-        return new Response().code(HttpStatus.UPDATE);
+        Response res = new Response();
+        boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
+        if (executeSuccess) {
+            this.dataScriptService.updateById(script);
+            res.code(HttpStatus.UPDATE);
+        } else {
+            res.code(HttpStatus.FAIL).message("脚本执行失败，请检查");
+        }
+        return res;
     }
 
     @PreAuthorize("hasAuthority('script:del')")

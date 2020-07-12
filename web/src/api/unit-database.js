@@ -58,3 +58,10 @@ export const updateDatabase = id => {
     method: 'post'
   })
 }
+
+export const batchUpdateDatabase = () => {
+  return axios.request({
+    url: '/database/actions/batch-update',
+    method: 'post'
+  })
+}

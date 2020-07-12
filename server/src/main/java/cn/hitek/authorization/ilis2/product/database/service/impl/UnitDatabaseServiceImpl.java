@@ -22,11 +22,13 @@ import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.service.InitFileService;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hutool.core.io.file.FileReader;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,24 +43,28 @@ import org.springframework.util.ResourceUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 
 /**
  * @author chenlm
  */
 @Service
-@Slf4j
+@Log4j2
 @AllArgsConstructor
 public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper, UnitDatabase> implements UnitDatabaseService {
 
     private final InitFileService initFileService;
     private final ConfigService configService;
     private final DataScriptService scriptService;
+    @Qualifier("asyncExecutor")
+    private final Executor asyncExecutor;
 
     @SneakyThrows
     @Override
@@ -67,6 +73,9 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         try {
             UnitDatabase database = getById(unitDatabaseId);
             Objects.requireNonNull(database, "database info error");
+            if (!database.getManageAble()) {
+                return;
+            }
             detectUnitDatabaseQualified(database);
             MainSourceProfile mainProfile = this.configService.getActiveConfig();
             Objects.requireNonNull(mainProfile, "can't find active database initial configuration");
@@ -112,7 +121,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         }
     }
 
-    private void readProcessLogAndSent2Client(InitFile initFile) throws IOException {
+    private void readProcessLogAndSent2Client(InitFile initFile) {
         FileReader fileReader = FileReader.create(initFile.getLogFile());
         List<String> logs = fileReader.readLines();
         for (String log : logs) {
@@ -244,58 +253,72 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         ud.setUnitName(unit.getName());
         ud.setTargetProfile(targetProfile.getProfileName());
         ud.setTargetProfileId(targetProfile.getId());
-        // 有前置保障，每次升级数据库都会在标准库执行
+        // 有前置保障，每次提交脚本在标准库执行
         ud.setDataVersion(this.scriptService.getLastDataScriptId());
         ud.setManageAble(targetProfile.getAvailable());
         save(ud);
         return ud.getId();
     }
 
-    @Async
+    @Async("asyncExecutor")
     @EventListener
     public void updateDatabaseManageAbleListener(UpdateDatabaseEvent event) {
         String targetProfileId = event.getTargetProfileId();
         List<UnitDatabase> list = query().eq(UnitDatabase::getTargetProfileId, targetProfileId).list();
-        list.stream().filter(ud -> !ud.getManageAble()).forEach(ud -> ud.setManageAble(true));
+        list.stream().filter(ud -> !ud.getManageAble()).forEach(ud -> ud.setManageAble(UnitDatabase.MANAGE_ABLE));
         super.updateBatchById(list);
     }
 
     @Override
     public List<UpdateEchoLog> updateDatabase(String id) {
         UnitDatabase database = getById(id);
+        return updateEachDatabase(database);
+    }
+
+    private List<UpdateEchoLog> updateEachDatabase(UnitDatabase database) {
         DataSource dataSource = initTargetDataSource(database);
         JdbcTemplate template = new JdbcTemplate(dataSource);
         DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
         ArrayList<UpdateEchoLog> results = new ArrayList<>(0);
         List<DataScript> scripts = this.scriptService.getScriptRange(database.getDataVersion());
         for (DataScript script : scripts) {
-            UpdateEchoLog execute = executeScript(manager, template, script.getScript(), script.getType());
+            UpdateEchoLog execute = executeScript(manager, template, script, database.getUnitName());
             results.add(execute);
             if (!execute.getSuccess()) {
                 break;
             }
             database.setDataVersion(script.getId());
         }
-        super.updateById(database);
+        if (!database.isStandardSchema()) {
+            super.updateById(database);
+        }
         return results;
     }
 
     private DataSource initTargetDataSource(UnitDatabase database) {
-        TargetSourceProfile profile = this.configService.getTargetProfileViaId(database.getTargetProfileId());
-        return new DriverManagerDataSource(
-                ConnectionHandler.getTargetPath(database),
-                profile.getUsername(),
-                EncryptUtil.decrypt(profile.getPassword()));
+        final String path = ConnectionHandler.getTargetPath(database);
+        final String username;
+        final String password;
+        if (database.isStandardSchema()) {
+            username = database.getDatabaseUsername();
+            password = database.getDatabasePwd();
+        } else {
+            TargetSourceProfile profile = this.configService.getTargetProfileViaId(database.getTargetProfileId());
+            username = profile.getUsername();
+            password = EncryptUtil.decrypt(profile.getPassword());
+        }
+        return new DriverManagerDataSource(path, username, password);
     }
 
     private UpdateEchoLog executeScript(DataSourceTransactionManager manager,
                                         JdbcTemplate template,
-                                        String script,
-                                        DataScript.Type type) {
-        UpdateEchoLog log = new UpdateEchoLog(script);
+                                        DataScript dataScript,
+                                        String unitName) {
+        String script = dataScript.getScript();
+        UpdateEchoLog log = new UpdateEchoLog(dataScript.getId(), script, unitName);
         TransactionStatus status = null;
         try {
-            switch (type) {
+            switch (dataScript.getType()) {
                 case DDL:
                     template.execute(script);
                     log.setSuccess(Boolean.TRUE);
@@ -336,5 +359,72 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         UnitDatabase database = query().eq(UnitDatabase::getUnitId, unitId).getOne();
         database.setDataVersion(version);
         baseMapper.updateDataVersion(database.getId(), version);
+    }
+
+    @Override
+    public List<UpdateEchoLog> batchUpdateDatabase() {
+        List<UnitDatabase> databases = query().eq(UnitDatabase::getManageAble, UnitDatabase.MANAGE_ABLE).list();
+        List<CompletableFuture<List<UpdateEchoLog>>> futures = databases
+                .stream()
+                .map(d -> CompletableFuture.completedFuture(d)
+                        .thenApplyAsync(this::updateEachDatabase, asyncExecutor))
+                .collect(Collectors.toList());
+        return futures
+                .stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean executeInStandardSchemas(DataScript script) {
+        script.setId(RandomUtil.randomLong());
+        List<MainSourceProfile> profiles = configService.query().list();
+        List<CompletableFuture<UpdateEchoLog>> futures = profiles
+                .stream()
+                .map(this::generateStandardDatabase)
+                .map(sd -> CompletableFuture.completedFuture(sd)
+                        .thenApplyAsync(sdf -> this.preExecute(sdf, script)))
+                .collect(Collectors.toList());
+        List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        return logs.stream().allMatch(UpdateEchoLog::getSuccess);
+    }
+
+    private UpdateEchoLog preExecute(UnitDatabase sd, DataScript script) {
+        DataSource dataSource = initTargetDataSource(sd);
+        JdbcTemplate template = new JdbcTemplate(dataSource);
+        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
+        return executeScript(manager, template, script, "standard");
+    }
+
+    private UnitDatabase generateStandardDatabase(MainSourceProfile mainSourceProfile) {
+        UnitDatabase standardDatabase = new UnitDatabase();
+        standardDatabase.setDatabaseName(mainSourceProfile.getSourceSchema());
+        standardDatabase.setHost(mainSourceProfile.getHost());
+        standardDatabase.setPort(mainSourceProfile.getPort());
+        standardDatabase.setDatabaseUsername(mainSourceProfile.getUsername());
+        standardDatabase.setDatabasePwd(mainSourceProfile.getDecryptPassword());
+        standardDatabase.setStandardSchema(true);
+        return standardDatabase;
+    }
+
+    private UnitDatabase generateStandardDatabase(MainSourceProfile mainSourceProfile, Long dataVersion) {
+        UnitDatabase standardDatabase = generateStandardDatabase(mainSourceProfile);
+        standardDatabase.setDataVersion(dataVersion);
+        standardDatabase.setUnitName("standard");
+        return standardDatabase;
+    }
+
+    @Override
+    public void updateStandardSchema(Long dataVersion) {
+        List<MainSourceProfile> profiles = configService.query().list();
+        List<CompletableFuture<List<UpdateEchoLog>>> futures = profiles
+                .stream()
+                .map(profile -> this.generateStandardDatabase(profile, dataVersion))
+                .map(d -> CompletableFuture.completedFuture(d)
+                        .thenApplyAsync(this::updateEachDatabase, asyncExecutor))
+                .collect(Collectors.toList());
+        List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList());
+        log.info("标准库执行脚本更新完毕，执行脚本 {} 条", logs.size());
     }
 }

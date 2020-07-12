@@ -86,4 +86,10 @@ public class DatabaseController {
         List<UpdateEchoLog> results = this.databaseService.updateDatabase(id);
         return new Response().code(HttpStatus.OK).data(results);
     }
+
+    @PostMapping("/actions/batch-update")
+    public Response batchUpdateDatabase() {
+        List<UpdateEchoLog> logs = this.databaseService.batchUpdateDatabase();
+        return new Response().code(HttpStatus.OK).code(HttpStatus.UPDATE).data(logs);
+    }
 }

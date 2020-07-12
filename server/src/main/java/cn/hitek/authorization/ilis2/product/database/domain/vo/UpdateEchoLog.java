@@ -12,7 +12,11 @@ import lombok.RequiredArgsConstructor;
 public class UpdateEchoLog {
 
     @NonNull
+    private Long scriptVersion;
+    @NonNull
     private String sqlScript;
+    @NonNull
+    private String unitName;
     private Boolean success;
     private String msg;
 }

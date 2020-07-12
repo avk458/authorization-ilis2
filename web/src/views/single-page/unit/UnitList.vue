@@ -116,7 +116,9 @@ export default {
         saveUnitInfo(data).then(res => {
           this.$Message.success(res.message)
           this.$refs.infoModal.handleCancel()
-          this.initDatabase({ id: res.data, unitName: data.name })
+          if (data.available) {
+            this.initDatabase({ id: res.data, unitName: data.name })
+          }
         })
       }
     },

@@ -5,12 +5,12 @@
       <Divider type="vertical" />
       <Button type="success" @click="handleScriptModal">提交脚本</Button>
       <Divider type="vertical"/>
-      <Button type="warning" @click="batchUpdateDatabase">批量升级</Button>
+      <Button type="warning" @click="handleBatchUpdate">批量升级</Button>
       <Divider/>
       <Table border :columns="columns" :data="data" :loading="loading">
         <template slot-scope="{ row }" slot="action">
-          <Button type="info" size="small" style="margin-right: 5px" @click="update(row)">升级</Button>
-          <Button type="success" size="small" style="margin-right: 5px" @click="handleInit(row)" :disabled="row.isInitialized">初始化</Button>
+          <Button type="info" size="small" style="margin-right: 5px" @click="update(row)" :disabled="!row.manageAble">升级</Button>
+          <Button type="success" size="small" style="margin-right: 5px" @click="handleInit(row)" :disabled="row.isInitialized || !row.manageAble">初始化</Button>
           <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
           <Button type="error" size="small" @click="remove(row)" :disabled="row.isInitialized">删除</Button>
         </template>
@@ -23,7 +23,13 @@
   </div>
 </template>
 <script>
-import { getDatabaseList, deleteDatabaseInfo, updateDatabaseInfo, saveDatabaseInfo } from '@/api/unit-database'
+import {
+  getDatabaseList,
+  deleteDatabaseInfo,
+  updateDatabaseInfo,
+  saveDatabaseInfo,
+  batchUpdateDatabase
+} from '@/api/unit-database'
 import DatabaseModal from './component/database-modal/'
 import UpdateEchoLog from './component/update-echo-modal'
 import ScriptModal from '@/views/single-page/database/script/components/script'
@@ -166,11 +172,20 @@ export default {
     handleScriptModal() {
       this.$refs.scriptModal.showModal()
     },
-    batchUpdateDatabase() {
+    handleBatchUpdate() {
       this.$Modal.confirm({
         title: '批量升级确认',
         content: '您确定要将所有能管理的单位数据库都升级到最新版本吗？',
-        onOk: () => {}
+        onOk: () => {
+          batchUpdateDatabase().then(res => {
+            this.$Message.success('完成批量更新数据库')
+            this.fetchData()
+            this.$refs.updateEchoLog.updated = true
+            this.$refs.updateEchoLog.logs = res.data
+            this.$refs.updateEchoLog.handleBtn()
+            this.$refs.updateEchoLog.showModal()
+          })
+        }
       })
     }
   },

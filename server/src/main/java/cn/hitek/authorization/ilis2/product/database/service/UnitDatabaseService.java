@@ -1,6 +1,7 @@
 package cn.hitek.authorization.ilis2.product.database.service;
 
 import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
+import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
@@ -68,4 +69,23 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param version 执行成功脚本id
      */
     void updateDatabaseDataVersion(String unitId, Long version);
+
+    /**
+     * 批量更新可管控的单位数据库
+     * @return execute log
+     */
+    List<UpdateEchoLog> batchUpdateDatabase();
+
+    /**
+     * 升级标准库
+     * @param script 数据脚本
+     * @return 执行结果
+     */
+    boolean executeInStandardSchemas(DataScript script);
+
+    /**
+     * 外网环境中导入内网脚本数据时更新标准库
+     * @param dataVersion 导入前的数据版本
+     */
+    void updateStandardSchema(Long dataVersion);
 }

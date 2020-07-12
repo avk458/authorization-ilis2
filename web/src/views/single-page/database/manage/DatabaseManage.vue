@@ -14,11 +14,12 @@
         <Upload
           v-if="prod"
           ref="upload"
-          :show-upload-list="false"
           accept=".sql"
+          :headers="header"
+          :show-upload-list="false"
           :before-upload="handleUpload"
           :on-success="handleSuccess"
-          action="http://192.168.2.129:10010/script/file">
+          :action="action">
           <Button>导入数据库脚本</Button>
         </Upload>
       </Col>
@@ -83,9 +84,9 @@ import { getDatabases } from '@/api/data'
 import { getLastId } from '@/api/script'
 import ColumnSyncModal from './components/sync-column-modal'
 import ScriptModal from '../script/components/script/script-modal'
+import mixin from '@/mixins/mixin'
 import config from '@/config'
 import { getToken } from '@/libs/util'
-import mixin from '@/mixins/mixin'
 
 export default {
   components: { ScriptModal, ColumnSyncModal },
@@ -136,11 +137,11 @@ export default {
       })
     },
     getUploadVersion(name) {
-      return 'v' + name.substring(0, name.indexOf('.'))
+      return 'v.' + name.substring(0, name.indexOf('.'))
     },
     async getCurrentVersion() {
       const res = await getLastId()
-      return 'v' + res.data
+      return 'v.' + res.data
     },
     handleSuccess() {
       this.$Notice.success({
@@ -152,6 +153,15 @@ export default {
   computed: {
     prod() {
       return process.env.NODE_ENV === 'production'
+    },
+    action() {
+      const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      return baseUrl + 'script/file'
+    },
+    header() {
+      return {
+        Authorization: 'Bearer ' + getToken()
+      }
     }
   },
   mounted() {

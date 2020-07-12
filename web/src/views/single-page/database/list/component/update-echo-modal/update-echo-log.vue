@@ -1,11 +1,11 @@
 <template>
-  <Modal v-model="logVisible" title="数据库升级">
+  <Modal v-model="logVisible" title="数据库升级" width="60%">
     <div v-if="!updated">
       <p>数据库：{{ unitDb.databaseName }}当前数据版本为：v.{{ unitDb.dataVersion || 0 }}</p>
       <p>您确定要升级至最新版吗？</p>
     </div>
     <div v-else>
-      <Table ref="logTable" :data="logs" :columns="columns" :stripe="true" :show-header="false" :max-height="400" size="small" no-data-text="暂无更新版本"/>
+      <Table ref="logTable" :data="logs" :columns="columns" :stripe="true" :max-height="400" size="small" no-data-text="暂无更新版本"/>
     </div>
     <div slot="footer">
       <Button :type="btnType" :loading="btnLoading" :long="logs.length === 0" @click="handleUpdate">{{ btn }}</Button>
@@ -34,8 +34,10 @@ export default {
       btnLoading: false,
       updated: false,
       columns: [
-        { type: 'index', width: 30 },
+        { title: '版本号', key: 'scriptVersion', width: 80, align: 'center' },
+        { title: '所属单位', key: 'unitName', width: 150 },
         {
+          title: '执行结果',
           key: 'success',
           render: (h, p) => {
             const suc = p.row.success
@@ -47,10 +49,11 @@ export default {
               }
             })
           },
-          width: 30
+          align: 'center',
+          width: 100
         },
-        { key: 'sqlScript', tooltip: true },
-        { key: 'msg', tooltip: true }
+        { title: '脚本', key: 'sqlScript', tooltip: true },
+        { title: '错误日志', key: 'msg', tooltip: true }
       ]
     }
   },
@@ -68,16 +71,23 @@ export default {
       updateDatabase(this.unitDb.id)
         .then(res => {
           this.logs = res.data
-          this.btn = this.executeFailed ? '升级出错啦，要扣绩效噢' : '升级成功，关闭'
-          this.btnType = this.executeFailed ? 'error' : 'success'
-          this.btnLoading = false
+          this.handleBtn()
           this.$emit('success-update')
         })
-        .catch(() => {
-          this.btn = '关闭'
-          this.btnType = 'error'
-          this.btnLoading = false
+        .catch(err => {
+          this.handleBtn(err)
         })
+    },
+    handleBtn(err) {
+      if (err) {
+        this.btn = '关闭'
+        this.btnType = 'error'
+        this.btnLoading = false
+      } else {
+        this.btn = this.executeFailed ? '升级出错啦，要扣绩效噢' : '升级成功，关闭'
+        this.btnType = this.executeFailed ? 'error' : 'success'
+        this.btnLoading = false
+      }
     },
     handleClose() {
       this.updated = false

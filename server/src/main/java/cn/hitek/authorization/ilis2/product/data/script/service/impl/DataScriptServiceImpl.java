@@ -77,7 +77,7 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
 
     private String generateFileName(Long lastId) {
         if (lastId == null) {
-            return "";
+            return "0";
         }
         if (lastId >= 100) {
             return lastId + "";
