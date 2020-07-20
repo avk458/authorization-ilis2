@@ -1,22 +1,20 @@
 package cn.hitek.authorization.ilis2;
 
-import cn.hitek.authorization.ilis2.common.constants.Constant;
+import cn.hitek.authorization.ilis2.product.unit.service.impl.UnitServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Set;
-
+@ActiveProfiles("test")
 @SpringBootTest
 class ApplicationTests {
 
 	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+	private UnitServiceImpl unitService;
 
 	@Test
 	void contextLoads() {
-		Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_OFFLINE_PREFIX + "test.*");
-		System.out.println(keys.size());
+		unitService.logUnitOnlineUsersEachDay();
 	}
 }

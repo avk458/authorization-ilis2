@@ -22,6 +22,7 @@ import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
 import cn.hitek.authorization.ilis2.product.init.file.service.InitFileService;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hutool.core.io.file.FileReader;
+import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -39,7 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.util.ResourceUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -101,6 +101,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             }
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new BusinessException("数据库初始化失败！");
         }
     }
@@ -169,10 +170,13 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                 .exist();
     }
 
-    @SneakyThrows
     @Override
     public boolean isDatabaseNameIllegally(String name) {
-        File file = ResourceUtils.getFile("classpath:MySQLKeyWords.txt");
+        String path = UnitDatabaseServiceImpl.class.getResource("MySQLKeyWords.txt").getPath();
+        File file = new File(path);
+        if (!file.exists()) {
+            FileWriter.create(file).writeFromStream(UnitDatabaseServiceImpl.class.getClassLoader().getResourceAsStream("classpath:MySQLKeyWords.txt"));
+        }
         FileReader fileReader = FileReader.create(file);
         Set<String> mySqlDatabaseNameKeyWords = new HashSet<>(fileReader.readLines());
         return mySqlDatabaseNameKeyWords.contains(name.toLowerCase());

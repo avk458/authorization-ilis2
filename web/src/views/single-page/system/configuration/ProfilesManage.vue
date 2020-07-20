@@ -19,13 +19,24 @@
         </template>
       </Table>
     </Card>
-    <MainSourceModal ref="mainModal" @update-validate="handleUpdate"/>
+    <MainSourceModal ref="mainModal" @form-validate="handleSubmit"/>
     <TargetSourceModal ref="targetModal" @on-form-validate="handelTargetProfileSubmit"/>
   </div>
 </template>
 
 <script>
-import { getMainProfiles, manipulateTheConfig, deleteMainProfile, updateMainProfile, getTargetProfiles, saveTargetProfile, updateTargetProfile, deleteTargetProfile, validateTargetConnection } from '@/api/config'
+import {
+  getMainProfiles,
+  manipulateTheConfig,
+  deleteMainProfile,
+  updateMainProfile,
+  getTargetProfiles,
+  saveTargetProfile,
+  updateTargetProfile,
+  deleteTargetProfile,
+  validateTargetConnection,
+  saveMainProfile
+} from '@/api/config'
 import MainSourceModal from './compoents/main-source-modal'
 import TargetSourceModal from './compoents/target-source-modal'
 
@@ -147,12 +158,20 @@ export default {
       Object.assign(data, row)
       this.$refs.mainModal.showModal(data)
     },
-    handleUpdate(data) {
-      updateMainProfile(data).then(res => {
-        this.$Message.success(res.message)
-        this.fetchData()
-        this.$refs.mainModal.handleClose()
-      })
+    handleSubmit(data) {
+      if (data.id) {
+        updateMainProfile(data).then(res => {
+          this.$Message.success(res.message)
+          this.fetchData()
+          this.$refs.mainModal.handleClose()
+        })
+      } else {
+        saveMainProfile(data).then(res => {
+          this.$Message.success(res.message)
+          this.fetchData()
+          this.$refs.mainModal.handleClose()
+        })
+      }
     },
     showMainModal() {
       this.$refs.mainModal.showModal()

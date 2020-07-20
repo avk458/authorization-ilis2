@@ -1,5 +1,5 @@
 <template>
-  <Modal title="登录日志" v-model="visible" width="70%">
+  <Modal :title="title" v-model="visible" width="70%">
     <Table :data="data" :columns="columns" border :loading="loading"/>
     <div class="pagination" v-if="total > 10">
       <Page
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { getUnitLoginLog } from '@/api/unit'
+import { getUnitLoginLog, getOnlineAccounts } from '@/api/unit'
 
 export default {
   name: 'login-log-modal',
@@ -26,7 +26,7 @@ export default {
       columns: [
         { title: '用户名', key: 'username', width: 120 },
         { title: '用户', key: 'realName', width: 120 },
-        { title: 'sessionId', key: 'sessionId', width: 310 },
+        { title: 'SessionId', key: 'sessionId', width: 310 },
         { title: 'IP', key: 'loginIp' },
         { title: 'IP地址', key: 'loginRegion' },
         { title: '操作时间', key: 'operationTime' },
@@ -38,21 +38,37 @@ export default {
         size: 10
       },
       total: 0,
-      unitCode: ''
+      unitCode: '',
+      type: '',
+      title: ''
     }
   },
   methods: {
     fetchData() {
       this.loading = true
-      getUnitLoginLog(this.unitCode, this.params).then(res => {
-        this.data = res.data.records
-        this.total = res.data.total
-        this.loading = false
-      })
+      switch (this.type) {
+      case 'total':
+        getUnitLoginLog(this.unitCode, this.params).then(res => {
+          this.data = res.data.records
+          this.total = res.data.total
+          this.loading = false
+          this.title = '登录日志'
+        })
+        break
+      case 'online':
+        getOnlineAccounts(this.unitCode, this.params).then(res => {
+          this.data = res.data.records
+          this.total = res.data.total
+          this.loading = false
+          this.title = '在线用户'
+        })
+        break
+      }
     },
-    showModal(unitCode) {
+    showModal(unitCode, type) {
       this.visible = true
       this.unitCode = unitCode
+      this.type = type
       this.fetchData()
     },
     handleSizeChange(size) {

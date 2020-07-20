@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.product.unit.controller;
 
+import cn.hitek.authorization.ilis2.common.annotations.FlushLogs;
 import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
@@ -9,10 +10,12 @@ import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
+import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +29,11 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/unit")
+@RequiredArgsConstructor
 public class UnitController {
 
     private final UnitService unitService;
-
-    public UnitController(UnitService unitService) {
-        this.unitService = unitService;
-    }
+    private final UnitUserLogger userLogger;
 
     @GetMapping("/list")
     public Response getUnitList() {
@@ -80,9 +81,17 @@ public class UnitController {
         return new Response().code(HttpStatus.OK).data(data);
     }
 
+    @FlushLogs
     @GetMapping("/login/log/{unitCode}")
     public Response getUnitLoginLog(@PathVariable String unitCode, Page<LoginInfo> page) {
         IPage<LoginInfo> logs = this.unitService.getUnitLoginLog(unitCode, page);
+        return new Response().code(HttpStatus.OK).data(logs);
+    }
+
+    @FlushLogs
+    @GetMapping("/online-accounts")
+    public Response getUnitOnlineAccounts(String unitCode, Page<LoginInfo> page) {
+        IPage<LoginInfo> logs = this.userLogger.getUnitOnlineAccounts(unitCode, page);
         return new Response().code(HttpStatus.OK).data(logs);
     }
 }

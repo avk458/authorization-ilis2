@@ -2,7 +2,9 @@
   <Card dis-hover>
     <Table :data="data" :loading="loading" :columns="columns" border>
       <template slot-scope="{ row }" slot="action">
-        <Button size="small" type="info" @click="handleLog(row)">登录日志</Button>
+        <Button size="small" type="info" @click="handleLog(row, 'total')">登录日志</Button>
+        <Divider type="vertical"/>
+        <Button size="small" type="success" @click="handleLog(row, 'online')">在线用户</Button>
       </template>
     </Table>
     <login-log-modal ref="loginLog"/>
@@ -34,8 +36,8 @@ export default {
         this.data = res.data
       })
     },
-    handleLog(row) {
-      this.$refs.loginLog.showModal(row.unitCode)
+    handleLog(row, type) {
+      this.$refs.loginLog.showModal(row.unitCode, type)
     }
   },
   mounted() {

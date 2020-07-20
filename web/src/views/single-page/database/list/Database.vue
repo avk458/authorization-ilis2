@@ -163,7 +163,7 @@ export default {
       }
     },
     handleInit(val) {
-      this.initDatabase(val)
+      this.initDatabase(val, this.fetchData)
     },
     update(row) {
       this.$refs.updateEchoLog.showModal()

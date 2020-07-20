@@ -11,9 +11,9 @@ import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.UnitUserOnlineLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.dto.WeekOnline;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.DatabaseInfo;
-import cn.hitek.authorization.ilis2.product.unit.domain.vo.OnlineLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitInfo;
+import cn.hitek.authorization.ilis2.product.unit.helper.UnitOnlineBucket;
 import cn.hitek.authorization.ilis2.product.unit.mapper.UnitMapper;
 import cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -152,41 +151,26 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     }
 
     /**
-     * 每个小时统计单位活跃用户
+     * 每天0点过10秒开始执行
      */
-    @Scheduled(cron = "0 0 0/1 * * ? ")
-    public void logUnitOnlineUsersEveryHour() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Unit> units = query().list();
-        for (Unit unit : units) {
-            Integer onlineUsers = this.userLogger.getUnitOnlineUsers(unit.getUniqCode());
-            OnlineLog log = new OnlineLog(now, unit.getUniqCode(), onlineUsers);
-            BoundListOperations<String, Object> listOps = this.redisTemplate
-                    .boundListOps(unit.getUniqCode() + Constant.USER_ONLINE_SUFFIX);
-            listOps.rightPush(log);
-        }
-    }
-
-    @Scheduled(cron = "0 30 0 * * ? ")
+    @Scheduled(cron = "10 0 0 * * ?")
     public void logUnitOnlineUsersEachDay() {
-        Set<String> keys = this.redisTemplate.keys("*" + Constant.USER_ONLINE_SUFFIX);
+        Set<String> keys = this.redisTemplate.keys(Constant.ILIS_ONLINE_BUCKET_PREFIX + "*");
         if (keys != null && !keys.isEmpty()) {
             for (String key : keys) {
-                BoundListOperations<String, Object> listOps = this.redisTemplate.boundListOps(key);
-                List<Object> logs = listOps.range(0, -1);
-                if (logs != null && !logs.isEmpty()) {
-                    OnlineLog log = (OnlineLog) logs.get(0);
-                    LocalDateTime time = log.getTime();
-                    String unitCode = log.getUnitCode();
-                    Integer topOnlineMembers = logs
+                Map<String, HashSet<LoginInfo>> periods = UnitOnlineBucket.get(this.redisTemplate, key);
+                if (null != periods && !periods.isEmpty()) {
+                    Integer topOnlineMembers = periods
+                            .values()
                             .stream()
-                            .map(o -> (OnlineLog) o)
-                            .map(OnlineLog::getMembers)
+                            .map(HashSet::size)
                             .max(Integer::compareTo)
                             .orElse(0);
-                    // delete unit online user log redis list
-                    listOps.trim(-1, 0);
-                    this.onlineLogMapper.insert(new UnitUserOnlineLog(time.toLocalDate(), unitCode, topOnlineMembers));
+                    LocalDate yesterday = LocalDate.now().minusDays(1);
+                    String unitCode = key.substring(key.lastIndexOf(".") + 1);
+                    this.onlineLogMapper.insert(new UnitUserOnlineLog(yesterday, unitCode, topOnlineMembers));
+                    // delete yesterday unit online bucket
+                    this.redisTemplate.delete(key);
                 }
             }
         }
@@ -217,20 +201,12 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
         HashMap<String, int[]> data = new HashMap<>(units.size());
         for (Unit unit : units) {
             int[] membersArray = new int[24];
-            String key = unit.getUniqCode() + Constant.USER_ONLINE_SUFFIX;
-            List<Object> logs = this.redisTemplate.boundListOps(key).range(0, -1);
-            if (logs != null && !logs.isEmpty()) {
-                // @formatter:off
-                logs
-                    .stream()
-                    .map(l -> (OnlineLog)l)
-                    .forEach(l -> {
-                        int hourIndex = l.getTime().getHour() - 1;
-                        membersArray[hourIndex] = l.getMembers();
-                    });
-                // @formatter:on
-                data.put(unit.getName(), membersArray);
+            final String bucketKey = Constant.ILIS_ONLINE_BUCKET_PREFIX + unit.getUniqCode();
+            Map<String, HashSet<LoginInfo>> unitLogs = UnitOnlineBucket.get(this.redisTemplate, bucketKey);
+            if (unitLogs != null && !unitLogs.isEmpty()) {
+                unitLogs.forEach((k, v) -> membersArray[Integer.parseInt(k) - 1] = v.size());
             }
+            data.put(unit.getName(), membersArray);
         }
         return data;
     }

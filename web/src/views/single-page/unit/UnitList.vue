@@ -119,6 +119,7 @@ export default {
           if (data.available) {
             this.initDatabase({ id: res.data, unitName: data.name })
           }
+          this.fetchData()
         })
       }
     },

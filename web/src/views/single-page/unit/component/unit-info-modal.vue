@@ -50,7 +50,7 @@ import { getTargetProfiles } from '@/api/config'
 export default {
   name: 'InfoModal',
   data() {
-    const CODE_PATTERN = /^[a-zA-Z0-9]{3,10}$/
+    const CODE_PATTERN = /^[a-zA-Z0-9]{4,6}$/
     const unitCodeValidator = async (rule, value, callback) => {
       if (this.uniqCodeCache === value) {
         callback()
@@ -61,6 +61,28 @@ export default {
         callback(new Error('检测到重复识别码，请重新输入'))
       } else {
         callback()
+      }
+    }
+    const nameValidator = (rule, value, callback) => {
+      const en = /[`~!@#$%^&*()_+<>?:"{},./;'[\]\s+]/im
+      const cn = /[·！#￥（——）：；“”‘、，|《。》？【】[\]]/im
+      const reg = /\p{Unified_Ideograph}/u
+      const field = rule.field
+      if (en.test(value) || cn.test(value)) {
+        callback(new Error('名称不能包含标点符号、空格等特殊字符'))
+      }
+      if (field === 'name') {
+        if (value.length > 3 && value.length < 20 && reg.test(value)) {
+          callback()
+        } else {
+          callback(new Error('非法单位名称'))
+        }
+      } else if (field === 'unitShortName') {
+        if (value.length >= 4 && value.length <= 6 && reg.test(value)) {
+          callback()
+        } else {
+          callback(new Error('单位简称长度必须在4-6位'))
+        }
       }
     }
     return {
@@ -75,15 +97,17 @@ export default {
         targetSourceId: '',
         targetSource: '',
         unitShortName: '',
-        singleLogin: true
+        singleLogin: true,
+        // for init
+        available: false
       },
       modalTitle: '新增单位信息',
       ruleValidate: {
         name: [
-          { required: true, min: 3, max: 20, message: '单位名称不能少于3个或者大于20个字', trigger: 'blur' }
+          { required: true, validator: nameValidator, trigger: 'blur' }
         ],
         unitShortName: [
-          { required: true, min: 3, max: 6, message: '单位简称最好是3-6个字', trigger: 'blur' }
+          { required: true, validator: nameValidator, trigger: 'blur' }
         ],
         uniqCode: [
           { required: true, validator: unitCodeValidator, trigger: 'blur' }
@@ -92,10 +116,13 @@ export default {
           { required: true, message: '请设置过期时间', trigger: 'blur' }
         ],
         maxAccount: [
-          { required: true, type: 'number', message: '非法最大用户数', trigger: 'change' }
+          { required: true, type: 'integer', message: '非法最大用户数', trigger: 'change' }
         ],
         maxOnlineAccount: [
-          { required: true, type: 'number', message: '非法最大在线用户数', trigger: 'change' }
+          { required: true, type: 'integer', message: '非法最大在线用户数', trigger: 'change' }
+        ],
+        targetSource: [
+          { required: true, message: '必须选择目标数据源', trigger: 'change' }
         ]
       },
       uniqCodeCache: undefined,
@@ -146,6 +173,9 @@ export default {
       this.$refs.unitForm.resetFields()
       this.modalVisible = false
       this.uniqCodeCache = undefined
+      this.targetSources = []
+      this.formData.targetSourceId = ''
+      this.formData.available = false
     },
     async validateCode(val) {
       const res = await validateUniqCode(val)
@@ -165,6 +195,8 @@ export default {
     handleSourceChange(val) {
       if (val) {
         this.formData.targetSource = val.label
+        const profile = this.targetSources.find(p => p.id === val.value)
+        this.formData.available = profile.available
       }
     }
   }

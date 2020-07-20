@@ -18,5 +18,6 @@ public class Constant {
     public static final String ILIS_LOGIN_ONLINE_PREFIX = "ilis.login.log.online.";
     public static final String ILIS_LOGIN_OFFLINE_PREFIX = "ilis.login.log.offline.";
     public static final String ILIS_LOGIN_TOTAL_PREFIX = "ilis.login.log.total.";
-    public static final String USER_ONLINE_SUFFIX = ".user.online.log";
+    public static final String ILIS_LOGIN_BUFFER_PREFIX = "login.buffer.";
+    public static final String ILIS_ONLINE_BUCKET_PREFIX = "ilis.online.bucket.";
 }

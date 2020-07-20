@@ -13,8 +13,11 @@
       <FormItem label="头像">
         <Upload
           type="drag"
-          :headers="smAuthorization"
-          action="https://sm.ms/api/v2/upload">
+          :headers="authHeader"
+          :before-upload="beforeUpload"
+          :on-success="handleSuccess"
+          :with-credentials="false"
+          action="http://images.ac.cn/api/upload">
           <div style="padding: 20px 0">
             <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
             <p>点击或者拖拽照片上传头像</p>
@@ -49,8 +52,8 @@ export default {
       }
     }
     const usernameValidator = async (rule, value, callback) => {
-      if (!value || value.length < 4) {
-        callback(new Error('用户名不能少于4位'))
+      if (!value || value.length < 4 || value.length > 10) {
+        callback(new Error('用户名不能少于4位或者大于10位'))
       } else if (!this.isEdit && await this.validateUsername(value)) {
         callback(new Error('检测到有重复用户名，请重新输入'))
       } else {
@@ -73,7 +76,7 @@ export default {
         realName: [{ required: true, message: '请输入用户姓名', trigger: 'blur' }],
         active: [{ required: true, type: 'boolean', message: '请设置是否启用用户', trigger: 'change' }]
       },
-      smAuthorization: {
+      authHeader: {
         Authorization: 'N6eFRqnCxXnAqKqSRU8k0QMGBRYjkKfh'
       },
       isEdit: false
@@ -103,6 +106,18 @@ export default {
     async validateUsername(username) {
       const res = await validateUsername(username)
       return res.data
+    },
+    handleSuccess(res, file, fs) {
+      console.log(res)
+      console.log(file)
+    },
+    beforeUpload() {
+      this.$axios.post('https://sm.ms/api/v2/token', {
+        username: 'ilis2',
+        password: 'ilis2Auth01'
+      }).then(res => {
+        console.log(res)
+      })
     }
   }
 }

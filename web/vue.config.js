@@ -16,5 +16,10 @@ module.exports = {
       .set('@', resolve('src'))
       .set('@@', resolve('src/components'))
   },
-  productionSourceMap: false
+  productionSourceMap: false,
+  devServer: {
+    compress: true,
+    disableHostCheck: true,
+    port: 8081
+  }
 }

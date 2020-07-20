@@ -55,4 +55,17 @@ public interface UnitUserLogger extends BaseService<LoginInfo> {
      * @return 分页
      */
     IPage<LoginInfo> getLogsViaUnitCode(String unitCode, Page<LoginInfo> page);
+
+    /**
+     * 根据单位code获取该单位在线用户集合
+     * @param unitCode 单位编码
+     * @param page page
+     * @return 分页
+     */
+    IPage<LoginInfo> getUnitOnlineAccounts(String unitCode, Page<LoginInfo> page);
+
+    /**
+     * 如果用户登录日志缓冲区有数据，则将日志入库
+     */
+    void flushLogIfPresent();
 }

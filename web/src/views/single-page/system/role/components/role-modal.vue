@@ -26,7 +26,7 @@ export default {
   name: 'role-modal',
   data() {
     const roleCodeValidator = (rule, value, callback) => {
-      if (!value || value.length < 5) {
+      if (!value || value.length < 5 || value.length > 10) {
         callback(new Error('非法角色标识'))
       } else if (!value.startsWith('ROLE_')) {
         callback(new Error('角色标识必须以ROLE_开头'))
@@ -45,7 +45,7 @@ export default {
       },
       ruleValidate: {
         role: [{ required: true, validator: roleCodeValidator }],
-        roleName: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }]
+        roleName: [{ required: true, min: 3, max: 10, message: '角色名称不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -60,6 +60,10 @@ export default {
     handleSubmit() {
       this.$refs.roleForm.validate(valid => {
         if (valid) {
+          if (this.formData.description && this.formData.description.length > 50) {
+            this.$Message.warning('角色描述长度超限')
+            return
+          }
           const data = { ...this.formData }
           this.$emit('success-valid', data)
         }

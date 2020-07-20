@@ -3,7 +3,7 @@
 <mapper namespace="cn.hitek.authorization.ilis2.product.data.script.mapper.DataScriptMapper">
 
     <select id="getLastId" resultType="long">
-        SELECT MAX(id) FROM t_data_script
+        SELECT MAX(id) FROM t_data_script where is_deleted = false
     </select>
     <update id="scriptExchange">
         update t_data_script x

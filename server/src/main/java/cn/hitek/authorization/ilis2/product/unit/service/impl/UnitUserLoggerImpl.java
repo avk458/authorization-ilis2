@@ -4,6 +4,7 @@ import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.utils.AddressUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
+import cn.hitek.authorization.ilis2.product.unit.helper.UnitOnlineBucket;
 import cn.hitek.authorization.ilis2.product.unit.mapper.LoginInfoMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
 import cn.hutool.core.util.StrUtil;
@@ -16,10 +17,12 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author chenlm
@@ -38,6 +41,10 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         return this.redisTemplate.boundSetOps(getTotalUsersKey(unitCode));
     }
 
+    private BoundSetOperations<String, Object> loginBuffer(String key) {
+        return this.redisTemplate.boundSetOps(key);
+    }
+
     @Async
     @Override
     public void handleLoginLog(LoginInfo loginInfo) {
@@ -45,7 +52,8 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         if (StrUtil.isNotBlank(loginIp)) {
             loginInfo.setLoginRegion(AddressUtil.getCityInfo(loginIp));
         }
-        this.save(loginInfo);
+        String key = Constant.ILIS_LOGIN_BUFFER_PREFIX + loginInfo.getUnitCode();
+        loginBuffer(key).add(loginInfo);
     }
 
     @Async
@@ -55,6 +63,7 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         final String key = generateOnlineKey(loginInfo.getUnitCode(), loginInfo.getSessionId());
         if (loginInfo.getLogin()) {
             sessionStorage().set(key, loginInfo, 13, TimeUnit.HOURS);
+            UnitOnlineBucket.put(this.redisTemplate, loginInfo);
         } else {
             this.redisTemplate.delete(key);
         }
@@ -84,6 +93,7 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
                 String key = generateOnlineKey(info.getUnitCode(), info.getSessionId());
                 sessionStorage().set(key, info, 13, TimeUnit.HOURS);
                 this.redisTemplate.delete(offlineKey);
+                UnitOnlineBucket.put(this.redisTemplate, info);
             }
         }
     }
@@ -118,5 +128,37 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         return baseMapper.selectPage(page, Wrappers.lambdaQuery(LoginInfo.class)
                 .eq(LoginInfo::getUnitCode, unitCode)
                 .orderByDesc(LoginInfo::getOperationTime));
+    }
+
+    @Override
+    public IPage<LoginInfo> getUnitOnlineAccounts(String unitCode, Page<LoginInfo> page) {
+        Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_ONLINE_PREFIX + unitCode + ".*");
+        if (keys != null && keys.size() > 0) {
+            Set<String> sessionIds = keys
+                    .stream()
+                    .map(key -> key.substring(key.lastIndexOf(".") + 1))
+                    .collect(Collectors.toSet());
+            return this.baseMapper.selectPage(page, Wrappers.lambdaQuery(LoginInfo.class)
+                    .in(LoginInfo::getSessionId, sessionIds)
+                    .orderByDesc(LoginInfo::getOperationTime));
+        } else {
+            return new Page<>(0, 0, 0);
+        }
+    }
+
+    @Scheduled(cron = "0 0 0/1 * * ? ")
+    @Override
+    public void flushLogIfPresent() {
+        Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_BUFFER_PREFIX + "*");
+        if (keys != null && !keys.isEmpty()) {
+            for (String key : keys) {
+                BoundSetOperations<String, Object> ops = loginBuffer(key);
+                Set<Object> members = ops.members();
+                if (members != null && !members.isEmpty()) {
+                    members.stream().map(o -> (LoginInfo) o).forEach(this::save);
+                    ops.getOperations().delete(key);
+                }
+            }
+        }
     }
 }

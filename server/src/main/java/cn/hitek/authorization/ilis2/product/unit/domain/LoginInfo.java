@@ -1,5 +1,7 @@
 package cn.hitek.authorization.ilis2.product.unit.domain;
 
+import cn.hutool.core.builder.EqualsBuilder;
+import cn.hutool.core.builder.HashCodeBuilder;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,4 +35,30 @@ public class LoginInfo {
     private String sessionId;
     private String loginRegion;
     private String remark;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LoginInfo info = (LoginInfo) o;
+
+        return new EqualsBuilder()
+                .append(userId, info.userId)
+                .append(sessionId, info.sessionId)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(userId)
+                .append(sessionId)
+                .toHashCode();
+    }
 }

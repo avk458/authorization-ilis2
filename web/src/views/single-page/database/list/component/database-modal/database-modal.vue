@@ -4,7 +4,7 @@
     <Form ref="databaseForm" :model="formData" :rules="databaseRules" :label-width="100"
           label-position="right">
       <FormItem label="所属单位" prop="unitId">
-        <Select v-model="formData.unitId" :label-in-value="true" @on-change="handleUnitSelect">
+        <Select v-model="formData.unitId" :label-in-value="true" :disabled="true" @on-change="handleUnitSelect">
           <Option v-for="u in unitList" :value="u.id" :key="u.id">{{ u.name }}</Option>
         </Select>
       </FormItem>
@@ -63,7 +63,7 @@
 
 <script>
 import { getUnitList } from '@/api/unit'
-import { isUnitHasActiveDatabase, isDatabaseNameIllegal } from '@/api/unit-database'
+import { isUnitHasActiveDatabase } from '@/api/unit-database'
 import { getFirstCharAtSpell } from '@/libs/tools'
 
 export default {
@@ -84,8 +84,6 @@ export default {
     const databaseNameValidator = async (rule, value, callback) => {
       if (value.length < 3 || value.length > 10) {
         callback(new Error('数据库名长度不合适'))
-      } else if (await this.databaseNameIllegal(value)) {
-        callback(new Error('数据库名不合规'))
       } else {
         callback()
       }
@@ -209,10 +207,11 @@ export default {
         sslParam += 'false'
       }
       this.sslParam = sslParam
-    },
-    async databaseNameIllegal(val) {
-      const res = await isDatabaseNameIllegal(val)
-      return res.data
+    }
+  },
+  computed: {
+    isEdit() {
+      return this.formData.id !== ''
     }
   }
 }

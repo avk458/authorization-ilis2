@@ -18,7 +18,7 @@ export const getTableListViaDatabase = form => {
 
 export const saveMainProfile = data => {
   return axios.request({
-    url: '/init/config/main/profile',
+    url: '/config/main/profile',
     method: 'post',
     data: data
   })

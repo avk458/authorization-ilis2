@@ -60,3 +60,12 @@ export const getUnitLoginLog = (unitCode, params) => {
     params: params
   })
 }
+
+export const getOnlineAccounts = (unitCode, params) => {
+  params.unitCode = unitCode
+  return axios.request({
+    url: '/unit/online-accounts',
+    method: 'get',
+    params: params
+  })
+}

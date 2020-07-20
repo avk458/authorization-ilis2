@@ -4,7 +4,7 @@ import { getToken } from '@/libs/util'
 
 export default {
   methods: {
-    initDatabase(val) {
+    initDatabase(val, callback) {
       this.$Notice.info({
         title: '提示',
         desc: `正在初始化${val.unitName}数据库，请稍候`
@@ -14,6 +14,9 @@ export default {
           title: '初始化数据库',
           desc: '成功！'
         })
+        if (callback) {
+          callback()
+        }
       }).catch(() => {
         this.$Notice.error({
           title: '失败',

@@ -61,7 +61,7 @@
   </div>
 </template>
 <script>
-import { loadSystemPath, getTableListViaDatabase, saveMainProfile, getDatabases } from '@/api/config'
+import { loadSystemPath, getTableListViaDatabase, getDatabases } from '@/api/config'
 
 export default {
   name: 'SettingModal',
@@ -126,7 +126,9 @@ export default {
         this.modalTitle = `编辑${data.profileName}信息`
         this.usernameHolder = '如需修改，请输入数据库用户名。留空则不修改用户名'
         this.passwordHolder = '如需修改，请输入数据库密码。留空则不修改密码'
+        this.handleConnection()
       } else {
+        this.isEdit = false
         this.editPath = true
       }
       loadSystemPath().then(res => {
@@ -154,17 +156,8 @@ export default {
       }
       this.$refs.configForm.validate(async valid => {
         if (valid) {
-          // update
-          if (this.formData.id) {
-            const payload = {}
-            Object.assign(payload, this.formData)
-            this.$emit('update-validate', payload)
-            return
-          }
-          // insert
-          const res = await saveMainProfile(this.formData)
-          this.$Message.success(res.message)
-          this.handleClose()
+          const payload = { ...this.formData }
+          this.$emit('form-validate', payload)
         }
       })
     },
@@ -178,6 +171,9 @@ export default {
       this.modalTitle = '新增主数据源配置信息'
       this.isEdit = false
       this.$refs.configForm.resetFields()
+      this.databases = []
+      this.usernameHolder = '请输入数据库用户名'
+      this.passwordHolder = '请输入数据库密码'
     },
     handleInitDataSwitch(on) {
       if (!on) {
