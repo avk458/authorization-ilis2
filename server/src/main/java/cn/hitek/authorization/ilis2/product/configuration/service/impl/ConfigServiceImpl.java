@@ -39,12 +39,10 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
     private final TargetSourceProfileMapper targetSourceProfileMapper;
     private final ApplicationEventPublisher eventPublisher;
 
+
     @Override
     public void saveMainProfile(MainSourceProfile config) {
         config.setPassword(EncryptUtil.encrypt(config.getPassword()));
-        if (MainSourceProfile.ACTIVE == config.getActive()) {
-            setOtherConfigInactive();
-        }
         save(config);
     }
 
@@ -99,12 +97,7 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
     @Override
     public void activeProfile(String configId) {
         MainSourceProfile config = getById(configId);
-        if (!MainSourceProfile.ACTIVE == config.getActive()) {
-            setOtherConfigInactive();
-            config.setActive(MainSourceProfile.ACTIVE);
-        } else {
-            config.setActive(!MainSourceProfile.ACTIVE);
-        }
+        config.setActive(!config.getActive());
         super.updateById(config);
     }
 
@@ -118,9 +111,6 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
 
     @Override
     public boolean updateById(MainSourceProfile entity) {
-        if (MainSourceProfile.ACTIVE == entity.getActive()) {
-            setOtherConfigInactive();
-        }
         String password = entity.getPassword();
         if (StrUtil.isNotBlank(password)) {
             entity.setPassword(EncryptUtil.encrypt(password));

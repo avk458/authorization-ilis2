@@ -68,9 +68,12 @@ public class Unit extends BaseEntity implements Serializable {
 
     private String unitShortName;
 
-    @NotBlank(message = "必须选择目标数据源", groups = {OnCreate.class, OnUpdate.class})
-    private String targetSourceId;
+    @NotBlank(message = "必须选择主数据源", groups = {OnCreate.class, OnUpdate.class})
+    private String mainProfileId;
 
-    private String targetSource;
+    @NotBlank(message = "必须选择目标数据源", groups = {OnCreate.class, OnUpdate.class})
+    private String targetProfileId;
+
+    private String targetProfile;
 
 }

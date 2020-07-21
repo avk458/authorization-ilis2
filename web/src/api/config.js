@@ -31,6 +31,13 @@ export const getMainProfiles = () => {
   })
 }
 
+export const getActiveMainProfiles = () => {
+  return axios.request({
+    url: '/config/main/active/profiles',
+    method: 'get'
+  })
+}
+
 export const getTargetProfiles = () => {
   return axios.request({
     url: '/config/target/profiles',

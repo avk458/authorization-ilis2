@@ -102,6 +102,8 @@ public class UnitDatabase extends BaseEntity implements Serializable {
      */
     private Boolean isInitialized;
 
+    private String mainProfileId;
+
     private String targetProfileId;
 
     private String targetProfile;

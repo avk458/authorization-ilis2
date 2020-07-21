@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.hitek'
-version = '1.0.3.RELEASE'
+version = '1.0.4.SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {

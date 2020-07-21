@@ -16,6 +16,7 @@ import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporters;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
+import cn.hitek.authorization.ilis2.product.database.helper.DynamicScript;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
@@ -65,6 +66,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     private final DataScriptService scriptService;
     @Qualifier("asyncExecutor")
     private final Executor asyncExecutor;
+    private final DynamicScript dynamicScript;
 
     @SneakyThrows
     @Override
@@ -77,8 +79,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                 return;
             }
             detectUnitDatabaseQualified(database);
-            MainSourceProfile mainProfile = this.configService.getActiveConfig();
-            Objects.requireNonNull(mainProfile, "can't find active database initial configuration");
+            MainSourceProfile mainProfile = this.configService.getById(database.getMainProfileId());
+            Objects.requireNonNull(mainProfile, "can't find main profile for initialize");
             Exporter dumper = Exporters.init(database.getDatabaseEnum());
             // 1. export
             initFile = dumper.export(mainProfile);
@@ -86,9 +88,12 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             initFile.setUnitDatabaseId(database.getId());
             initFile.setUnitDatabaseName(database.getDatabaseName());
             TargetSourceProfile targetProfile = this.configService.getTargetProfileViaId(database.getTargetProfileId());
-            initializeDatabaseUser(ConnectionHandler.getTargetConnection(targetProfile), database);
+            Connection connection = ConnectionHandler.getTargetConnection(targetProfile);
+            initializeDatabaseUser(connection, database);
             // 2. initialize
             dumper.restore(targetProfile, database, initFile);
+            List<String> scripts = this.dynamicScript.getScripts(database);
+            insertUnitCustomInfo(connection, scripts);
             this.initFileService.save(initFile);
             database.setIsInitialized(UnitDatabase.INITIALIZED);
             super.updateById(database);
@@ -106,20 +111,27 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         }
     }
 
-    public void initializeDatabaseUser(Connection connection, UnitDatabase unitDatabase) throws SQLException {
+    private void insertUnitCustomInfo(Connection connection, List<String> scripts) throws SQLException {
         try {
-            final String schema = unitDatabase.getDatabaseName();
-            final String user = EncryptUtil.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
-            final String decryptPwd = EncryptUtil.decrypt(unitDatabase.getDatabasePwd());
             Statement statement = connection.createStatement();
-            statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
-            // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
-            statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema + ".* " + "TO " + user);
-            statement.execute("FLUSH PRIVILEGES ");
-            statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
+            for (String s : scripts) {
+                statement.execute(s);
+            }
         } finally {
             connection.close();
         }
+    }
+
+    private void initializeDatabaseUser(Connection connection, UnitDatabase unitDatabase) throws SQLException {
+        final String schema = unitDatabase.getDatabaseName();
+        final String user = EncryptUtil.decrypt(unitDatabase.getDatabaseUsername()) + "@'%'";
+        final String decryptPwd = EncryptUtil.decrypt(unitDatabase.getDatabasePwd());
+        Statement statement = connection.createStatement();
+        statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
+        // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
+        statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema + ".* " + "TO " + user);
+        statement.execute("FLUSH PRIVILEGES ");
+        statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
     }
 
     private void readProcessLogAndSent2Client(InitFile initFile) {
@@ -242,7 +254,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public String createUnitDatabaseInfo(Unit unit) {
-        TargetSourceProfile targetProfile = this.configService.getTargetProfileViaId(unit.getTargetSourceId());
+        TargetSourceProfile targetProfile = this.configService.getTargetProfileViaId(unit.getTargetProfileId());
         String defaultName = "ilis_" + unit.getUniqCode();
         UnitDatabase ud = new UnitDatabase();
         ud.setDatabaseUsername(defaultName);
@@ -255,9 +267,10 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         ud.setParams(Constant.PARAMS);
         ud.setUnitId(unit.getId());
         ud.setUnitName(unit.getName());
+        ud.setMainProfileId(unit.getMainProfileId());
         ud.setTargetProfile(targetProfile.getProfileName());
         ud.setTargetProfileId(targetProfile.getId());
-        // 有前置保障，每次提交脚本在标准库执行
+        // 有前置保障，每次提交脚本都会在标准库执行
         ud.setDataVersion(this.scriptService.getLastDataScriptId());
         ud.setManageAble(targetProfile.getAvailable());
         save(ud);

@@ -67,7 +67,7 @@ public class ConfigController {
     @PutMapping("/actions/active/{profileId}")
     public Response activeMainProfile(@PathVariable String profileId) {
         this.configService.activeProfile(profileId);
-        return new Response().code(HttpStatus.OK);
+        return new Response().code(HttpStatus.UPDATE);
     }
 
     @PreAuthorize("hasAuthority('profile:main:del')")

@@ -77,6 +77,7 @@ public class MySqlDumper implements Exporter {
         command.add("-p" + password);
         // make sure this progress will not hang in metadata lock
         command.add("--single-transaction");
+        command.add("--hex-blob");
         command.add(config.getSourceSchema());
         return command;
     }

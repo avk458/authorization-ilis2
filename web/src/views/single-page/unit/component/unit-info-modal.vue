@@ -19,16 +19,29 @@
         <InputNumber :max="1000" :min="1" v-model="formData.maxOnlineAccount" style="width: 100%"></InputNumber>
       </FormItem>
       <FormItem label="单点登录" prop="singleLogin">
-        <i-switch v-model="formData.singleLogin" size="large" true-color="#13ce66" false-color="#ff4949"/>
+        <i-switch v-model="formData.singleLogin" size="large">
+          <span slot="open">启用</span>
+          <span slot="close">关闭</span>
+        </i-switch>
       </FormItem>
       <FormItem label="过期时间" prop="expireDate">
         <DatePicker type="date" format="yyyy-MM-dd" placeholder="选择日期" :value="formData.expireDate" @on-change="handleDateChange"></DatePicker>
       </FormItem>
-      <FormItem label="选择目标数据源" prop="targetSource">
+      <FormItem label="选择主数据源" prop="mainProfileId">
         <Select
-          v-model="formData.targetSourceId"
+          v-model="formData.mainProfileId"
+          style="width: 100%"
+          :disabled="isEdit"
+        >
+          <Option v-for="item in mainSources" :value="item.id" :key="item.id" :label="item.profileName" :disabled="!item.active">{{ item.profileName }}</Option>
+        </Select>
+      </FormItem>
+      <FormItem label="选择目标数据源" prop="targetProfile">
+        <Select
+          v-model="formData.targetProfileId"
           style="width: 100%"
           :label-in-value="true"
+          :disabled="isEdit"
           @on-change="handleSourceChange"
         >
           <Option v-for="item in targetSources" :value="item.id" :key="item.id" :label="item.profileName">{{ item.profileName }}</Option>
@@ -45,7 +58,7 @@
 <script>
 import { validateUniqCode } from '@/api/unit'
 import { getFirstCharAtSpell } from '@/libs/tools'
-import { getTargetProfiles } from '@/api/config'
+import { getTargetProfiles, getMainProfiles } from '@/api/config'
 
 export default {
   name: 'InfoModal',
@@ -94,8 +107,9 @@ export default {
         expireDate: '',
         maxAccount: 0,
         maxOnlineAccount: 0,
-        targetSourceId: '',
-        targetSource: '',
+        targetProfileId: '',
+        mainProfileId: '',
+        targetProfile: '',
         unitShortName: '',
         singleLogin: true,
         // for init
@@ -121,12 +135,17 @@ export default {
         maxOnlineAccount: [
           { required: true, type: 'integer', message: '非法最大在线用户数', trigger: 'change' }
         ],
-        targetSource: [
+        targetProfile: [
           { required: true, message: '必须选择目标数据源', trigger: 'change' }
+        ],
+        mainProfileId: [
+          { required: true, message: '必须选择主数据源', trigger: 'change' }
         ]
       },
       uniqCodeCache: undefined,
-      targetSources: []
+      targetSources: [],
+      mainSources: [],
+      isEdit: false
     }
   },
   computed: {
@@ -145,6 +164,7 @@ export default {
         this.formData = data
         this.modalTitle = '编辑单位信息'
         this.uniqCodeCache = data.uniqCode
+        this.isEdit = true
       } else {
         this.modalTitle = '新增单位信息'
         this.formData.expireDate = this.defaultDate
@@ -154,6 +174,9 @@ export default {
     fetchData() {
       getTargetProfiles().then(res => {
         this.targetSources = res.data
+      })
+      getMainProfiles().then(res => {
+        this.mainSources = res.data
       })
     },
     handleSubmit() {
@@ -174,8 +197,9 @@ export default {
       this.modalVisible = false
       this.uniqCodeCache = undefined
       this.targetSources = []
-      this.formData.targetSourceId = ''
+      this.formData.targetProfileId = ''
       this.formData.available = false
+      this.isEdit = false
     },
     async validateCode(val) {
       const res = await validateUniqCode(val)
@@ -194,7 +218,7 @@ export default {
     },
     handleSourceChange(val) {
       if (val) {
-        this.formData.targetSource = val.label
+        this.formData.targetProfile = val.label
         const profile = this.targetSources.find(p => p.id === val.value)
         this.formData.available = profile.available
       }
