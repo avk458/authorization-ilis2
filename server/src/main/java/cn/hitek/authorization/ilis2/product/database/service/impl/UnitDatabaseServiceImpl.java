@@ -217,11 +217,15 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         String databaseUsername = entity.getDatabaseUsername();
         String databasePwd = entity.getDatabasePwd();
         if (StrUtil.isNotBlank(databaseUsername)) {
-            renameDatabaseUsername(EncryptUtil.decrypt(dbEntity.getDatabaseUsername()), databaseUsername, entity.getTargetProfileId());
+            if (entity.getManageAble()) {
+                renameDatabaseUsername(EncryptUtil.decrypt(dbEntity.getDatabaseUsername()), databaseUsername, entity.getTargetProfileId());
+            }
             databaseUsername = EncryptUtil.encrypt(databaseUsername);
         }
         if (StrUtil.isNotBlank(databasePwd)) {
-            alterDatabasePassword(dbEntity, entity, entity.getTargetProfileId());
+            if (entity.getManageAble()) {
+                alterDatabasePassword(dbEntity, entity, entity.getTargetProfileId());
+            }
             databasePwd = EncryptUtil.encrypt(databasePwd);
         }
         entity.setDatabaseUsername(databaseUsername);
