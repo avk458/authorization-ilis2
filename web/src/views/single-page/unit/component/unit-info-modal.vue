@@ -24,6 +24,14 @@
           <span slot="close">关闭</span>
         </i-switch>
       </FormItem>
+      <FormItem label="是否作为主数据源" prop="mainSource">
+        <Poptip trigger="hover" title="提示" content="若开启此选项，则会自动新增一条可选主数据源">
+          <i-switch v-model="formData.mainSource" size="large">
+            <span slot="open">是</span>
+            <span slot="close">否</span>
+          </i-switch>
+        </Poptip>
+      </FormItem>
       <FormItem label="过期时间" prop="expireDate">
         <DatePicker type="date" format="yyyy-MM-dd" placeholder="选择日期" :value="formData.expireDate" @on-change="handleDateChange"></DatePicker>
       </FormItem>
@@ -113,7 +121,8 @@ export default {
         unitShortName: '',
         singleLogin: true,
         // for init
-        available: false
+        available: false,
+        mainSource: false
       },
       modalTitle: '新增单位信息',
       ruleValidate: {
@@ -185,6 +194,12 @@ export default {
           if (this.formData.maxOnlineAccount > this.formData.maxAccount) {
             this.$Message.error('最大在线用户不能大于最大用户数')
             return
+          }
+          if (this.formData.mainSource) {
+            if (!this.formData.available) {
+              this.$Message.warning('无法在当前所选目标数据源创建标准库')
+              return
+            }
           }
           const payload = { ...this.formData }
           this.$emit('on-success-valid', payload)

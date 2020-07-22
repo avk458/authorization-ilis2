@@ -13,6 +13,7 @@ import cn.hitek.authorization.ilis2.product.unit.domain.dto.WeekOnline;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.DatabaseInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitInfo;
+import cn.hitek.authorization.ilis2.product.unit.event.AutoInsertMainProfileEvent;
 import cn.hitek.authorization.ilis2.product.unit.helper.UnitOnlineBucket;
 import cn.hitek.authorization.ilis2.product.unit.mapper.UnitMapper;
 import cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper;
@@ -25,6 +26,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -48,6 +50,7 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     private final RedisTemplate<String, Object> redisTemplate;
     private final UnitUserLogger userLogger;
     private final UnitUserOnlineLogMapper onlineLogMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     final String[] weeks = new String[]{"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
 
@@ -73,6 +76,10 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     @Override
     public String insertUnitInfo(Unit unit) {
         save(unit);
+        if (unit.getMainSource()) {
+            AutoInsertMainProfileEvent event = new AutoInsertMainProfileEvent(this, unit);
+            this.eventPublisher.publishEvent(event);
+        }
         return this.databaseService.createUnitDatabaseInfo(unit);
     }
 

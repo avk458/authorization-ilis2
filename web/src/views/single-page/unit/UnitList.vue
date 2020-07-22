@@ -52,7 +52,7 @@ export default {
             })
           }
         },
-        { title: '目标数据源', key: 'targetSource' },
+        { title: '目标数据源', key: 'targetProfile' },
         {
           title: '是否已授权',
           key: 'isAuthorized',

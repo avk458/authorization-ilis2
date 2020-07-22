@@ -241,7 +241,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             statement.execute("ALTER USER '" + username + "'@'%' IDENTIFIED BY '" + entity.getDatabasePwd() + "'");
             statement.execute("FLUSH PRIVILEGES ");
         } catch (SQLException e) {
-            throw new BusinessException("修改数据密码出错：" + e.getMessage());
+            throw new BusinessException("修改数据库密码出错：" + e.getMessage());
         }
     }
 
@@ -252,7 +252,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                     "TO '" + username + "'@'%'");
             statement.execute("FLUSH PRIVILEGES ");
         } catch (SQLException e) {
-            throw new BusinessException("修改数据用户名出错：" + e.getMessage());
+            throw new BusinessException("修改数据库用户名出错：" + e.getMessage());
         }
     }
 
@@ -286,8 +286,10 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     public void updateDatabaseManageAbleListener(UpdateDatabaseEvent event) {
         String targetProfileId = event.getTargetProfileId();
         List<UnitDatabase> list = query().eq(UnitDatabase::getTargetProfileId, targetProfileId).list();
-        list.stream().filter(ud -> !ud.getManageAble()).forEach(ud -> ud.setManageAble(UnitDatabase.MANAGE_ABLE));
-        super.updateBatchById(list);
+        list.stream()
+                .filter(ud -> !ud.getManageAble())
+                .peek(ud -> ud.setManageAble(UnitDatabase.MANAGE_ABLE))
+                .forEach(super::updateById);
     }
 
     @Override
@@ -400,7 +402,11 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     @Override
     public boolean executeInStandardSchemas(DataScript script) {
         script.setId(RandomUtil.randomLong());
-        List<MainSourceProfile> profiles = configService.query().list();
+        MainSourceProfile profile = this.configService.getStandardProfile();
+        UnitDatabase standardDatabase = generateStandardDatabase(profile);
+        UpdateEchoLog log = preExecute(standardDatabase, script);
+        return log.getSuccess();
+        /*List<MainSourceProfile> profiles = configService.query().list();
         List<CompletableFuture<UpdateEchoLog>> futures = profiles
                 .stream()
                 .map(this::generateStandardDatabase)
@@ -408,7 +414,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                         .thenApplyAsync(sdf -> this.preExecute(sdf, script)))
                 .collect(Collectors.toList());
         List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
-        return logs.stream().allMatch(UpdateEchoLog::getSuccess);
+        return logs.stream().allMatch(UpdateEchoLog::getSuccess);*/
     }
 
     private UpdateEchoLog preExecute(UnitDatabase sd, DataScript script) {
@@ -438,7 +444,15 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public void updateStandardSchema(Long dataVersion) {
-        List<MainSourceProfile> profiles = configService.query().list();
+        MainSourceProfile profile = this.configService.getStandardProfile();
+        UnitDatabase standardDatabase = generateStandardDatabase(profile, dataVersion);
+        List<UpdateEchoLog> logs = updateEachDatabase(standardDatabase);
+        if (logs.stream().allMatch(UpdateEchoLog::getSuccess)) {
+            log.info("标准库执行脚本更新完毕，执行脚本 {} 条", logs.size());
+        } else {
+            logs.stream().filter(l -> !l.getSuccess()).findFirst().ifPresent(errorLog -> log.error(errorLog.getMsg()));
+        }
+        /*List<MainSourceProfile> profiles = configService.query().list();
         List<CompletableFuture<List<UpdateEchoLog>>> futures = profiles
                 .stream()
                 .map(profile -> this.generateStandardDatabase(profile, dataVersion))
@@ -446,6 +460,6 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                         .thenApplyAsync(this::updateEachDatabase, asyncExecutor))
                 .collect(Collectors.toList());
         List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList());
-        log.info("标准库执行脚本更新完毕，执行脚本 {} 条", logs.size());
+        */
     }
 }

@@ -115,4 +115,10 @@ public interface ConfigService extends BaseService<MainSourceProfile> {
      * @return target schemas
      */
     List<Schema> getTargetSourceSchemas(String targetProfileId);
+
+    /**
+     * 获取唯一的，系统初始时由开发人员制作的ilis空库
+     * @return 空库主数据源
+     */
+    MainSourceProfile getStandardProfile();
 }

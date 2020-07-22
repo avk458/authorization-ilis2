@@ -20,4 +20,5 @@ public class Constant {
     public static final String ILIS_LOGIN_TOTAL_PREFIX = "ilis.login.log.total.";
     public static final String ILIS_LOGIN_BUFFER_PREFIX = "login.buffer.";
     public static final String ILIS_ONLINE_BUCKET_PREFIX = "ilis.online.bucket.";
+    public static final String STANDARD_SCHEMA = "ilis_standard";
 }

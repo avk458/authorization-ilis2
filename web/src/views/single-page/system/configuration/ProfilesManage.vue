@@ -223,13 +223,15 @@ export default {
         this.$refs.targetModal.handleClose()
       })
     },
-    async handleValidateConnections(row) {
+    handleValidateConnections(row) {
       this.$Message.info('正在验证数据库连接，请稍候')
-      await validateTargetConnection(row).then(res => {
+      validateTargetConnection(row).then(res => {
         if (res.data) {
           row.available = res.data
-          updateTargetProfile(row)
-          this.fetchData()
+          updateTargetProfile(row).then(() => {
+            this.$Message.success('验证成功，目标数据库当前连接可用')
+            this.fetchData()
+          })
         } else {
           this.$Message.warning('验证失败，无法获取目标数据源连接')
         }

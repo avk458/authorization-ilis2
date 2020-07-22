@@ -76,4 +76,6 @@ public class Unit extends BaseEntity implements Serializable {
 
     private String targetProfile;
 
+    private Boolean mainSource;
+
 }

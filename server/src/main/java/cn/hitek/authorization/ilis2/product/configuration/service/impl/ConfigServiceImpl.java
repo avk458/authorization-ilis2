@@ -13,10 +13,14 @@ import cn.hitek.authorization.ilis2.product.configuration.mapper.TargetSourcePro
 import cn.hitek.authorization.ilis2.product.configuration.service.ConfigService;
 import cn.hitek.authorization.ilis2.product.data.management.domain.Schema;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
+import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import cn.hitek.authorization.ilis2.product.unit.event.AutoInsertMainProfileEvent;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -239,5 +243,33 @@ public class ConfigServiceImpl extends BaseServiceImpl<MainSourceProfileMapper, 
             schemas.add(schema);
         }
         return schemas;
+    }
+
+    @Async("asyncExecutor")
+    @EventListener
+    public void insertMainProfile(AutoInsertMainProfileEvent event) {
+        Unit unit = event.getUnit();
+        String targetProfileId = unit.getTargetProfileId();
+        TargetSourceProfile targetSourceProfile = this.targetSourceProfileMapper.selectById(targetProfileId);
+        if (!targetSourceProfile.getAvailable()) {
+            throw new BusinessException("无法在当前所选目标数据源创建标准库");
+        }
+        String mainProfileId = unit.getMainProfileId();
+        MainSourceProfile selectedProfile = this.getById(mainProfileId);
+        MainSourceProfile newProfile = new MainSourceProfile();
+        newProfile.setHost(targetSourceProfile.getHost());
+        newProfile.setPort(targetSourceProfile.getPort());
+        newProfile.setPath(selectedProfile.getPath());
+        newProfile.setUsername(targetSourceProfile.getUsername());
+        newProfile.setPassword(targetSourceProfile.getPassword());
+        newProfile.setActive(MainSourceProfile.ACTIVE);
+        newProfile.setProfileName(unit.getName());
+        newProfile.setSourceSchema("ilis_" + unit.getUniqCode());
+        this.save(newProfile);
+    }
+
+    @Override
+    public MainSourceProfile getStandardProfile() {
+        return query().eq(MainSourceProfile::getSourceSchema, Constant.STANDARD_SCHEMA).getOne();
     }
 }
