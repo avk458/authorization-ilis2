@@ -3,6 +3,6 @@
 <mapper namespace="cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper">
     <select id="getWeekStatisticData"
             resultType="cn.hitek.authorization.ilis2.product.unit.domain.dto.WeekOnline">
-        select log_time, sum(online_members) members from t_unit_user_online_log where week(log_time) = week(now()) group by log_time
+        select log_time, sum(online_members) members from t_unit_user_online_log where week(log_time, 1) = week(now(), 1) group by log_time
     </select>
 </mapper>
