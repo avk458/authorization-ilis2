@@ -1,5 +1,8 @@
 package cn.hitek.authorization.ilis2.product.data.script.domain;
 
+import cn.hitek.authorization.ilis2.common.validation.data.NormalScript;
+import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
+import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +44,7 @@ public class DataScript {
     private Type type;
 
     @NotBlank(message = "数据库脚本不能为空")
+    @NormalScript(groups = {OnCreate.class, OnUpdate.class})
     private String script;
 
     private String remark;

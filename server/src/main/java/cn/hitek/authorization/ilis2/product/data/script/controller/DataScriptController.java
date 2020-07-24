@@ -3,6 +3,8 @@ package cn.hitek.authorization.ilis2.product.data.script.controller;
 import cn.hitek.authorization.ilis2.common.constants.RequestConstants;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
+import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
+import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
@@ -15,7 +17,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 /**
@@ -32,7 +33,7 @@ public class DataScriptController {
 
     @PreAuthorize("hasAuthority('script:add')")
     @PostMapping
-    public Response insertDataScript(@Valid @RequestBody DataScript script) {
+    public Response insertDataScript(@Validated(OnCreate.class) @RequestBody DataScript script) {
         Response res = new Response();
         boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
         if (executeSuccess) {
@@ -46,7 +47,7 @@ public class DataScriptController {
 
     @PreAuthorize("hasAuthority('script:update')")
     @PutMapping
-    public Response updateDataScript(@Valid @RequestBody DataScript script) {
+    public Response updateDataScript(@Validated(OnUpdate.class) @RequestBody DataScript script) {
         Response res = new Response();
         boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
         if (executeSuccess) {

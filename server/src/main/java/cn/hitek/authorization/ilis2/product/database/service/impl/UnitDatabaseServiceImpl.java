@@ -402,11 +402,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     @Override
     public boolean executeInStandardSchemas(DataScript script) {
         script.setId(RandomUtil.randomLong());
-        MainSourceProfile profile = this.configService.getStandardProfile();
-        UnitDatabase standardDatabase = generateStandardDatabase(profile);
-        UpdateEchoLog log = preExecute(standardDatabase, script);
-        return log.getSuccess();
-        /*List<MainSourceProfile> profiles = configService.query().list();
+        List<MainSourceProfile> profiles = configService
+                .query().eq(MainSourceProfile::getSourceSchema, Constant.STANDARD_SCHEMA).list();
         List<CompletableFuture<UpdateEchoLog>> futures = profiles
                 .stream()
                 .map(this::generateStandardDatabase)
@@ -414,7 +411,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                         .thenApplyAsync(sdf -> this.preExecute(sdf, script)))
                 .collect(Collectors.toList());
         List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
-        return logs.stream().allMatch(UpdateEchoLog::getSuccess);*/
+        return logs.stream().allMatch(UpdateEchoLog::getSuccess);
     }
 
     private UpdateEchoLog preExecute(UnitDatabase sd, DataScript script) {
