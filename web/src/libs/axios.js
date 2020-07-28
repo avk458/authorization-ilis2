@@ -39,6 +39,7 @@ class HttpRequest {
       config.headers = {
         Authorization: 'Bearer ' + token
       }
+      config.withCredentials = false
     }
     return config
   }

@@ -401,7 +401,9 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
 
     @Override
     public boolean executeInStandardSchemas(DataScript script) {
-        script.setId(RandomUtil.randomLong());
+        if (script.getId() == null) {
+            script.setId(RandomUtil.randomLong());
+        }
         List<MainSourceProfile> profiles = configService
                 .query().eq(MainSourceProfile::getSourceSchema, Constant.STANDARD_SCHEMA).list();
         List<CompletableFuture<UpdateEchoLog>> futures = profiles

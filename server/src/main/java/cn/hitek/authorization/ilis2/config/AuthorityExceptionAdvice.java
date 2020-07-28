@@ -4,7 +4,7 @@ import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
 import cn.hitek.authorization.ilis2.common.exception.CustomException;
 import cn.hitek.authorization.ilis2.common.response.Response;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -22,7 +22,7 @@ import javax.validation.ConstraintViolationException;
  * @author chenlm
  */
 @RestControllerAdvice
-@Slf4j
+@Log4j2
 public class AuthorityExceptionAdvice {
 
     private final String bem = "参数异常";

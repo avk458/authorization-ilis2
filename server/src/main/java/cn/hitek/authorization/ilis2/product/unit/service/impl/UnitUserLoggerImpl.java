@@ -2,6 +2,7 @@ package cn.hitek.authorization.ilis2.product.unit.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.utils.AddressUtil;
+import cn.hitek.authorization.ilis2.framework.socket.manager.SocketManager;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.helper.UnitOnlineBucket;
@@ -66,6 +67,7 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
             UnitOnlineBucket.put(this.redisTemplate, loginInfo);
         } else {
             this.redisTemplate.delete(key);
+            SocketManager.remove(loginInfo.getSessionId() + "," + loginInfo.getUnitCode());
         }
     }
 

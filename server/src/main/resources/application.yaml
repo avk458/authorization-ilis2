@@ -7,7 +7,8 @@ server:
     worker-threads: 32
     buffer-size: 1024
     direct-buffers: true
-#logging:
+logging:
+  config: classpath:log4j2.xml
 # do not change those config, unless you know what are u doing.
 spring:
   profiles:
