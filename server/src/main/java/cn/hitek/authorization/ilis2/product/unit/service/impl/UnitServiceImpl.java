@@ -211,7 +211,7 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
             final String bucketKey = Constant.ILIS_ONLINE_BUCKET_PREFIX + unit.getUniqCode();
             Map<String, HashSet<LoginInfo>> unitLogs = UnitOnlineBucket.get(this.redisTemplate, bucketKey);
             if (unitLogs != null && !unitLogs.isEmpty()) {
-                unitLogs.forEach((k, v) -> membersArray[Integer.parseInt(k) - 1] = v.size());
+                unitLogs.forEach((k, v) -> membersArray[Integer.parseInt(k)] = v.size());
             }
             data.put(unit.getName(), membersArray);
         }
