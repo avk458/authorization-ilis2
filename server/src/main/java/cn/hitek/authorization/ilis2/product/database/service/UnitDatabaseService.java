@@ -88,4 +88,10 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param dataVersion 导入前的数据版本
      */
     void updateStandardSchema(Long dataVersion);
+
+    /**
+     * 新增脚本预先在标准库执行
+     * @param script 数据脚本
+     */
+    void insertScriptIfExecuted(DataScript script);
 }

@@ -34,15 +34,8 @@ public class DataScriptController {
     @PreAuthorize("hasAuthority('script:add')")
     @PostMapping
     public Response insertDataScript(@Validated(OnCreate.class) @RequestBody DataScript script) {
-        Response res = new Response();
-        boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
-        if (executeSuccess) {
-            this.dataScriptService.save(script);
-            res.code(HttpStatus.ADD);
-        } else {
-            res.code(HttpStatus.FAIL).message("脚本执行失败，请检查");
-        }
-        return res;
+        this.unitDatabaseService.insertScriptIfExecuted(script);
+        return new Response().code(HttpStatus.ADD);
     }
 
     @PreAuthorize("hasAuthority('script:update')")

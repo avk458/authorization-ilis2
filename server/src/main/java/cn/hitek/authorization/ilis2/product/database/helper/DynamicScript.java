@@ -27,7 +27,7 @@ public class DynamicScript {
         Unit unit = this.unitMapper.selectById(database.getUnitId());
         Objects.requireNonNull(unit, "不能获取到单位信息");
         ArrayList<String> strings = new ArrayList<>(2);
-        String ilisDepartVersion = "INSERT INTO %s.t_s_depart_version VALUES ('402882105ec60bc0015ec6262d3d0003', null, 'A03', '%s', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '%s', '%s', '1', null, null, null, null, null, null, null, '', '', null, null, null, '%s');";
+        String ilisDepartVersion = "REPLACE INTO %s.t_s_depart_version VALUES ('402882105ec60bc0015ec6262d3d0003', null, 'A03', '%s', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '%s', '%s', '1', null, null, null, null, null, null, null, '', '', null, null, null, '%s');";
         String ilisDepart = "update %s.t_s_depart set departname = '%s', org_code = 'A03', org_type = '1' WHERE ID = '8a8ab0b246dc81120146dc8180ba0017';";
         String ilisSnCategoryOrg = "INSERT INTO %s.t_sn_category_org (id, create_name, create_by, create_date, update_name, update_by, update_date, sys_company_code, org_id, sn_category_id, is_delete, depart_name) VALUES ('%s', null, null, null, null, null, null, '%s', '%s', '%s', 0, '%s');";
         LocalDateTime date = LocalDateTime.now();

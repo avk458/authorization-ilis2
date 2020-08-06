@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出。-->
-<!--monitorInterval：Log4j2能够自动检测修改配置 文件和重新配置本身，设置间隔秒数。-->
-<Configuration status="off" monitorInterval="600">
+<Configuration status="off" monitorInterval="300">
     <properties>
-        <!--通用变量-->
         <property name="LOG_HOME" value="logs"/>
         <property name="ERROR_LOG_FILE_NAME" value="error"/>
         <property name="INFO_LOG_FILE_NAME" value="info"/>
@@ -15,13 +12,10 @@
         <Property name="LOG_PATTERN">${LOG_LEVEL_PATTERN} %d{${LOG_DATEFORMAT_PATTERN}} ${sys:PID} -&#45;&#45; [%t] %-c{1.} %F:%L - %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
     </properties>
     <Appenders>
-        <!--console-->
         <Console name="CONSOLE" target="SYSTEM_OUT">
-            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
             <Filters>
                 <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
-            <!--输出日志的格式-->
             <PatternLayout pattern="${CONSOLE_LOG_PATTERN}"/>
         </Console>
         <RollingRandomAccessFile name="ERROR_LOG"
@@ -58,12 +52,10 @@
         </Rewrite>
     </Appenders>
     <Loggers>
-        <!--AsyncLogger-->
         <Logger name="cn.hitek" level="INFO" includeLocation="true"/>
         <Logger name="org.crown.framework.p6spy" level="DEBUG" includeLocation="true"/>
         <Logger name="com.baomidou.mybatisplus.core.metadata.TableInfoHelper" level="ERROR" includeLocation="true"/>
         <Logger name="com.baomidou.dynamic" level="INFO" includeLocation="true"/>
-        <!--AsyncRoot-->
         <Root level="warn" includeLocation="true">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="REWRITE"/>

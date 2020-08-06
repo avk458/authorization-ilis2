@@ -114,7 +114,7 @@ spring:
     port: 3306
     url: jdbc:mysql://127.0.0.1:3306/auth01?characterEncoding=utf8&serverTimezone=CTT&useSSL=false
     username: root
-    password: 123456
+    password: hitek@aliyun1998
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

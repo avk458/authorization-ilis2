@@ -1,12 +1,12 @@
 package cn.hitek.authorization.ilis2.product.data.script.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
+import cn.hitek.authorization.ilis2.common.properties.DataSourceProperties;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.base.domain.UserDetail;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.mapper.DataScriptMapper;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
-import cn.hitek.authorization.ilis2.common.properties.DataSourceProperties;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -23,9 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -48,6 +47,7 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
 
     @Override
     public List<DataScript> getScriptRange(Long dataVersion, Long updateVersion) {
+        dataVersion = dataVersion == null ? 0L : dataVersion;
         return query().gt(DataScript::getId, dataVersion).le(DataScript::getId, updateVersion).list();
     }
 
@@ -110,14 +110,14 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
     @SneakyThrows
     @Override
     public void importScriptFile(MultipartFile multipartFile) {
-        Path tmp = Files.createTempFile("tmp", ".sql");
-        multipartFile.transferTo(tmp);
+        // Path tmp = Files.createTempFile("tmp", ".sql");
+        // multipartFile.transferTo(tmp);
         Connection connection = DriverManager.getConnection(
                 dataSourceProperties.getUrl(),
                 dataSourceProperties.getUsername(),
                 dataSourceProperties.getPassword());
         ScriptRunner runner = new ScriptRunner(connection);
-        runner.runScript(new FileReader(tmp.toFile()));
+        runner.runScript(new InputStreamReader(multipartFile.getInputStream(), StandardCharsets.UTF_8));
     }
 
     @Override

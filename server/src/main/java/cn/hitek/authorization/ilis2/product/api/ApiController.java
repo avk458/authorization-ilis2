@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,11 +46,11 @@ public class ApiController {
 
     @Limit(name = "获取数据库数据版本", key = "dataVersion", prefix = "limit", period = 60, count = 20)
     @GetMapping("/data/version")
-    public Response getDatabaseVersionAndScriptVersion(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code) {
+    public Long getDatabaseVersionAndScriptVersion(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, code).getOne();
         Objects.requireNonNull(unit, "未获取到对应单位信息");
-        Map<String, Long> result = this.databaseService.getDatabaseVersionAndScriptVersion(unit);
-        return new Response().code(HttpStatus.OK).data(result);
+        // Map<String, Long> result = this.databaseService.getDatabaseVersionAndScriptVersion(unit);
+        return this.dataScriptService.getLastDataScriptId();
     }
 
     @Limit(name = "获取数据库数据脚本", key = "dataScript", prefix = "limit", period = 60, count = 20)

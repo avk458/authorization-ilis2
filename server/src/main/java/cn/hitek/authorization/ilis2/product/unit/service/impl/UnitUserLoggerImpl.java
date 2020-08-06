@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -21,6 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenlm
  */
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginInfo> implements UnitUserLogger {
@@ -67,7 +70,12 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
             UnitOnlineBucket.put(this.redisTemplate, loginInfo);
         } else {
             this.redisTemplate.delete(key);
-            SocketManager.remove(loginInfo.getSessionId() + "," + loginInfo.getUnitCode());
+            try {
+                SocketManager.destroySession(loginInfo.getSessionId() + "," + loginInfo.getUnitCode());
+            } catch (IOException e) {
+                log.warn("尝试销毁ilis用户长连接失败， {}", loginInfo.toString());
+                e.printStackTrace();
+            }
         }
     }
 

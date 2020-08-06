@@ -307,9 +307,9 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         for (DataScript script : scripts) {
             UpdateEchoLog execute = executeScript(manager, template, script, database.getUnitName());
             results.add(execute);
-            if (!execute.getSuccess()) {
-                break;
-            }
+            // if (!execute.getSuccess()) {
+            //     break;
+            // }
             database.setDataVersion(script.getId());
         }
         if (!database.isStandardSchema()) {
@@ -354,6 +354,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                     break;
                 default:
             }
+            template.execute("UPDATE ilis_standard.t_s_data_version SET version = " + dataScript.getId());
         } catch (DataAccessException e) {
             log.setSuccess(Boolean.FALSE);
             e.printStackTrace();
@@ -460,5 +461,14 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
                 .collect(Collectors.toList());
         List<UpdateEchoLog> logs = futures.stream().map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList());
         */
+    }
+
+    @Transactional(rollbackFor = BusinessException.class)
+    @Override
+    public void insertScriptIfExecuted(DataScript script) {
+        this.scriptService.save(script);
+        if (!this.executeInStandardSchemas(script)) {
+            throw new BusinessException("脚本执行失败，请检查");
+        }
     }
 }

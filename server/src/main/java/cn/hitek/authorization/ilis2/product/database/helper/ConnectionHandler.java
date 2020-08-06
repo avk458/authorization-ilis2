@@ -50,7 +50,7 @@ public class ConnectionHandler {
         return DriverManager.getConnection(path, config.getUsername(), config.getDecryptPassword());
     }
 
-    public static String getTargetPath(UnitDatabase unitDatabase) {
+    public synchronized static String getTargetPath(UnitDatabase unitDatabase) {
         DatabasePathLinear linear = DatabasePathLinear.getInstance();
         return linear.setHost(unitDatabase.getHost())
                 .setPort(unitDatabase.getPort())
