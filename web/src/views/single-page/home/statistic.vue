@@ -63,6 +63,7 @@ export default {
             type: 'category',
             boundaryGap: false,
             data: [
+              '00:00',
               '1:00',
               '2:00',
               '3:00',
@@ -85,8 +86,7 @@ export default {
               '20:00',
               '21:00',
               '22:00',
-              '23:00',
-              '00:00'
+              '23:00'
             ]
           }
         ],
