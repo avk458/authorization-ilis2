@@ -7,7 +7,6 @@ import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.api.vo.Feedback;
 import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.data.script.service.DataScriptService;
-import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
@@ -49,18 +48,17 @@ public class ApiController {
     public Long getDatabaseVersionAndScriptVersion(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, code).getOne();
         Objects.requireNonNull(unit, "未获取到对应单位信息");
-        // Map<String, Long> result = this.databaseService.getDatabaseVersionAndScriptVersion(unit);
         return this.dataScriptService.getLastDataScriptId();
     }
 
     @Limit(name = "获取数据库数据脚本", key = "dataScript", prefix = "limit", period = 60, count = 20)
-    @GetMapping("/data/script/{updateVer}")
+    @GetMapping("/data/script/{startVer}/{updateVer}")
     public Response getDataScriptRange(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR)String code,
+                                       @PathVariable Long startVer,
                                        @PathVariable Long updateVer) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, code).getOne();
         Objects.requireNonNull(unit, "未获取到对应单位信息");
-        UnitDatabase database = this.databaseService.query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
-        List<DataScript> scripts = this.dataScriptService.getScriptRange(database.getDataVersion(), updateVer);
+        List<DataScript> scripts = this.dataScriptService.getScriptRange(startVer, updateVer);
         return new Response().code(HttpStatus.OK).data(scripts);
     }
 
@@ -68,5 +66,10 @@ public class ApiController {
     public void updateFeedback(@RequestBody Feedback feedback) {
         Unit unit = this.unitService.query().eq(Unit::getUniqCode, feedback.getCode()).getOne();
         this.databaseService.updateDatabaseDataVersion(unit.getId(), feedback.getVersion());
+    }
+
+    @GetMapping("/online-status/{sessionId}")
+    public boolean getSessionOnlineStatus(@PathVariable String sessionId, String code) {
+        return unitService.isUnitSessionOnline(sessionId, code);
     }
 }

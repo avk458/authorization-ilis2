@@ -1,6 +1,7 @@
 package cn.hitek.authorization.ilis2.framework.socket.manager;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class SocketManager {
     public static void destroySession(String key) throws IOException {
         WebSocketSession session = get(key);
         if (session != null && session.isOpen()) {
+            session.sendMessage(new TextMessage("offline"));
             session.close();
             remove(key);
             log.debug("销毁session {}", key);

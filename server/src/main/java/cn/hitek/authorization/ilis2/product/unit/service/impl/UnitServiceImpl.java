@@ -241,4 +241,10 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     public IPage<LoginInfo> getUnitLoginLog(String unitCode, Page<LoginInfo> page) {
         return this.userLogger.getLogsViaUnitCode(unitCode, page);
     }
+
+    @Override
+    public Boolean isUnitSessionOnline(String sessionId, String code) {
+        final String key = Constant.ILIS_LOGIN_ONLINE_PREFIX + code + "." + sessionId;
+        return this.redisTemplate.hasKey(key);
+    }
 }

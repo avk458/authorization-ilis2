@@ -9,12 +9,12 @@
       </Col>
     </Row>
     <Row :gutter="20" style="margin-top: 10px;">
-      <Col :md="24" :lg="8" style="margin-bottom: 20px;">
+      <Col :md="24" :lg="10" style="margin-bottom: 20px;">
         <Card shadow>
           <chart-pie style="height: 300px;" :value="pieData" text="单位用户占比"></chart-pie>
         </Card>
       </Col>
-      <Col :md="24" :lg="16" style="margin-bottom: 20px;">
+      <Col :md="24" :lg="14" style="margin-bottom: 20px;">
         <Card shadow>
           <chart-bar style="height: 300px;" :value="barData" text="每周用户活跃量"/>
         </Card>

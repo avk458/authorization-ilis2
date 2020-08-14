@@ -29,7 +29,12 @@ export default {
         { title: 'SessionId', key: 'sessionId', width: 310 },
         { title: 'IP', key: 'loginIp' },
         { title: 'IP地址', key: 'loginRegion' },
-        { title: '操作时间', key: 'operationTime' },
+        {
+          render: (h, p) => {
+            p.column.title = this.type === 'total' ? '操作时间' : '最近在线时间'
+            return h('span', p.row.operationTime)
+          }
+        },
         { title: '类型', key: 'remark', width: 130 }
       ],
       loading: false,

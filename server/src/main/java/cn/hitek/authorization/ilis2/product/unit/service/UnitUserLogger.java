@@ -68,4 +68,10 @@ public interface UnitUserLogger extends BaseService<LoginInfo> {
      * 如果用户登录日志缓冲区有数据，则将日志入库
      */
     void flushLogIfPresent();
+
+    /**
+     * 更新用户在线时间
+     * @param token ws token
+     */
+    void updateStatus(String token);
 }

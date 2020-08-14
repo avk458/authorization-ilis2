@@ -56,7 +56,7 @@
         <Logger name="org.crown.framework.p6spy" level="DEBUG" includeLocation="true"/>
         <Logger name="com.baomidou.mybatisplus.core.metadata.TableInfoHelper" level="ERROR" includeLocation="true"/>
         <Logger name="com.baomidou.dynamic" level="INFO" includeLocation="true"/>
-        <Root level="warn" includeLocation="true">
+        <Root level="info" includeLocation="true">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="REWRITE"/>
             <appender-ref ref="ERROR_LOG"/>

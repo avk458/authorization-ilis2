@@ -8,6 +8,7 @@ import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.helper.UnitOnlineBucket;
 import cn.hitek.authorization.ilis2.product.unit.mapper.LoginInfoMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -18,12 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -69,12 +72,13 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
             sessionStorage().set(key, loginInfo, 13, TimeUnit.HOURS);
             UnitOnlineBucket.put(this.redisTemplate, loginInfo);
         } else {
-            this.redisTemplate.delete(key);
             try {
-                SocketManager.destroySession(loginInfo.getSessionId() + "," + loginInfo.getUnitCode());
+                SocketManager.destroySession(encodeWsToken(loginInfo.getSessionId(), loginInfo.getUnitCode()));
             } catch (IOException e) {
                 log.warn("尝试销毁ilis用户长连接失败， {}", loginInfo.toString());
                 e.printStackTrace();
+            } finally {
+                this.redisTemplate.delete(key);
             }
         }
     }
@@ -94,8 +98,12 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
 
     @Override
     public void addOnlineUser(String token) {
-        if (StrUtil.isNotBlank(token) && token.contains(StringPool.COMMA)) {
-            String[] split = token.split(StringPool.COMMA);
+        String wsToken = decodeWsToken(token);
+        if (StrUtil.isBlank(wsToken)) {
+            return;
+        }
+        if (wsToken.contains(StringPool.COMMA)) {
+            String[] split = wsToken.split(StringPool.COMMA);
             final String offlineKey = generateOfflineKey(split[1], split[0]);
             Object obj = sessionStorage().get(offlineKey);
             if (obj instanceof LoginInfo) {
@@ -110,8 +118,13 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
 
     @Override
     public void removeOnlineUser(String token) {
-        if (StrUtil.isNotBlank(token) && token.contains(StringPool.COMMA)) {
-            String[] split = token.split(StringPool.COMMA);
+        String wsToken = decodeWsToken(token);
+        if (StrUtil.isBlank(wsToken)) {
+            return;
+        }
+        SocketManager.remove(token);
+        if (wsToken.contains(StringPool.COMMA)) {
+            String[] split = wsToken.split(StringPool.COMMA);
             final String key = generateOnlineKey(split[1], split[0]);
             Object obj = sessionStorage().get(key);
             if (obj instanceof LoginInfo) {
@@ -123,14 +136,19 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         }
     }
 
+    @Nullable
+    private String decodeWsToken(String rawToken) {
+        return rawToken == null ? null : Base64.decodeStr(rawToken);
+    }
+
+    private String encodeWsToken(String sessionId, String unitCode) {
+        return Base64.encode(sessionId + "," + unitCode);
+    }
+
     @Override
     public Integer getUnitOnlineUsers(String uniqCode) {
         Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_ONLINE_PREFIX + uniqCode + ".*");
-        if (keys != null && !keys.isEmpty()) {
-            return keys.size();
-        } else {
-            return 0;
-        }
+        return Optional.ofNullable(keys).orElse(Collections.emptySet()).size();
     }
 
     @Override
@@ -143,17 +161,18 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
     @Override
     public IPage<LoginInfo> getUnitOnlineAccounts(String unitCode, Page<LoginInfo> page) {
         Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_ONLINE_PREFIX + unitCode + ".*");
-        if (keys != null && keys.size() > 0) {
-            Set<String> sessionIds = keys
-                    .stream()
-                    .map(key -> key.substring(key.lastIndexOf(".") + 1))
-                    .collect(Collectors.toSet());
-            return this.baseMapper.selectPage(page, Wrappers.lambdaQuery(LoginInfo.class)
-                    .in(LoginInfo::getSessionId, sessionIds)
-                    .orderByDesc(LoginInfo::getOperationTime));
-        } else {
-            return new Page<>(0, 0, 0);
-        }
+        List<Object> objects = sessionStorage().multiGet(Optional.ofNullable(keys).orElse(Collections.emptySet()));
+        objects = Optional.ofNullable(objects).orElse(Collections.emptyList());
+        List<LoginInfo> infos = objects
+                .stream()
+                .map(o -> (LoginInfo) o)
+                .skip((page.getCurrent() - 1) * page.getSize())
+                .limit(page.getSize())
+                .collect(Collectors.toList());
+        Page<LoginInfo> infoPage = new Page<>();
+        infoPage.setRecords(infos);
+        infoPage.setTotal(objects.size());
+        return infoPage;
     }
 
     @Scheduled(cron = "0 0 0/1 * * ? ")
@@ -168,6 +187,33 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
                     members.stream().map(o -> (LoginInfo) o).forEach(this::save);
                     ops.getOperations().delete(key);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void updateStatus(String token) {
+        String wsToken = decodeWsToken(token);
+        if (StrUtil.isBlank(wsToken)) {
+            return;
+        }
+        if (wsToken.contains(StringPool.COMMA)) {
+            String[] split = wsToken.split(StringPool.COMMA);
+            final String key = generateOnlineKey(split[1], split[0]);
+            Object obj = sessionStorage().get(key);
+            LoginInfo info = null;
+            if (obj instanceof LoginInfo) {
+                info = (LoginInfo) obj;
+            } else {
+                String offlineKey = generateOfflineKey(split[1], split[0]);
+                Object offObj = sessionStorage().get(offlineKey);
+                if (offObj instanceof LoginInfo) {
+                    info = (LoginInfo) offObj;
+                }
+            }
+            if (info != null) {
+                info.setOperationTime(LocalDateTime.now());
+                sessionStorage().set(key, info);
             }
         }
     }

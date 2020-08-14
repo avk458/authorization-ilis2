@@ -92,4 +92,12 @@ public interface UnitService extends BaseService<Unit>{
      * @return 登录记录
      */
     IPage<LoginInfo> getUnitLoginLog(String unitCode, Page<LoginInfo> page);
+
+    /**
+     * 单位用户会话是否在线
+     * @param sessionId session id
+     * @param code 单位编码
+     * @return 结果
+     */
+    Boolean isUnitSessionOnline(String sessionId, String code);
 }

@@ -1,6 +1,26 @@
 <template>
  <Card dis-hover>
-   <Button type="success" @click="handleScriptModal">提交脚本</Button>
+   <Row :gutter="16"  justify="start">
+     <Col span="2">
+       <Button type="success" @click="handleScriptModal">提交脚本</Button>
+     </Col>
+     <Col span="2">
+       <Button v-if="!prod" type="info" @click="handleExportDataScript">导出数据库脚本</Button>
+     </Col>
+     <Col span="2">
+       <Upload
+         v-if="prod"
+         ref="upload"
+         accept=".sql"
+         :headers="header"
+         :show-upload-list="false"
+         :before-upload="handleUpload"
+         :on-success="handleSuccess"
+         :action="action">
+         <Button>导入数据库脚本</Button>
+       </Upload>
+     </Col>
+   </Row>
    <Divider/>
    <Table border :data="data" :columns="columns" :draggable="true" @on-drag-drop="handleDrag">
      <template slot-scope="{ row }" slot="action">
@@ -25,10 +45,14 @@
 <script>
 import { getScripts, deleteScript, changeScript } from '@/api/script'
 import ScriptModal from './components/script/'
+import mixin from '@/mixins/mixin'
+import config from '@/config'
+import { getToken } from '@/libs/util'
 
 export default {
   name: 'ScriptManage',
   components: { ScriptModal },
+  mixins: [mixin],
   data() {
     return {
       data: [],
@@ -90,6 +114,27 @@ export default {
         this.$Message.success(res.message)
         this.fetchData()
       })
+    },
+    handleSuccess() {
+      this.$Notice.success({
+        title: '成功',
+        desc: '数据脚本导入成功'
+      })
+      this.fetchData()
+    }
+  },
+  computed: {
+    prod() {
+      return process.env.NODE_ENV === 'production'
+    },
+    action() {
+      const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      return baseUrl + 'script/file'
+    },
+    header() {
+      return {
+        Authorization: 'Bearer ' + getToken()
+      }
     }
   },
   mounted() {
