@@ -17,6 +17,8 @@ import cn.hitek.authorization.ilis2.product.database.exporter.Exporter;
 import cn.hitek.authorization.ilis2.product.database.exporter.Exporters;
 import cn.hitek.authorization.ilis2.product.database.helper.ConnectionHandler;
 import cn.hitek.authorization.ilis2.product.database.helper.DynamicScript;
+import cn.hitek.authorization.ilis2.product.database.helper.SqlUtil;
+import cn.hitek.authorization.ilis2.product.database.helper.UnitInfoScripts;
 import cn.hitek.authorization.ilis2.product.database.mapper.UnitDatabaseMapper;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
 import cn.hitek.authorization.ilis2.product.init.file.domain.InitFile;
@@ -107,6 +109,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
+            log.warn(e.getMessage());
             throw new BusinessException("数据库初始化失败！");
         }
     }
@@ -129,7 +132,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         Statement statement = connection.createStatement();
         statement.execute("CREATE USER " + user + " IDENTIFIED BY '" + decryptPwd + "'");
         // statement.execute("GRANT ALL PRIVILEGES ON " + schema +".* " + "TO " + user);
-        statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT ON " + schema + ".* " + "TO " + user);
+        statement.execute("GRANT INSERT,DELETE,UPDATE,SELECT,ALTER,INDEX,DROP,CREATE ON " + schema + ".* " + "TO " + user);
         statement.execute("FLUSH PRIVILEGES ");
         statement.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8 COLLATE utf8_general_ci");
     }
@@ -469,6 +472,18 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         this.scriptService.save(script);
         if (!this.executeInStandardSchemas(script)) {
             throw new BusinessException("脚本执行失败，请检查");
+        }
+    }
+
+    @Override
+    public void updateCenterUnitInfo(Unit unit) {
+        try (Connection connection = this.configService.getTargetSourceConnection(unit.getTargetProfileId())) {
+            List<String> scripts = UnitInfoScripts.get(unit.getCenterUnitId(), unit.getName());
+            for (String sql : scripts) {
+                SqlUtil.executeUpdate(connection, sql);
+            }
+        } catch (SQLException e) {
+            // ignore
         }
     }
 }

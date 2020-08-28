@@ -3,8 +3,12 @@ export default {
   cookieExpires: 1,
   useI18n: false,
   baseUrl: {
-    dev: 'http://192.168.2.3:10010/',
+    dev: 'http://192.168.2.129:10010/',
     pro: ''
   },
-  homeName: 'home'
+  homeName: 'home',
+  centerBaseUrl: {
+    dev: 'http://192.168.2.3:8300/api/',
+    pro: 'http://plus.ilis.cn:8300/api/'
+  }
 }

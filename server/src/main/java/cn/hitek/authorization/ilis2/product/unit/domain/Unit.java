@@ -78,4 +78,8 @@ public class Unit extends BaseEntity implements Serializable {
 
     private Boolean mainSource;
 
+    private Long centerUnitId;
+
+    private Boolean isSynchronized;
+
 }

@@ -3,13 +3,16 @@
     v-model="visible"
     :title="modalTitle"
     :footer-hide="true"
-    @on-visible-change="handelVisible">
-    <Form ref="targetForm" :model="formData" :rules="ruleValidate" label-position="right" :label-width="150">
+    @on-visible-change="handleVisible">
+    <Form ref="targetForm" :model="formData" :rules="ruleValidate" label-position="right" :label-width="100">
       <FormItem label="配置名称" prop="profileName">
         <Input v-model="formData.profileName" placeholder="请输入配置名称"></Input>
       </FormItem>
       <FormItem label="数据库地址" prop="host">
         <Input v-model="formData.host" placeholder="请输入数据库连接地址"/>
+      </FormItem>
+      <FormItem label="部署地址" prop="deploy">
+        <Input v-model="formData.deploy" placeholder="请输入目标数据源部署地址"/>
       </FormItem>
       <FormItem label="数据库端口" prop="port">
         <InputNumber :min="1024" :max="65535" v-model="formData.port" placeholder="请输入数据库端口" style="width: 100%"></InputNumber>
@@ -72,7 +75,8 @@ export default {
         port: 3306,
         username: '',
         password: '',
-        available: false
+        available: false,
+        deploy: ''
       },
       modalTitle: '新增目标数据源配置信息',
       usernameHolder: '请输入数据库用户名',
@@ -81,7 +85,7 @@ export default {
     }
   },
   methods: {
-    handelVisible(visible) {
+    handleVisible(visible) {
       if (!visible) {
         this.handleClose()
       }

@@ -9,6 +9,9 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <Button size="small" type="success" style="margin-right: 4px" @click="applyForAuthorization(row)" :disabled="row.isAuthorized">申请授权</Button>
+          <Poptip :transfer="true" :word-wrap="true" :width="150" trigger="hover" title="提示" content="当本单位信息注册到数据中心， 当修改单位信息后需要重新注册">
+            <Button size="small" type="info" style="margin-right: 4px" @click="handleRegister(row)" :disabled="row.isSynchronized">注册</Button>
+          </Poptip>
           <Button size="small" type="primary" style="margin-right: 4px" @click="edit(row)" :disabled="row.isAuthorized">编辑</Button>
           <Button size="small" type="error" @click="remove(row)" :disabled="row.isAuthorized">删除</Button>
         </template>
@@ -19,9 +22,10 @@
 </template>
 
 <script>
-import { getUnitList, saveUnitInfo, updateUnitInfo, deleteUnitInfo, updateUnitLoginPolicy } from '@/api/unit'
+import { deleteUnitInfo, getUnitList, saveUnitInfo, updateUnitInfo, updateUnitLoginPolicy } from '@/api/unit'
 import InfoModal from './component/unit-info-modal'
 import mixin from '@/mixins/mixin'
+import config from '@/config'
 
 export default {
   name: 'unit-info',
@@ -71,7 +75,7 @@ export default {
           },
           width: 200
         },
-        { title: '操作', slot: 'action', align: 'center', width: 230 }
+        { title: '操作', slot: 'action', align: 'center', width: 260 }
       ],
       data: [],
       loading: false
@@ -105,23 +109,59 @@ export default {
       Object.assign(val, row)
       this.$refs.infoModal.showModal(val)
     },
-    submit(data) {
+    async submit(data) {
       if (data.id) {
-        updateUnitInfo(data).then(res => {
-          this.$Message.success(res.message)
-          this.$refs.infoModal.handleCancel()
-          this.fetchData()
-        })
+        this.updateUnit(this, data)
       } else {
-        saveUnitInfo(data).then(res => {
-          this.$Message.success(res.message)
-          this.$refs.infoModal.handleCancel()
-          if (data.available) {
-            this.initDatabase({ id: res.data, unitName: data.name })
-          }
-          this.fetchData()
-        })
+        const that = this
+        const registerSuccess = await this.registerUnitInfo(that, data)
+        if (registerSuccess) {
+          saveUnitInfo(data).then(async res => {
+            this.$Message.success(res.message)
+            this.$refs.infoModal.handleCancel()
+            if (data.available) {
+              console.log('init database')
+              // this.initDatabase({ id: res.data, unitName: data.name })
+            }
+            this.fetchData()
+          })
+        }
       }
+    },
+    async registerUnitInfo(context, info) {
+      const centerUnitId = info.centerUnitId
+      let api, formData
+      if (centerUnitId) {
+        api = this.centerBaseUrl + 'TestUnit/Update'
+        formData = {
+          id: centerUnitId,
+          name: info.name
+        }
+      } else {
+        api = this.centerBaseUrl + 'TestUnit/Register'
+        formData = { name: info.name }
+      }
+      const { data } = await this.$axios.post(api, formData)
+      if (data.success) {
+        info.centerUnitId = centerUnitId || data.data.id
+        info.isSynchronized = true
+        if (info.id) {
+          this.updateUnit(context, info)
+        }
+      } else {
+        this.$Message.warning(data.msg || '单位信息注册失败，请联系管理员或者稍候再试')
+      }
+      return data.success
+    },
+    handleRegister(row) {
+      this.registerUnitInfo(this, row)
+    },
+    updateUnit(context, unitInfo) {
+      updateUnitInfo(unitInfo).then(res => {
+        context.$Message.success(res.message)
+        context.$refs.infoModal.handleCancel()
+        context.fetchData()
+      })
     },
     applyForAuthorization(row) {
       console.log(row)
@@ -135,6 +175,11 @@ export default {
   },
   mounted() {
     this.fetchData()
+  },
+  computed: {
+    centerBaseUrl() {
+      return process.env.NODE_ENV === 'development' ? config.centerBaseUrl.dev : config.centerBaseUrl.pro
+    }
   }
 }
 </script>

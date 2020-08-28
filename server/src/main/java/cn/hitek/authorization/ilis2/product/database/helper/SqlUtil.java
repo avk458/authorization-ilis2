@@ -15,4 +15,9 @@ public class SqlUtil {
         Statement statement = connection.createStatement();
         return statement.executeQuery(sql);
     }
+
+    public static void executeUpdate(Connection connection, String sql) throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(sql);
+    }
 }

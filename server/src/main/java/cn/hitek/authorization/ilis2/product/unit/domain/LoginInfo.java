@@ -51,6 +51,9 @@ public class LoginInfo {
         return new EqualsBuilder()
                 .append(userId, info.userId)
                 .append(sessionId, info.sessionId)
+                .append(unitCode, info.unitCode)
+                .append(login, info.login)
+                .append(remark, info.remark)
                 .isEquals();
     }
 

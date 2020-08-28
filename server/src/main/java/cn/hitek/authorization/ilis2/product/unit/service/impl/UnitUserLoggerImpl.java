@@ -1,7 +1,6 @@
 package cn.hitek.authorization.ilis2.product.unit.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
-import cn.hitek.authorization.ilis2.common.utils.AddressUtil;
 import cn.hitek.authorization.ilis2.framework.socket.manager.SocketManager;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
@@ -24,6 +23,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,10 +55,6 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
     @Async
     @Override
     public void handleLoginLog(LoginInfo loginInfo) {
-        String loginIp = loginInfo.getLoginIp();
-        if (StrUtil.isNotBlank(loginIp)) {
-            loginInfo.setLoginRegion(AddressUtil.getCityInfo(loginIp));
-        }
         String key = Constant.ILIS_LOGIN_BUFFER_PREFIX + loginInfo.getUnitCode();
         loginBuffer(key).add(loginInfo);
     }
@@ -69,7 +65,7 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         unitTotalClientStorage(loginInfo.getUnitCode()).add(loginInfo.getUserId());
         final String key = generateOnlineKey(loginInfo.getUnitCode(), loginInfo.getSessionId());
         if (loginInfo.getLogin()) {
-            sessionStorage().set(key, loginInfo, 13, TimeUnit.HOURS);
+            set(key, loginInfo);
             UnitOnlineBucket.put(this.redisTemplate, loginInfo);
         } else {
             try {
@@ -105,14 +101,13 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         if (wsToken.contains(StringPool.COMMA)) {
             String[] split = wsToken.split(StringPool.COMMA);
             final String offlineKey = generateOfflineKey(split[1], split[0]);
-            Object obj = sessionStorage().get(offlineKey);
-            if (obj instanceof LoginInfo) {
-                LoginInfo info = (LoginInfo) obj;
-                String key = generateOnlineKey(info.getUnitCode(), info.getSessionId());
-                sessionStorage().set(key, info, 13, TimeUnit.HOURS);
+            LoginInfo info = get(offlineKey);
+            Optional.ofNullable(info).ifPresent(i -> {
+                String key = generateOnlineKey(i.getUnitCode(), i.getSessionId());
+                set(key, i);
                 this.redisTemplate.delete(offlineKey);
-                UnitOnlineBucket.put(this.redisTemplate, info);
-            }
+                UnitOnlineBucket.put(this.redisTemplate, i);
+            });
         }
     }
 
@@ -126,13 +121,12 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         if (wsToken.contains(StringPool.COMMA)) {
             String[] split = wsToken.split(StringPool.COMMA);
             final String key = generateOnlineKey(split[1], split[0]);
-            Object obj = sessionStorage().get(key);
-            if (obj instanceof LoginInfo) {
-                LoginInfo info = (LoginInfo) obj;
-                final String offlineKey = generateOfflineKey(info.getUnitCode(), info.getSessionId());
-                sessionStorage().set(offlineKey, info, 13, TimeUnit.HOURS);
+            LoginInfo info = get(key);
+            Optional.ofNullable(info).ifPresent(i -> {
+                final String offlineKey = generateOfflineKey(i.getUnitCode(), i.getSessionId());
+                set(offlineKey, i);
                 this.redisTemplate.delete(key);
-            }
+            });
         }
     }
 
@@ -179,15 +173,14 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
     @Override
     public void flushLogIfPresent() {
         Set<String> keys = this.redisTemplate.keys(Constant.ILIS_LOGIN_BUFFER_PREFIX + "*");
-        if (keys != null && !keys.isEmpty()) {
-            for (String key : keys) {
-                BoundSetOperations<String, Object> ops = loginBuffer(key);
-                Set<Object> members = ops.members();
-                if (members != null && !members.isEmpty()) {
-                    members.stream().map(o -> (LoginInfo) o).forEach(this::save);
-                    ops.getOperations().delete(key);
-                }
-            }
+        keys = Optional.ofNullable(keys).orElse(new HashSet<>());
+        for (String key : keys) {
+            BoundSetOperations<String, Object> ops = loginBuffer(key);
+            Set<Object> members = ops.members();
+            Optional.ofNullable(members).ifPresent(m -> {
+                m.stream().map(o -> (LoginInfo) o).forEach(this::save);
+                ops.getOperations().delete(key);
+            });
         }
     }
 
@@ -200,21 +193,39 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         if (wsToken.contains(StringPool.COMMA)) {
             String[] split = wsToken.split(StringPool.COMMA);
             final String key = generateOnlineKey(split[1], split[0]);
-            Object obj = sessionStorage().get(key);
-            LoginInfo info = null;
-            if (obj instanceof LoginInfo) {
-                info = (LoginInfo) obj;
-            } else {
+            LoginInfo info = get(key);
+            if (info == null) {
                 String offlineKey = generateOfflineKey(split[1], split[0]);
-                Object offObj = sessionStorage().get(offlineKey);
-                if (offObj instanceof LoginInfo) {
-                    info = (LoginInfo) offObj;
-                }
+                info = get(offlineKey);
             }
             if (info != null) {
                 info.setOperationTime(LocalDateTime.now());
-                sessionStorage().set(key, info);
+                set(key, info);
             }
         }
+    }
+
+    private void set(String key, LoginInfo loginInfo) {
+        sessionStorage().set(key, loginInfo, 13, TimeUnit.HOURS);
+    }
+
+    @Nullable
+    private LoginInfo get(String key) {
+        Object obj = sessionStorage().get(key);
+        return (LoginInfo) Optional.ofNullable(obj).orElse(null);
+    }
+
+    @PreDestroy
+    public void inactiveAccounts() {
+        log.info("Starting inactive accounts");
+        Set<String> onlineKeys = this.redisTemplate.keys(Constant.ILIS_LOGIN_ONLINE_PREFIX + "*");
+        Optional.ofNullable(onlineKeys)
+                .ifPresent(keys -> {
+                    for (String key : keys) {
+                        final String newKey = Constant.ILIS_LOGIN_OFFLINE_PREFIX + key.substring(Constant.ILIS_LOGIN_ONLINE_PREFIX.length());
+                        this.redisTemplate.rename(key, newKey);
+                    }
+                    log.info("Set {} accounts offline", keys.size());
+                });
     }
 }

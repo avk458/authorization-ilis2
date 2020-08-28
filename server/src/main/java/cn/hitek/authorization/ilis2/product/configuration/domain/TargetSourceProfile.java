@@ -43,4 +43,6 @@ public class TargetSourceProfile extends BaseEntity {
     @TableLogic
     @TableField(fill = FieldFill.INSERT, select = false)
     private Boolean isDeleted;
+
+    private String deploy;
 }

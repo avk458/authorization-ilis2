@@ -94,4 +94,10 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param script 数据脚本
      */
     void insertScriptIfExecuted(DataScript script);
+
+    /**
+     * 同步更新修改后的单位信息
+     * @param entity 单位信息实体
+     */
+    void updateCenterUnitInfo(Unit entity);
 }

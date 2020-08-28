@@ -2,6 +2,7 @@ package cn.hitek.authorization.ilis2.product.unit.service.impl;
 
 import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.exception.BusinessException;
+import cn.hitek.authorization.ilis2.common.utils.AddressUtil;
 import cn.hitek.authorization.ilis2.common.utils.EncryptUtil;
 import cn.hitek.authorization.ilis2.framework.web.service.impl.BaseServiceImpl;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
@@ -19,6 +20,7 @@ import cn.hitek.authorization.ilis2.product.unit.mapper.UnitMapper;
 import cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -116,8 +118,24 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     }
 
     @Override
+    public boolean updateById(Unit entity) {
+        Unit repoUnit = getById(entity.getId());
+        if (entity.getIsSynchronized() &&
+                !repoUnit.getName().equals(entity.getName())) {
+            entity.setIsSynchronized(false);
+        } else {
+            this.databaseService.updateCenterUnitInfo(entity);
+        }
+        return super.updateById(entity);
+    }
+
+    @Override
     public void logUserLogin(LoginInfo loginInfo) {
+        String loginIp = loginInfo.getLoginIp();
         loginInfo.setOperationTime(LocalDateTime.now());
+        if (StrUtil.isNotBlank(loginIp)) {
+            loginInfo.setLoginRegion(AddressUtil.getCityInfo(loginIp));
+        }
         this.userLogger.handleLoginLog(loginInfo);
         this.userLogger.handleLoginStatisticLog(loginInfo);
     }
