@@ -15,7 +15,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Objects;
@@ -35,10 +34,7 @@ public class ApiController {
 
     @Limit(name = "单位用户登录", key = "clientLogin", prefix = "limit", period = 60, count = 10)
     @GetMapping("/unit/info")
-    public String getUnitInfo(HttpServletRequest req, @RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR) String code) {
-        String host = req.getHeader("host");
-        String remoteAddr = req.getRemoteAddr();
-        String remoteHost = req.getRemoteHost();
+    public String getUnitInfo(@RequestParam @NotBlank(message = RequestConstants.PARAM_ERROR) String code) {
         return this.unitService.getUnitInfo(code);
     }
 

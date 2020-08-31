@@ -478,7 +478,8 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     @Override
     public void updateCenterUnitInfo(Unit unit) {
         try (Connection connection = this.configService.getTargetSourceConnection(unit.getTargetProfileId())) {
-            List<String> scripts = UnitInfoScripts.get(unit.getCenterUnitId(), unit.getName());
+            UnitDatabase database = query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
+            List<String> scripts = UnitInfoScripts.get(unit.getCenterUnitId(), unit.getName(), database.getDatabaseName());
             for (String sql : scripts) {
                 SqlUtil.executeUpdate(connection, sql);
             }

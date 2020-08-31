@@ -120,9 +120,9 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     @Override
     public boolean updateById(Unit entity) {
         Unit repoUnit = getById(entity.getId());
-        if (entity.getIsSynchronized() &&
+        if (entity.getIsRegistered() &&
                 !repoUnit.getName().equals(entity.getName())) {
-            entity.setIsSynchronized(false);
+            entity.setIsRegistered(false);
         } else {
             this.databaseService.updateCenterUnitInfo(entity);
         }

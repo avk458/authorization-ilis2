@@ -66,7 +66,8 @@ export default {
         host: [{ required: true, message: 'host不能为空', trigger: 'blur' }],
         port: [{ required: true, type: 'number', message: '端口范围不合法', trigger: 'blur' }],
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-        password: [{ required: true, validator: commonValidator, message: '密码不合规', trigger: 'blur' }]
+        password: [{ required: true, validator: commonValidator, message: '密码不合规', trigger: 'blur' }],
+        deploy: [{ required: true, message: '部署地址不能为空', trigger: 'blur' }]
       },
       formData: {
         id: '',

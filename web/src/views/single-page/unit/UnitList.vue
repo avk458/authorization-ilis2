@@ -10,7 +10,7 @@
         <template slot-scope="{ row }" slot="action">
           <Button size="small" type="success" style="margin-right: 4px" @click="applyForAuthorization(row)" :disabled="row.isAuthorized">申请授权</Button>
           <Poptip :transfer="true" :word-wrap="true" :width="150" trigger="hover" title="提示" content="当本单位信息注册到数据中心， 当修改单位信息后需要重新注册">
-            <Button size="small" type="info" style="margin-right: 4px" @click="handleRegister(row)" :disabled="row.isSynchronized">注册</Button>
+            <Button size="small" type="info" style="margin-right: 4px" @click="handleRegister(row)" :disabled="row.isRegistered">注册</Button>
           </Poptip>
           <Button size="small" type="primary" style="margin-right: 4px" @click="edit(row)" :disabled="row.isAuthorized">编辑</Button>
           <Button size="small" type="error" @click="remove(row)" :disabled="row.isAuthorized">删除</Button>
@@ -120,8 +120,7 @@ export default {
             this.$Message.success(res.message)
             this.$refs.infoModal.handleCancel()
             if (data.available) {
-              console.log('init database')
-              // this.initDatabase({ id: res.data, unitName: data.name })
+              this.initDatabase({ id: res.data, unitName: data.name })
             }
             this.fetchData()
           })
@@ -144,7 +143,7 @@ export default {
       const { data } = await this.$axios.post(api, formData)
       if (data.success) {
         info.centerUnitId = centerUnitId || data.data.id
-        info.isSynchronized = true
+        info.isRegistered = true
         if (info.id) {
           this.updateUnit(context, info)
         }

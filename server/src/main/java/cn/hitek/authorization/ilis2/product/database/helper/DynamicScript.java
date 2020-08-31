@@ -39,7 +39,7 @@ public class DynamicScript {
         strings.add(String.format(ilisDepartVersion, databaseName, unitName, now, twentyYearsLater, unitShortName));
         strings.add(String.format(ilisDepart, databaseName, unitName));
         strings.add(String.format(ilisSnCategoryOrg, databaseName, IdUtil.simpleUUID(), "A03", "8a8ab0b246dc81120146dc8180ba0017", "2c9284d07357297e01735a6f21da006d", unitName));
-        strings.addAll(UnitInfoScripts.get(unit.getCenterUnitId(), unitName));
+        strings.addAll(UnitInfoScripts.get(unit.getCenterUnitId(), unitName, databaseName));
         return strings;
     }
 }
