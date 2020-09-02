@@ -34,6 +34,8 @@ public class LoginInfo {
     private String loginIp;
     private String sessionId;
     private String loginRegion;
+    private String os;
+    private String browser;
     private String remark;
 
     @Override

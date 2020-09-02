@@ -82,8 +82,8 @@ export default {
       targetLoading: false,
       targetColumns: [
         { title: '配置名称', key: 'profileName' },
-        { title: 'Host', key: 'host' },
         { title: '部署地址', key: 'deploy' },
+        { title: 'Host', key: 'host' },
         { title: '端口', key: 'port' },
         { title: '用户名', key: 'username' },
         {

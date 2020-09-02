@@ -26,14 +26,17 @@ export default {
       columns: [
         { title: '用户名', key: 'username', width: 120 },
         { title: '用户', key: 'realName', width: 120 },
-        { title: 'SessionId', key: 'sessionId', width: 310 },
-        { title: 'IP', key: 'loginIp' },
+        { title: 'SessionId', key: 'sessionId' },
+        { title: 'IP', key: 'loginIp', width: 120 },
         { title: 'IP地址', key: 'loginRegion' },
+        { title: '操作系统', key: 'os' },
+        { title: '浏览器', key: 'browser' },
         {
           render: (h, p) => {
             p.column.title = this.type === 'total' ? '操作时间' : '最近在线时间'
             return h('span', p.row.operationTime)
-          }
+          },
+          width: 170
         },
         { title: '类型', key: 'remark', width: 130 }
       ],
