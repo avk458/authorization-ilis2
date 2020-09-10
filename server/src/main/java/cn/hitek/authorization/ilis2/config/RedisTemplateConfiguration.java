@@ -1,5 +1,6 @@
 package cn.hitek.authorization.ilis2.config;
 
+import cn.hitek.authorization.ilis2.product.unit.domain.ClientAccount;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -38,6 +39,15 @@ public class RedisTemplateConfiguration {
     @Bean
     public RedisTemplate<String, Serializable> limitRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Serializable> template = new RedisTemplate<>();
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, ClientAccount> clientRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, ClientAccount> template = new RedisTemplate<>();
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setConnectionFactory(redisConnectionFactory);

@@ -21,15 +21,12 @@ import cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -93,21 +90,15 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
         UnitInfo info = new UnitInfo();
         info.setExpired(LocalDate.now().isAfter(unit.getExpireDate()));
         info.setSingleLogin(unit.getSingleLogin());
-        Long totalUsers = getUnitTotalUsers(unit);
-        info.setUserMaxLimits(totalUsers >= unit.getMaxAccount());
-        Integer unitOnlineUsers = this.userLogger.getUnitOnlineUsers(unit.getUniqCode());
-        info.setUserOnlineMaxLimits(unitOnlineUsers >= unit.getMaxOnlineAccount());
+        int totalAccounts = this.userLogger.getUnitTotalAccounts(unit.getUniqCode());
+        info.setUserMaxLimits(totalAccounts >= unit.getMaxAccount());
+        Integer onlineAccounts = this.userLogger.getUnitOnlineAccounts(unit.getUniqCode());
+        info.setUserOnlineMaxLimits(onlineAccounts >= unit.getMaxOnlineAccount());
         UnitDatabase database = this.databaseService.query().eq(UnitDatabase::getUnitId, unit.getId()).getOne();
         info.setData(new DatabaseInfo(database));
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(info);
         return EncryptUtil.encrypt(json);
-    }
-
-    private Long getUnitTotalUsers(Unit unit) {
-        String totalUsersKey = this.userLogger.getTotalUsersKey(unit.getUniqCode());
-        BoundSetOperations<String, Object> setOps = this.redisTemplate.boundSetOps(totalUsersKey);
-        return setOps.size();
     }
 
     @Override
@@ -141,23 +132,8 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     }
 
     @Override
-    public Long combineUnitUsers(String type) {
-        Long counter = 0L;
-        Set<String> keys = this.redisTemplate.keys(type + "*");
-        if (keys != null) {
-            switch (type) {
-                case Constant.ILIS_LOGIN_TOTAL_PREFIX:
-                    for (String key : keys) {
-                        counter += this.redisTemplate.boundSetOps(key).size();
-                    }
-                    break;
-                case Constant.ILIS_LOGIN_ONLINE_PREFIX:
-                    counter += keys.size();
-                    break;
-                default:
-            }
-        }
-        return counter;
+    public Map<String, Integer> combineUnitUsers() {
+        return this.userLogger.combineAccounts();
     }
 
     @Override
@@ -167,9 +143,8 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
         for (Unit unit : units) {
             HashMap<String, Object> data = new HashMap<>(1);
             data.put("name", unit.getName());
-            String key = this.userLogger.getTotalUsersKey(unit.getUniqCode());
-            Long count = this.redisTemplate.boundSetOps(key).size();
-            data.put("value", count);
+            int online = this.userLogger.getUnitTotalAccounts(unit.getUniqCode());
+            data.put("value", online);
             list.add(data);
         }
         return list;
@@ -245,10 +220,10 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
             account.setUnitCode(unit.getUniqCode());
             account.setUnitName(unit.getName());
             account.setMaxAccount(unit.getMaxAccount());
-            Long totalUsers = getUnitTotalUsers(unit);
-            account.setTotalAccount(totalUsers.intValue());
+            int totalAccounts = this.userLogger.getUnitTotalAccounts(unit.getUniqCode());
+            account.setTotalAccount(totalAccounts);
             account.setMaxOnlineAccount(unit.getMaxOnlineAccount());
-            Integer unitOnlineUsers = this.userLogger.getUnitOnlineUsers(unit.getUniqCode());
+            Integer unitOnlineUsers = this.userLogger.getUnitOnlineAccounts(unit.getUniqCode());
             account.setOnlineAccount(unitOnlineUsers);
             list.add(account);
         }
@@ -256,13 +231,7 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     }
 
     @Override
-    public IPage<LoginInfo> getUnitLoginLog(String unitCode, Page<LoginInfo> page) {
-        return this.userLogger.getLogsViaUnitCode(unitCode, page);
-    }
-
-    @Override
-    public Boolean isUnitSessionOnline(String sessionId, String code) {
-        final String key = Constant.ILIS_LOGIN_ONLINE_PREFIX + code + "." + sessionId;
-        return this.redisTemplate.hasKey(key);
+    public Boolean isUnitSessionOnline(String userId, String code) {
+        return this.userLogger.isUserOnline(userId, code);
     }
 }

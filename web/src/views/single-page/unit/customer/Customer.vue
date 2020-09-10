@@ -2,20 +2,22 @@
   <Card dis-hover>
     <Table :data="data" :loading="loading" :columns="columns" border>
       <template slot-scope="{ row }" slot="action">
-        <Button size="small" type="info" @click="handleLog(row, 'total')">登录日志</Button>
-        <Divider type="vertical"/>
-        <Button size="small" type="success" @click="handleLog(row, 'online')">在线用户</Button>
+<!--        <Button size="small" type="info" @click="handleLog(row, 'total')">登录日志</Button>-->
+<!--        <Divider type="vertical"/>-->
+<!--        <Button size="small" type="success" @click="handleLog(row, 'online')">在线用户</Button>-->
+        <Button size="small" type="info" @click="handleUnitAccounts(row)">查看用户</Button>
       </template>
     </Table>
-    <login-log-modal ref="loginLog"/>
+    <unit-accounts ref="unitAccounts"/>
   </Card>
 </template>
 <script>
-import LoginLogModal from './components/login-log-modal'
+
 import { getUnitAccount } from '@/api/unit'
+import UnitAccounts from '@/views/single-page/unit/customer/components/unit-accounts'
 
 export default {
-  components: { LoginLogModal },
+  components: { UnitAccounts },
   data() {
     return {
       data: [],
@@ -23,8 +25,8 @@ export default {
         { title: '单位名称', key: 'unitName' },
         { title: '可用用户数', key: 'maxAccount' },
         { title: '累计用户数', key: 'totalAccount' },
-        { title: '可用在线用户数', key: 'maxOnlineAccount' },
-        { title: '当前在线用户数', key: 'onlineAccount' },
+        { title: '可用在线会话数', key: 'maxOnlineAccount' },
+        { title: '当前在线会话数', key: 'onlineAccount' },
         { title: '操作', slot: 'action' }
       ],
       loading: false
@@ -38,6 +40,9 @@ export default {
     },
     handleLog(row, type) {
       this.$refs.loginLog.showModal(row.unitCode, type)
+    },
+    handleUnitAccounts(row) {
+      this.$refs.unitAccounts.showModal(row)
     }
   },
   mounted() {

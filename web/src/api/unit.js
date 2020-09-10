@@ -61,10 +61,25 @@ export const getUnitLoginLog = (unitCode, params) => {
   })
 }
 
-export const getOnlineAccounts = (unitCode, params) => {
-  params.unitCode = unitCode
+export const getOnlineSessions = (unitCode, userId, params) => {
   return axios.request({
-    url: '/unit/online-accounts',
+    url: `/unit/${unitCode}/${userId}/sessions`,
+    method: 'get',
+    params: params
+  })
+}
+
+export const getUnitTotalAccounts = (unitCode, params) => {
+  return axios.request({
+    url: `/unit/${unitCode}/accounts`,
+    method: 'get',
+    params: params
+  })
+}
+
+export const getAccountLoginLogs = (unitCode, userId, params) => {
+  return axios.request({
+    url: `/unit/${unitCode}/${userId}/log`,
     method: 'get',
     params: params
   })

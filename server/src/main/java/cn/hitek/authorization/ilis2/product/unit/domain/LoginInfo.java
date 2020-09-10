@@ -20,6 +20,11 @@ import java.time.LocalDateTime;
 @TableName("t_unit_user_login_log")
 public class LoginInfo {
 
+    public static final int LOGIN = 100;
+    public static final int LOGOUT = 110;
+    public static final int KICK_OUT = 120;
+    public static final int TIME_OUT = 130;
+
     @TableId
     private Long id;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -30,13 +35,12 @@ public class LoginInfo {
     private String username;
     private String realName;
     private String unitCode;
-    private Boolean login;
+    private int operationType;
     private String loginIp;
     private String sessionId;
     private String loginRegion;
     private String os;
     private String browser;
-    private String remark;
 
     @Override
     public boolean equals(Object o) {
@@ -54,8 +58,7 @@ public class LoginInfo {
                 .append(userId, info.userId)
                 .append(sessionId, info.sessionId)
                 .append(unitCode, info.unitCode)
-                .append(login, info.login)
-                .append(remark, info.remark)
+                .append(operationType, info.operationType)
                 .isEquals();
     }
 
@@ -64,6 +67,8 @@ public class LoginInfo {
         return new HashCodeBuilder(17, 37)
                 .append(userId)
                 .append(sessionId)
+                .append(unitCode)
+                .append(operationType)
                 .toHashCode();
     }
 }

@@ -4,8 +4,6 @@ import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -56,10 +54,9 @@ public interface UnitService extends BaseService<Unit>{
 
     /**
      * 所有单位累计用户数
-     * @param type 类型 '.total' | '.online'
      * @return 所有单位累计用户数
      */
-    Long combineUnitUsers(String type);
+    Map<String, Integer> combineUnitUsers();
 
     /**
      * 单位用户占比
@@ -86,18 +83,10 @@ public interface UnitService extends BaseService<Unit>{
     List<UnitAccount> getUnitAccountData();
 
     /**
-     * 根据单位编码获取单位登录记录
-     * @param unitCode 单位编码
-     * @param page 翻页参数
-     * @return 登录记录
-     */
-    IPage<LoginInfo> getUnitLoginLog(String unitCode, Page<LoginInfo> page);
-
-    /**
      * 单位用户会话是否在线
-     * @param sessionId session id
+     * @param userId user id
      * @param code 单位编码
      * @return 结果
      */
-    Boolean isUnitSessionOnline(String sessionId, String code);
+    Boolean isUnitSessionOnline(String userId, String code);
 }

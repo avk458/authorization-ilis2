@@ -68,8 +68,8 @@ public class ApiController {
         this.databaseService.updateDatabaseDataVersion(unit.getId(), feedback.getVersion());
     }
 
-    @GetMapping("/online-status/{sessionId}")
-    public boolean getSessionOnlineStatus(@PathVariable String sessionId, String code) {
-        return unitService.isUnitSessionOnline(sessionId, code);
+    @GetMapping("/online-status/{userId}")
+    public boolean getSessionOnlineStatus(@PathVariable String userId, String code) {
+        return unitService.isUnitSessionOnline(userId, code);
     }
 }

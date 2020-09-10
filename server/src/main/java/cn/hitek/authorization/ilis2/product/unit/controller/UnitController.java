@@ -6,6 +6,7 @@ import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.common.validation.group.OnCreate;
 import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
+import cn.hitek.authorization.ilis2.product.unit.domain.ClientAccount;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
@@ -81,17 +82,35 @@ public class UnitController {
         return new Response().code(HttpStatus.OK).data(data);
     }
 
+    @GetMapping("/{unitCode}/accounts")
+    public Response getUnitTotalAccounts(@PathVariable String unitCode, Page<ClientAccount> page) {
+        IPage<ClientAccount> accounts = this.userLogger.getClientAccounts(unitCode, page);
+        return new Response().code(HttpStatus.OK).data(accounts);
+    }
+
     @FlushLogs
     @GetMapping("/login/log/{unitCode}")
     public Response getUnitLoginLog(@PathVariable String unitCode, Page<LoginInfo> page) {
-        IPage<LoginInfo> logs = this.unitService.getUnitLoginLog(unitCode, page);
+        IPage<LoginInfo> logs = this.userLogger.getUnitAccountLogs(unitCode, page);
         return new Response().code(HttpStatus.OK).data(logs);
     }
 
     @FlushLogs
-    @GetMapping("/online-accounts")
-    public Response getUnitOnlineAccounts(String unitCode, Page<LoginInfo> page) {
-        IPage<LoginInfo> logs = this.userLogger.getUnitOnlineAccounts(unitCode, page);
+    @GetMapping("/{unitCode}/{userId}/sessions")
+    public Response getUnitOnlineAccounts(@PathVariable String unitCode,
+                                          @PathVariable String userId,
+                                          @NotBlank(message = RequestConstants.PARAM_ERROR) String sessionIds,
+                                          Page<LoginInfo> page) {
+        IPage<LoginInfo> sessionLogs = this.userLogger.getUnitOnlineAccounts(unitCode, userId, sessionIds, page);
+        return new Response().code(HttpStatus.OK).data(sessionLogs);
+    }
+
+    @FlushLogs
+    @GetMapping("/{unitCode}/{userId}/log")
+    public Response getAccountLoginLog(@PathVariable String unitCode,
+                                       @PathVariable String userId,
+                                       Page<LoginInfo> page) {
+        IPage<LoginInfo> logs = this.userLogger.getAccountLogs(unitCode, userId, page);
         return new Response().code(HttpStatus.OK).data(logs);
     }
 }

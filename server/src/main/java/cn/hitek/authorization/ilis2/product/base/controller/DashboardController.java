@@ -1,6 +1,5 @@
 package cn.hitek.authorization.ilis2.product.base.controller;
 
-import cn.hitek.authorization.ilis2.common.constants.Constant;
 import cn.hitek.authorization.ilis2.common.enums.HttpStatus;
 import cn.hitek.authorization.ilis2.common.response.Response;
 import cn.hitek.authorization.ilis2.product.base.helper.DashboardGenerateTool;
@@ -28,9 +27,8 @@ public class DashboardController {
     @GetMapping("/info-cards")
     public Response getInfoCardsData() {
         Long lastDataScriptId = this.scriptService.getLastDataScriptId();
-        Long totalUsers = this.unitService.combineUnitUsers(Constant.ILIS_LOGIN_TOTAL_PREFIX);
-        Long onlineUsers = this.unitService.combineUnitUsers(Constant.ILIS_LOGIN_ONLINE_PREFIX);
-        List<Map<String, Object>> cardsData = DashboardGenerateTool.generateInfoCardsData(lastDataScriptId, totalUsers, onlineUsers);
+        Map<String, Integer> accountsData = this.unitService.combineUnitUsers();
+        List<Map<String, Object>> cardsData = DashboardGenerateTool.generateInfoCardsData(lastDataScriptId, accountsData);
         return new Response().code(HttpStatus.OK).data(cardsData);
     }
 

@@ -15,11 +15,17 @@
 </template>
 
 <script>
-import { getUnitLoginLog, getOnlineAccounts } from '@/api/unit'
+import { getAccountLoginLogs, getOnlineSessions } from '@/api/unit'
 
 export default {
   name: 'login-log-modal',
   data() {
+    const OPERATION_TYPE = {
+      100: '登录',
+      110: '登出',
+      120: '被下线',
+      130: '会话到期'
+    }
     return {
       visible: false,
       data: [],
@@ -31,14 +37,15 @@ export default {
         { title: 'IP地址', key: 'loginRegion' },
         { title: '操作系统', key: 'os' },
         { title: '浏览器', key: 'browser' },
+        { title: '操作时间', key: 'operationTime', width: 170 },
         {
+          title: '类型',
+          key: 'operationType',
+          width: 100,
           render: (h, p) => {
-            p.column.title = this.type === 'total' ? '操作时间' : '最近在线时间'
-            return h('span', p.row.operationTime)
-          },
-          width: 170
-        },
-        { title: '类型', key: 'remark', width: 130 }
+            return h('span', OPERATION_TYPE[p.row.operationType])
+          }
+        }
       ],
       loading: false,
       params: {
@@ -47,36 +54,39 @@ export default {
       },
       total: 0,
       unitCode: '',
-      type: '',
-      title: ''
+      userId: '',
+      title: '',
+      sessionIds: ''
     }
   },
   methods: {
     fetchData() {
       this.loading = true
       switch (this.type) {
-      case 'total':
-        getUnitLoginLog(this.unitCode, this.params).then(res => {
+      case 'logs':
+        getAccountLoginLogs(this.unitCode, this.userId, this.params).then(res => {
           this.data = res.data.records
           this.total = res.data.total
           this.loading = false
-          this.title = '登录日志'
         })
         break
-      case 'online':
-        getOnlineAccounts(this.unitCode, this.params).then(res => {
+      case 'sessions':
+        this.params.sessionIds = this.sessionIds
+        getOnlineSessions(this.unitCode, this.userId, this.params).then(res => {
           this.data = res.data.records
           this.total = res.data.total
           this.loading = false
-          this.title = '在线用户'
+          this.title = '在线会话'
         })
         break
       }
     },
-    showModal(unitCode, type) {
+    showModal(row, unitCode, type) {
+      this.type = type
       this.visible = true
       this.unitCode = unitCode
-      this.type = type
+      this.userId = row.userId
+      this.sessionIds = Object.keys(row.sessions).join(',')
       this.fetchData()
     },
     handleSizeChange(size) {
