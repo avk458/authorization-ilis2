@@ -157,9 +157,8 @@ export default {
 </script>
 
 <style>
-.tip-table
-{
-  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+.tip-table {
+  font-family: Consolas, Menlo, Courier, monospace;
   font-size: 12px;
   background: #fff;
   width: 480px;
@@ -170,19 +169,19 @@ export default {
   border-left: solid 1px #e2e2e2;
   color: #5c6b77;
 }
-.tip-table th
-{
-  font-size: 14px;
-  padding: 8px 16px;
+
+.tip-table th {
+  font-size: 12px;
+  padding: 8px 8px;
   border-bottom: 1px solid #e2e2e2;
   border-right: 1px solid #e2e2e2;
   background: #f7f7f7;
   font-weight: bold;
 }
-.tip-table td
-{
+
+.tip-table td {
   border-bottom: 1px solid #e2e2e2;
-  padding: 8px 16px;
+  padding: 8px 8px;
   border-right: solid 1px #e2e2e2;
 }
 </style>

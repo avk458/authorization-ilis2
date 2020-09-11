@@ -42,7 +42,13 @@ public class DataScriptController {
     @PutMapping
     public Response updateDataScript(@Validated(OnUpdate.class) @RequestBody DataScript script) {
         Response res = new Response();
-        boolean executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
+        boolean executeSuccess;
+        DataScript dbEntity = this.dataScriptService.getById(script.getId());
+        if (dbEntity.getScript().equals(script.getScript())) {
+            executeSuccess = true;
+        } else {
+            executeSuccess = this.unitDatabaseService.executeInStandardSchemas(script);
+        }
         if (executeSuccess) {
             this.dataScriptService.updateById(script);
             res.code(HttpStatus.UPDATE);

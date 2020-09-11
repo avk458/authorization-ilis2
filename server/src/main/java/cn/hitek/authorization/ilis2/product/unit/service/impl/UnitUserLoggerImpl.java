@@ -189,19 +189,18 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         BoundHashOperations<String, String, ClientAccount> hashOps = accountHashOps(unitCode);
         Map<String, ClientAccount> entries = hashOps.entries();
         entries = Optional.ofNullable(entries).orElse(MapUtil.empty());
-        Page<ClientAccount> data = new Page<>();
-        data.setTotal(entries.size());
+        Page<ClientAccount> pages = new Page<>();
         List<ClientAccount> accounts = entries.values()
                 .stream()
                 .sorted(Comparator
-                        .nullsLast(Comparator.comparing(ClientAccount::getLastOperations))
-                        .thenComparing(ClientAccount::isOnline)
-                        .reversed())
+                        .comparing(ClientAccount::isOnline, Comparator.reverseOrder())
+                        .thenComparing(ClientAccount::getLastOperations, Comparator.nullsLast(LocalDateTime::compareTo)))
                 .skip((page.getCurrent() - 1) * page.getSize())
                 .limit(page.getSize())
                 .collect(Collectors.toList());
-        data.setRecords(accounts);
-        return data;
+        pages.setTotal(entries.size());
+        pages.setRecords(accounts);
+        return pages;
     }
 
     @Override
