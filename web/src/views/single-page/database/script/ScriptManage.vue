@@ -58,8 +58,23 @@ export default {
       data: [],
       columns: [
         { title: 'ID', key: 'id', width: 60 },
-        { title: '创建', key: 'createName', width: 80 },
-        { title: '更新', key: 'updateName', width: 80 },
+        { title: '创建人', key: 'createName', width: 80 },
+        {
+          title: '最近修改',
+          width: 95,
+          render: (h, p) => {
+            const value = p.row.updateName || p.row.createName
+            return h('span', value)
+          }
+        },
+        {
+          title: '最近修改时间',
+          width: 168,
+          render: (h, p) => {
+            const value = p.row.updateTime || p.row.createTime
+            return h('span', value)
+          }
+        },
         { title: '类型', key: 'type', width: 70 },
         { title: 'Script', key: 'script', tooltip: true },
         { title: '备注', key: 'remark', tooltip: true, width: 300 },

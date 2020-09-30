@@ -35,6 +35,7 @@ public class ClientAccount implements Serializable {
         this.unitCode = loginInfo.getUnitCode();
         this.username = loginInfo.getUsername();
         this.realName = loginInfo.getRealName();
+        this.loginTimes = 1L;
     }
 
     @TableId

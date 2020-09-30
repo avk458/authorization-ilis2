@@ -1,9 +1,10 @@
 import axios from '@/libs/api.request'
 
-export const getUnitList = () => {
+export const getUnitList = (params) => {
   return axios.request({
     url: '/unit/list',
-    method: 'get'
+    method: 'get',
+    params: params
   })
 }
 

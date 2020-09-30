@@ -12,9 +12,7 @@ import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
-import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,10 +35,8 @@ public class UnitController {
     private final UnitUserLogger userLogger;
 
     @GetMapping("/list")
-    public Response getUnitList() {
-        List<Unit> list = this.unitService
-                .list(Wrappers.lambdaQuery(Unit.class).select(i -> i.getFieldFill().equals(FieldFill.DEFAULT)));
-        return new Response().code(HttpStatus.OK).data(list);
+    public IPage<Unit> getUnitList(Page<Unit> page) {
+        return this.unitService.getPageRecords(page);
     }
 
     @PreAuthorize("hasAuthority('unit:add')")

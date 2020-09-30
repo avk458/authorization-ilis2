@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundSetOperations;
@@ -23,7 +24,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,6 +65,7 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         loginBuffer(key).add(loginInfo);
     }
 
+    @SneakyThrows
     @Async
     @Override
     public void handleLoginStatisticLog(LoginInfo loginInfo) {
@@ -73,26 +74,25 @@ public class UnitUserLoggerImpl extends BaseServiceImpl<LoginInfoMapper, LoginIn
         String sessionId = loginInfo.getSessionId();
         LocalDateTime now = LocalDateTime.now();
         ClientAccount account = accountGetter(unitCode, userId);
-        if (account == null) {
-            account = new ClientAccount(loginInfo);
-            account.setLoginTimes(1L);
-        }
+        account = Optional.ofNullable(account).orElse(new ClientAccount(loginInfo));
         account.setLastOperations(now);
         Map<String, LocalDateTime> sessions = account.getSessions();
-        if (LoginInfo.LOGIN == loginInfo.getOperationType()) {
-            UnitOnlineBucket.put(this.redisTemplate, loginInfo);
-            account.setLoginTimes(account.getLoginTimes() + 1);
-            sessions.put(sessionId, now);
-        } else {
-            sessions.remove(sessionId);
-            if (LoginInfo.KICK_OUT == loginInfo.getOperationType()) {
-                try {
-                    SocketManager.destroySession(sessionId);
-                } catch (IOException e) {
-                    log.warn("销毁被踢出用户连接失败");
-                    e.printStackTrace();
-                }
-            }
+        switch (loginInfo.getOperationType()) {
+            case LoginInfo.LOGIN:
+                UnitOnlineBucket.put(this.redisTemplate, loginInfo);
+                account.setLoginTimes(account.getLoginTimes() + 1);
+                sessions.put(sessionId, now);
+                break;
+            case LoginInfo.KICK_OUT:
+                sessions.remove(sessionId);
+                SocketManager.destroySession(sessionId);
+                break;
+            case LoginInfo.TIME_OUT:
+                sessions.remove(sessionId);
+                SocketManager.closeConnection(sessionId);
+                break;
+            default:
+                sessions.remove(sessionId);
         }
         persistentAccount(account);
         accountSetter(unitCode, account);

@@ -28,7 +28,9 @@ import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -296,8 +298,9 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
     }
 
     @Override
-    public List<UpdateEchoLog> updateDatabase(String id) {
+    public List<UpdateEchoLog> updateDatabase(String id, Long updateVersion) {
         UnitDatabase database = getById(id);
+        database.setChosenUpdate(updateVersion);
         return updateEachDatabase(database);
     }
 
@@ -306,7 +309,7 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         JdbcTemplate template = new JdbcTemplate(dataSource);
         DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource);
         ArrayList<UpdateEchoLog> results = new ArrayList<>(0);
-        List<DataScript> scripts = this.scriptService.getScriptRange(database.getDataVersion());
+        List<DataScript> scripts = this.scriptService.getScriptRange(database.getDataVersion(), database.getChosenUpdate());
         for (DataScript script : scripts) {
             UpdateEchoLog execute = executeScript(manager, template, script, database.getUnitName());
             results.add(execute);
@@ -488,5 +491,10 @@ public class UnitDatabaseServiceImpl extends BaseServiceImpl<UnitDatabaseMapper,
         } catch (SQLException e) {
             // ignore
         }
+    }
+
+    @Override
+    public IPage<UnitDatabase> getPageRecords(Page<UnitDatabase> page) {
+        return baseMapper.selectPage(page, Wrappers.emptyWrapper());
     }
 }

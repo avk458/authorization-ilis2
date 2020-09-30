@@ -72,4 +72,10 @@ public class ApiController {
     public boolean getSessionOnlineStatus(@PathVariable String userId, String code) {
         return unitService.isUnitSessionOnline(userId, code);
     }
+
+    @GetMapping("/total-accounts-limit/{unitCode}")
+    public boolean hasReachTotalAccountsLimit(@PathVariable String unitCode, Integer count) {
+        Unit unit = this.unitService.query().eq(Unit::getUniqCode, unitCode).getOne();
+        return unit.getMaxAccount() <= count;
+    }
 }

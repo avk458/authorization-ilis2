@@ -4,6 +4,8 @@ import cn.hitek.authorization.ilis2.framework.web.service.BaseService;
 import cn.hitek.authorization.ilis2.product.unit.domain.LoginInfo;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
 import cn.hitek.authorization.ilis2.product.unit.domain.vo.UnitAccount;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -89,4 +91,11 @@ public interface UnitService extends BaseService<Unit>{
      * @return 结果
      */
     Boolean isUnitSessionOnline(String userId, String code);
+
+    /**
+     * 获取分页单位信息集合
+     * @param page 分页参数
+     * @return 分页数据
+     */
+    IPage<Unit> getPageRecords(Page<Unit> page);
 }

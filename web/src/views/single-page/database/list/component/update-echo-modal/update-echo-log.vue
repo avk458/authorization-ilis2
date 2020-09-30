@@ -1,38 +1,25 @@
 <template>
-  <Modal v-model="logVisible" title="数据库升级" width="60%">
-    <div v-if="!updated">
-      <p>数据库：{{ unitDb.databaseName }}当前数据版本为：v.{{ unitDb.dataVersion || 0 }}</p>
-      <p>您确定要升级至最新版吗？</p>
-    </div>
-    <div v-else>
-      <Table ref="logTable" :data="logs" :columns="columns" :stripe="true" :max-height="400" size="small" no-data-text="暂无更新版本"/>
+  <Modal v-model="logVisible" title="数据库升级日志" width="60%">
+    <div>
+      <Table ref="logTable" :data="logs" :columns="columns" :stripe="true" :max-height="400" size="small" no-data-text="暂无升级日志"/>
     </div>
     <div slot="footer">
-      <Button :type="btnType" :loading="btnLoading" :long="logs.length === 0" @click="handleUpdate">{{ btn }}</Button>
+      <Button :type="btnType" @click="handleClose">{{ btn }}</Button>
       <Button v-if="logs.length > 0" @click="exportLog">导出升级日志</Button>
     </div>
   </Modal>
 </template>
 
 <script>
-import { updateDatabase } from '@/api/unit-database'
 
 export default {
   name: 'update-echo-log',
-  props: {
-    unitDb: {
-      required: true,
-      type: Object
-    }
-  },
   data() {
     return {
       logVisible: false,
       logs: [],
-      btn: '开始升级',
+      btn: '',
       btnType: 'primary',
-      btnLoading: false,
-      updated: false,
       columns: [
         { title: '版本号', key: 'scriptVersion', width: 80, align: 'center' },
         { title: '所属单位', key: 'unitName', width: 150 },
@@ -58,42 +45,19 @@ export default {
     }
   },
   methods: {
-    showModal() {
+    showModal(logs) {
       this.logVisible = true
+      this.logs = logs
+      this.handleBtn()
     },
-    handleUpdate() {
-      if (this.updated) {
-        this.handleClose()
-        return
-      }
-      this.btnLoading = true
-      this.updated = true
-      updateDatabase(this.unitDb.id)
-        .then(res => {
-          this.logs = res.data
-          this.handleBtn()
-          this.$emit('success-update')
-        })
-        .catch(err => {
-          this.handleBtn(err)
-        })
-    },
-    handleBtn(err) {
-      if (err) {
-        this.btn = '关闭'
-        this.btnType = 'error'
-        this.btnLoading = false
-      } else {
-        this.btn = this.executeFailed ? '升级出错啦，要扣绩效噢' : '升级成功，关闭'
-        this.btnType = this.executeFailed ? 'error' : 'success'
-        this.btnLoading = false
-      }
+    handleBtn() {
+      this.btn = this.executeFailed ? '升级过程中遇到错误，请注意检查' : '升级成功，关闭'
+      this.btnType = this.executeFailed ? 'warning' : 'success'
     },
     handleClose() {
       this.updated = false
-      this.btn = '开始升级'
+      this.btn = ''
       this.btnType = 'primary'
-      this.btnLoading = false
       this.logs = []
       this.logVisible = false
     },

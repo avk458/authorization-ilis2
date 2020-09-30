@@ -117,6 +117,13 @@ public class UnitDatabase extends BaseEntity implements Serializable {
     @JsonIgnore
     private boolean standardSchema;
 
+    /**
+     * 用于选择更新
+     */
+    @TableField(exist = false)
+    @JsonIgnore
+    private Long chosenUpdate;
+
 
     public DatabaseType getDatabaseEnum() {
         switch (databaseType) {

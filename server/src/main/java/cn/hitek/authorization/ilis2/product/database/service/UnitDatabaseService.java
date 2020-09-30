@@ -5,6 +5,8 @@ import cn.hitek.authorization.ilis2.product.data.script.domain.DataScript;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.unit.domain.Unit;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -51,9 +53,10 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
     /**
      * 更新单位数据库
      * @param id 数据库id
+     * @param updateVersion 所选升级到的版本
      * @return 执行结果
      */
-    List<UpdateEchoLog> updateDatabase(String id);
+    List<UpdateEchoLog> updateDatabase(String id, Long updateVersion);
 
     /**
      * 获取当前单位数据库数据版本以及数据库脚本版本
@@ -100,4 +103,11 @@ public interface UnitDatabaseService extends BaseService<UnitDatabase> {
      * @param entity 单位信息实体
      */
     void updateCenterUnitInfo(Unit entity);
+
+    /**
+     * 获取单位数据库信息分页集合
+     * @param page 分页参数
+     * @return 分页集合
+     */
+    IPage<UnitDatabase> getPageRecords(Page<UnitDatabase> page);
 }

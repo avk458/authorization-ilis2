@@ -8,6 +8,8 @@ import cn.hitek.authorization.ilis2.common.validation.group.OnUpdate;
 import cn.hitek.authorization.ilis2.product.database.domain.UnitDatabase;
 import cn.hitek.authorization.ilis2.product.database.domain.vo.UpdateEchoLog;
 import cn.hitek.authorization.ilis2.product.database.service.UnitDatabaseService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +32,8 @@ public class DatabaseController {
     }
 
     @GetMapping("/list")
-    public Response getDatabaseList() {
-        List<UnitDatabase> list = this.databaseService.list();
-        return new Response().code(HttpStatus.OK).data(list);
+    public IPage<UnitDatabase> getDatabaseList(Page<UnitDatabase> page) {
+        return this.databaseService.getPageRecords(page);
     }
 
     @PreAuthorize("hasAuthority('database:add')")
@@ -81,9 +82,9 @@ public class DatabaseController {
     }
 
     @PreAuthorize("hasAuthority('database:update')")
-    @PostMapping("/actions/update/{id}")
-    public Response updateDatabase(@PathVariable String id) {
-        List<UpdateEchoLog> results = this.databaseService.updateDatabase(id);
+    @PostMapping("/actions/update/{id}/{updateVersion}")
+    public Response updateDatabase(@PathVariable String id, @PathVariable Long updateVersion) {
+        List<UpdateEchoLog> results = this.databaseService.updateDatabase(id, updateVersion);
         return new Response().code(HttpStatus.OK).data(results);
     }
 

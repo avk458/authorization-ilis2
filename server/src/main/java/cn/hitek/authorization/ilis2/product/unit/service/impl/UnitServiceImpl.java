@@ -21,8 +21,11 @@ import cn.hitek.authorization.ilis2.product.unit.mapper.UnitUserOnlineLogMapper;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitService;
 import cn.hitek.authorization.ilis2.product.unit.service.UnitUserLogger;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -233,5 +236,10 @@ public class UnitServiceImpl extends BaseServiceImpl<UnitMapper, Unit> implement
     @Override
     public Boolean isUnitSessionOnline(String userId, String code) {
         return this.userLogger.isUserOnline(userId, code);
+    }
+
+    @Override
+    public IPage<Unit> getPageRecords(Page<Unit> page) {
+        return this.baseMapper.selectPage(page, Wrappers.lambdaQuery(Unit.class).select(i -> i.getFieldFill().equals(FieldFill.DEFAULT)));
     }
 }

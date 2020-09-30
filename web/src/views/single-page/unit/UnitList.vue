@@ -9,13 +9,23 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <Button size="small" type="success" style="margin-right: 4px" @click="applyForAuthorization(row)" :disabled="row.isAuthorized">申请授权</Button>
-          <Poptip :transfer="true" :word-wrap="true" :width="150" trigger="hover" title="提示" content="当本单位信息注册到数据中心， 当修改单位信息后需要重新注册">
+          <Poptip :transfer="true" :word-wrap="true" :width="150" trigger="hover" title="提示" content="将本单位信息注册到数据中心， 如果修改单位信息后需要重新注册">
             <Button size="small" type="info" style="margin-right: 4px" @click="handleRegister(row)" :disabled="row.isRegistered">注册</Button>
           </Poptip>
           <Button size="small" type="primary" style="margin-right: 4px" @click="edit(row)" :disabled="row.isAuthorized">编辑</Button>
           <Button size="small" type="error" @click="remove(row)" :disabled="row.isAuthorized">删除</Button>
         </template>
       </Table>
+      <div class="pagination" v-if="total > 10">
+        <Page
+          :total="total"
+          :current.sync="params.current"
+          :page-size.sync="params.size"
+          show-sizer
+          @on-page-size-change="handleSizeChange"
+          @on-change="handlePageChange"
+        />
+      </div>
     </Card>
     <info-modal ref="infoModal" @on-success-valid="submit"></info-modal>
   </div>
@@ -78,7 +88,12 @@ export default {
         { title: '操作', slot: 'action', align: 'center', width: 260 }
       ],
       data: [],
-      loading: false
+      loading: false,
+      total: 0,
+      params: {
+        current: 1,
+        size: 10
+      }
     }
   },
   methods: {
@@ -96,9 +111,10 @@ export default {
     },
     fetchData() {
       this.loading = true
-      getUnitList().then(res => {
+      getUnitList(this.params).then(res => {
         this.loading = false
-        this.data = res.data
+        this.data = res.records
+        this.total = res.total
       })
     },
     handleModal() {
@@ -134,11 +150,15 @@ export default {
         api = this.centerBaseUrl + 'TestUnit/Update'
         formData = {
           id: centerUnitId,
-          name: info.name
+          name: info.name,
+          unitJM: info.uniqCode
         }
       } else {
         api = this.centerBaseUrl + 'TestUnit/Register'
-        formData = { name: info.name }
+        formData = {
+          name: info.name,
+          unitJM: info.uniqCode
+        }
       }
       const { data } = await this.$axios.post(api, formData)
       if (data.success) {
@@ -170,6 +190,14 @@ export default {
         this.$Message.success(res.message)
         this.fetchData()
       })
+    },
+    handleSizeChange(size) {
+      this.params.size = size
+      this.fetchData()
+    },
+    handlePageChange(current) {
+      this.params.current = current
+      this.fetchData()
     }
   },
   mounted() {
@@ -182,3 +210,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.pagination{
+  margin-top: 20px;
+  text-align: right;
+}
+</style>

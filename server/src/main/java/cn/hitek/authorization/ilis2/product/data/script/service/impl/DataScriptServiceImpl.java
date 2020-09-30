@@ -48,7 +48,7 @@ public class DataScriptServiceImpl extends BaseServiceImpl<DataScriptMapper, Dat
     @Override
     public List<DataScript> getScriptRange(Long dataVersion, Long updateVersion) {
         dataVersion = dataVersion == null ? 0L : dataVersion;
-        return query().gt(DataScript::getId, dataVersion).le(DataScript::getId, updateVersion).list();
+        return query().gt(DataScript::getId, dataVersion).le(updateVersion != null, DataScript::getId, updateVersion).list();
     }
 
     @SneakyThrows

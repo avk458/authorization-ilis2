@@ -15,10 +15,20 @@
           <Button type="error" size="small" @click="remove(row)" :disabled="row.isInitialized">删除</Button>
         </template>
       </Table>
+      <div class="pagination" v-if="total > 10">
+        <Page
+          :total="total"
+          :current.sync="params.current"
+          :page-size.sync="params.size"
+          show-sizer
+          @on-page-size-change="handleSizeChange"
+          @on-change="handlePageChange"
+        />
+      </div>
     </Card>
     <DatabaseModal ref="databaseModal" @on-success-valid="submit"/>
-<!--    <InitializationModal ref="initializationModal" @success-init="fetchData"/>-->
-    <update-echo-log ref="updateEchoLog" :unit-db="unitDb" @success-update="fetchData"/>
+    <!--    <InitializationModal ref="initializationModal" @success-init="fetchData"/>-->
+    <update-echo-log ref="updateEchoLog" @success-update="fetchData"/>
     <script-modal ref="scriptModal"/>
   </div>
 </template>
@@ -28,12 +38,13 @@ import {
   deleteDatabaseInfo,
   updateDatabaseInfo,
   saveDatabaseInfo,
-  batchUpdateDatabase
+  batchUpdateDatabase, updateDatabase
 } from '@/api/unit-database'
 import DatabaseModal from './component/database-modal/'
 import UpdateEchoLog from './component/update-echo-modal'
 import ScriptModal from '@/views/single-page/database/script/components/script'
 import InitMixin from '@/mixins/mixin'
+import { getLastId } from '@/api/script'
 
 export default {
   components: { DatabaseModal, UpdateEchoLog, ScriptModal },
@@ -117,15 +128,21 @@ export default {
       ],
       data: [],
       loading: false,
-      unitDb: {}
+      unitDb: {},
+      total: 0,
+      params: {
+        current: 1,
+        size: 10
+      }
     }
   },
   methods: {
     async fetchData() {
       this.loading = true
-      getDatabaseList().then(res => {
-        this.data = res.data
+      getDatabaseList(this.params).then(res => {
         this.loading = false
+        this.data = res.records
+        this.total = res.total
       })
     },
     handleModal() {
@@ -165,9 +182,36 @@ export default {
     handleInit(val) {
       this.initDatabase(val, this.fetchData)
     },
-    update(row) {
-      this.$refs.updateEchoLog.showModal()
-      this.unitDb = row
+    async update(row) {
+      const res = await getLastId()
+      let version = parseInt(res.data)
+      this.$Modal.confirm({
+        title: '数据库升级确认',
+        render: (h) => {
+          const name = row.databaseName
+          const currentVer = row.dataVersion
+          return h('div', [
+            h('Alert', { props: { type: 'warning' } }, `数据库：${name} 当前版本为 v.${currentVer}`),
+            h('span', '选择您要升级的数据版本 '),
+            h('InputNumber', {
+              props: {
+                value: version,
+                max: version,
+                min: currentVer,
+                formatter: (value) => { return `v.${value}` }
+              },
+              on: {
+                input: (value) => { version = value }
+              }
+            })
+          ])
+        },
+        onOk: async () => {
+          const res = await updateDatabase(row.id, version)
+          this.$refs.updateEchoLog.showModal(res.data)
+          this.fetchData()
+        }
+      })
     },
     handleScriptModal() {
       this.$refs.scriptModal.showModal()
@@ -180,13 +224,18 @@ export default {
           batchUpdateDatabase().then(res => {
             this.$Message.success('完成批量更新数据库')
             this.fetchData()
-            this.$refs.updateEchoLog.updated = true
-            this.$refs.updateEchoLog.logs = res.data
-            this.$refs.updateEchoLog.handleBtn()
-            this.$refs.updateEchoLog.showModal()
+            this.$refs.updateEchoLog.showModal(res.data)
           })
         }
       })
+    },
+    handleSizeChange(size) {
+      this.params.size = size
+      this.fetchData()
+    },
+    handlePageChange(current) {
+      this.params.current = current
+      this.fetchData()
     }
   },
   mounted() {
@@ -194,3 +243,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.pagination{
+  margin-top: 20px;
+  text-align: right;
+}
+</style>

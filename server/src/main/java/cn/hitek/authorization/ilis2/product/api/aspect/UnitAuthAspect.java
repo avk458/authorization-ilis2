@@ -22,7 +22,7 @@ import java.util.Objects;
 /**
  * @author chenlm
  */
-@Profile("prod")
+@Profile("pre")
 @Aspect
 @Component
 @RequiredArgsConstructor

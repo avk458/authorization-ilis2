@@ -1,9 +1,10 @@
 import axios from '@/libs/api.request'
 
-export const getDatabaseList = () => {
+export const getDatabaseList = (params) => {
   return axios.request({
     url: '/database/list',
-    method: 'get'
+    method: 'get',
+    params: params
   })
 }
 
@@ -52,9 +53,9 @@ export const initUnitDatabase = id => {
   })
 }
 
-export const updateDatabase = id => {
+export const updateDatabase = (id, chosenUpdate) => {
   return axios.request({
-    url: `/database/actions/update/${id}`,
+    url: `/database/actions/update/${id}/${chosenUpdate}`,
     method: 'post'
   })
 }
